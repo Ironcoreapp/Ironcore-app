@@ -40,13 +40,18 @@ const btnLogout = document.getElementById('btn-logout');
 
 if(btnGoogleLogin) {
   btnGoogleLogin.addEventListener('click', async () => {
+    showToast('🔄 Intentando conectar con Google...');
     try {
+      if (!window.firebaseModules || !auth) {
+        showToast('⚠️ Error: Firebase no está inicializado.');
+        return;
+      }
       const provider = new window.firebaseModules.GoogleAuthProvider();
       await window.firebaseModules.signInWithPopup(auth, provider);
       showToast('⚔️ ¡Acceso autorizado al Dojo!');
     } catch(error) {
-      showToast('⚠️ Error al iniciar sesión con Google.');
-      console.error(error);
+      showToast(`⚠️ Error: ${error.code || error.message}`);
+      console.error("Error detallado de Firebase Auth:", error);
     }
   });
 }
@@ -656,3 +661,4 @@ if ('serviceWorker' in navigator) {
 
 // --- INICIALIZAR ---
 iniciarSakuraBackground();
+
