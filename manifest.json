@@ -1,0 +1,20 @@
+{
+  "name": "IronCore Tracker Pro",
+  "short_name": "IronCore",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#030508",
+  "theme_color": "#00e5ff",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
