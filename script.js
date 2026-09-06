@@ -43,7 +43,7 @@ function showToast(msg) {
   if(!toast) return;
   toast.innerHTML = msg;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 4000);
+  setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
 // --- GESTIÓN DE AUTENTICACIÓN GOOGLE ---
@@ -69,7 +69,6 @@ if(btnGoogleLogin) {
     provider.setCustomParameters({ prompt: 'select_account' });
 
     try {
-      // Intento 1: Popup
       await signInWithPopup(auth, provider);
       showToast('⚔️ ¡Acceso autorizado al Dojo!');
     } catch(error) {
@@ -93,13 +92,34 @@ if(btnLogout) {
 }
 
 onAuthStateChanged(auth, async (user) => {
+  const welcomeBox = document.getElementById('user-welcome-box');
+  const userNameEl = document.getElementById('user-display-name');
+  const userAvatarEl = document.getElementById('user-avatar');
+
   if (user) {
     currentUser = user;
-    if(authScreen) authScreen.style.display = 'none';
+    if (authScreen) authScreen.style.display = 'none';
+
+    // Saludo personalizado con el primer nombre de Google
+    if (userNameEl) {
+      const nombreCompleto = user.displayName || "Guerrero";
+      const primerNombre = nombreCompleto.split(' ')[0]; 
+      userNameEl.innerText = primerNombre;
+    }
+
+    // Avatar de perfil de Google
+    if (userAvatarEl && user.photoURL) {
+      userAvatarEl.src = user.photoURL;
+      userAvatarEl.style.display = 'inline-block';
+    }
+
+    if (welcomeBox) welcomeBox.style.display = 'flex';
+
     await cargarDatosDesdeNube(user.uid);
   } else {
     currentUser = null;
-    if(authScreen) authScreen.style.display = 'flex';
+    if (authScreen) authScreen.style.display = 'flex';
+    if (welcomeBox) welcomeBox.style.display = 'none';
   }
 });
 
@@ -538,7 +558,7 @@ function actualizarDashboard() {
   }
 }
 
-// --- BASE ALIMENTOS FATSECRET ---
+// --- BASE DE ALIMENTOS ---
 const fatSecretDB = [
   { nombre: "Pechuga de Pollo (100g)", cal: 165, prot: 31, carb: 0, gras: 3.6 },
   { nombre: "Arroz Blanco Cocido (100g)", cal: 130, prot: 2.7, carb: 28, gras: 0.3 },
