@@ -17,7 +17,10 @@ import {
   collection,
   addDoc,
   getDocs,
-  deleteDoc
+  deleteDoc,
+  query,
+  orderBy,
+  limit
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // --- CONFIGURACIÓN DE FIREBASE ---
@@ -176,7 +179,6 @@ async function cargarDatosDesdeNube(uid) {
 async function cargarRegistrosDelDia(uid) {
   const hoyKey = getTodayKey();
   
-  // 1. Cargar comidas
   const listaComidas = document.getElementById('lista-comidas');
   if(listaComidas) {
     listaComidas.innerHTML = '';
@@ -188,7 +190,6 @@ async function cargarRegistrosDelDia(uid) {
     });
   }
 
-  // 2. Cargar entrenos
   const listaEntrenos = document.getElementById('lista-entrenos');
   if(listaEntrenos) {
     listaEntrenos.innerHTML = '';
@@ -455,7 +456,13 @@ function setupTabs(btnClass, subTabClass) {
       btns.forEach(t => t.classList.remove('active'));
       tabs.forEach(s => s.style.display = 'none');
       btn.classList.add('active');
-      document.getElementById(btn.getAttribute('data-tab')).style.display = 'block';
+      const targetTab = btn.getAttribute('data-tab');
+      document.getElementById(targetTab).style.display = 'block';
+
+      // Al tocar la pestaña de Leaderboard, consulta Firestore
+      if(targetTab === 'tab-leaderboard') {
+        cargarLeaderboard();
+      }
     });
   });
 }
@@ -615,7 +622,7 @@ if(btnConfirmWorkout) {
   });
 }
 
-// --- RANGOS SAMURAI ---
+// --- RANGOS SAMURAI Y RANKING GLOBAL ---
 const rangos = [
   { nombre: "Ashigaru", minRatio: 0, color: "#6b7c93", msg: "Primer paso." },
   { nombre: "Rōnin", minRatio: 1.5, color: "#ffaa00", msg: "Camino propio." },
@@ -626,13 +633,16 @@ const rangos = [
 
 const btnCalcularRango = document.getElementById('btn-calcular-rango');
 if(btnCalcularRango) {
-  btnCalcularRango.addEventListener('click', () => {
+  btnCalcularRango.addEventListener('click', async () => {
     const bw = parseFloat(document.getElementById('input-peso').value) || 75;
     const bench = parseFloat(document.getElementById('rm-bench').value) || 0;
     const squat = parseFloat(document.getElementById('rm-squat').value) || 0;
     const deadlift = parseFloat(document.getElementById('rm-deadlift').value) || 0;
     if(bench === 0 && squat === 0 && deadlift === 0) { showToast('⚠️ Ingresa marcas.'); return; }
-    const total = bench + squat + deadlift; const ratio = (total / bw).toFixed(2);
+    
+    const total = bench + squat + deadlift; 
+    const ratio = parseFloat((total / bw).toFixed(2));
+    
     let rangoActual = rangos[0], progresion = 0;
     for(let i = 0; i < rangos.length; i++) {
       if(ratio >= rangos[i].minRatio) {
@@ -640,8 +650,13 @@ if(btnCalcularRango) {
         progresion = i < rangos.length - 1 ? ((ratio - rangos[i].minRatio) / (rangos[i+1].minRatio - rangos[i].minRatio)) * 100 : 100;
       }
     }
-    document.getElementById('rango-titulo').innerText = rangoActual.nombre; document.getElementById('rango-titulo').style.color = rangoActual.color;
-    document.getElementById('rango-multi').innerText = `${ratio}x`; document.getElementById('rango-total').innerText = total; document.getElementById('rango-msg').innerText = rangoActual.msg;
+
+    document.getElementById('rango-titulo').innerText = rangoActual.nombre; 
+    document.getElementById('rango-titulo').style.color = rangoActual.color;
+    document.getElementById('rango-multi').innerText = `${ratio}x`; 
+    document.getElementById('rango-total').innerText = total; 
+    document.getElementById('rango-msg').innerText = rangoActual.msg;
+    
     const progressBar = document.getElementById('rango-progreso'); 
     if(progressBar) {
       progressBar.style.width = `${progresion}%`; 
@@ -651,8 +666,82 @@ if(btnCalcularRango) {
     if(rankCard) rankCard.style.borderColor = rangoActual.color;
     const headerRank = document.getElementById('header-rank');
     if(headerRank) headerRank.innerHTML = `Rango: <span style="color: ${rangoActual.color};">${rangoActual.nombre.toUpperCase()}</span>`;
-    showToast(`⚔️ Rango: ${rangoActual.nombre.toUpperCase()}`);
+    
+    // Publicar resultado al ranking público en Firestore
+    if(currentUser && db) {
+      try {
+        const lbRef = doc(db, "leaderboard", currentUser.uid);
+        await setDoc(lbRef, {
+          userId: currentUser.uid,
+          nombre: currentUser.displayName ? currentUser.displayName.split(' ')[0] : "Guerrero",
+          foto: currentUser.photoURL || "",
+          multiplicador: ratio,
+          totalKg: total,
+          pesoCorporal: bw,
+          rango: rangoActual.nombre,
+          colorRango: rangoActual.color,
+          updatedAt: Date.now()
+        }, { merge: true });
+        showToast(`⚔️ Rango ${rangoActual.nombre.toUpperCase()} publicado al Ranking!`);
+      } catch(e) {
+        console.error("Error publicando en Leaderboard:", e);
+      }
+    }
   });
+}
+
+// Cargar tabla de líderes ordenada por multiplicador
+async function cargarLeaderboard() {
+  const container = document.getElementById('leaderboard-list');
+  if(!container || !db) return;
+  container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">Cargando guerreros...</p>`;
+
+  try {
+    const q = query(collection(db, "leaderboard"), orderBy("multiplicador", "desc"), limit(20));
+    const snapshot = await getDocs(q);
+
+    if(snapshot.empty) {
+      container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">Aún no hay marcas registradas. Sé el primero en evaluar tu 1RM.</p>`;
+      return;
+    }
+
+    let html = "";
+    let pos = 1;
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const topClass = pos === 1 ? "top-1" : pos === 2 ? "top-2" : pos === 3 ? "top-3" : "";
+      const medal = pos === 1 ? "🥇" : pos === 2 ? "🥈" : pos === 3 ? "🥉" : `#${pos}`;
+      const defaultImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300e5ff'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+
+      html += `
+        <div class="leaderboard-item ${topClass}">
+          <div class="lb-rank-num">${medal}</div>
+          <div class="lb-user-info">
+            <img class="lb-avatar" src="${data.foto || defaultImg}" alt="Avatar">
+            <div>
+              <span class="lb-name">${data.nombre}</span>
+              <span class="lb-badge" style="color: ${data.colorRango};">${data.rango}</span>
+            </div>
+          </div>
+          <div class="lb-score">
+            <span class="lb-multiplier">${data.multiplicador}x</span>
+            <span class="lb-kg">${data.totalKg} kg tot</span>
+          </div>
+        </div>
+      `;
+      pos++;
+    });
+
+    container.innerHTML = html;
+  } catch(e) {
+    console.error("Error al cargar Leaderboard:", e);
+    container.innerHTML = `<p style="font-size: 12px; color: #ff3366; text-align: center;">Error al cargar el ranking.</p>`;
+  }
+}
+
+const btnRefreshLB = document.getElementById('btn-refresh-leaderboard');
+if(btnRefreshLB) {
+  btnRefreshLB.addEventListener('click', cargarLeaderboard);
 }
 
 // --- GRÁFICOS ---
@@ -706,7 +795,7 @@ function actualizarDashboard() {
   }
 }
 
-// --- BASE DE ALIMENTOS ---
+// --- BASE DE ALIMENTOS FATSECRET ---
 const fatSecretDB = [
   { nombre: "Pechuga de Pollo (100g)", cal: 165, prot: 31, carb: 0, gras: 3.6 },
   { nombre: "Arroz Blanco Cocido (100g)", cal: 130, prot: 2.7, carb: 28, gras: 0.3 },
