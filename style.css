@@ -119,6 +119,15 @@ main { padding: 15px; }
 #lista-comidas, #lista-entrenos { padding: 0; margin: 0; }
 #lista-comidas li, #lista-entrenos li { background: #1a2130; margin-bottom: 10px; padding: 15px; border-radius: 10px; list-style: none; border-left: 4px solid var(--primary); font-size: 13px; font-weight: 600;}
 
+/* ESTILOS DEL PLAN DEL ORÁCULO */
+.plan-meal-card { background: #141a26; border: 1px solid rgba(0,229,255,0.1); border-radius: 12px; padding: 15px; margin-bottom: 12px; text-align: left; position: relative;}
+.plan-meal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;}
+.plan-meal-title { font-size: 14px; font-weight: 800; color: var(--primary); text-transform: uppercase;}
+.plan-meal-cals { font-size: 12px; color: #fff; font-weight: 700; background: rgba(0,229,255,0.15); padding: 3px 8px; border-radius: 6px;}
+.plan-meal-desc { font-size: 13px; line-height: 1.5; color: #e2e8f0; margin-bottom: 10px;}
+.btn-swap { background: transparent; border: 1px solid #ffaa00; color: #ffaa00; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; float: right; margin-top: -5px;}
+.btn-swap:active { background: rgba(255,170,0,0.1); }
+
 .food-search-item { padding: 10px; background: #1a2130; margin-bottom: 5px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; }
 .food-search-item:hover { background: rgba(0,229,255,0.1); color: var(--primary); }
 
