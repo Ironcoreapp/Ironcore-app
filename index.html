@@ -22,17 +22,15 @@
     </div>
   </div>
 
-  <!-- PANTALLA DE ONBOARDING (RITUAL DE INICIACIÓN) -->
+  <!-- PANTALLA DE ONBOARDING -->
   <div id="onboarding-screen" class="onboarding-overlay" style="display: none;">
     <div class="ob-card">
       <div class="ob-header">
         <h3 id="ob-title">Identidad del Guerrero</h3>
         <div class="ob-progress"><div class="ob-progress-bar" id="ob-bar"></div></div>
       </div>
-      
       <div class="ob-viewport">
         <div class="ob-track" id="ob-track">
-          
           <!-- Paso 1: Identidad -->
           <div class="ob-step">
             <img id="ob-avatar" src="" alt="Avatar" class="ob-avatar-img">
@@ -41,7 +39,6 @@
             <p style="font-size:10px; color:var(--text-muted); margin-top:10px;">Este será tu nombre en el Ranking Global.</p>
             <button class="btn btn-primary" style="width:100%; margin-top:25px;" onclick="moverOnboarding(1)">Siguiente ➔</button>
           </div>
-
           <!-- Paso 2: Biometría -->
           <div class="ob-step">
             <label style="margin-top:0;">Género Base (TMB)</label>
@@ -49,20 +46,17 @@
               <div class="ob-gender-btn active" data-gen="M" onclick="seleccionarGenero('M')">Hombre</div>
               <div class="ob-gender-btn" data-gen="F" onclick="seleccionarGenero('F')">Mujer</div>
             </div>
-            
             <div class="macros-grid" style="margin-top: 15px;">
               <div><label>Edad</label><input type="number" id="ob-edad" class="neon-input" placeholder="Años" value="25"></div>
               <div><label>Estatura</label><input type="number" id="ob-altura" class="neon-input" placeholder="cm" value="175"></div>
             </div>
             <label>Peso Actual (kg)</label>
             <input type="number" id="ob-peso" class="neon-input" placeholder="Ej: 75" value="75" step="0.1">
-
             <div style="display:flex; gap:10px; margin-top:25px;">
               <button class="btn btn-secondary" style="flex:1;" onclick="moverOnboarding(-1)">⬅ Atrás</button>
               <button class="btn btn-primary" style="flex:2;" onclick="moverOnboarding(1)">Siguiente ➔</button>
             </div>
           </div>
-
           <!-- Paso 3: Objetivos -->
           <div class="ob-step">
             <label style="margin-top:0;">¿Cuál es tu senda?</label>
@@ -80,13 +74,11 @@
                 <span>💪</span><b>Volumen</b><br><small>Hipertrofia máxima</small>
               </div>
             </div>
-            
             <div style="display:flex; gap:10px; margin-top:25px;">
               <button class="btn btn-secondary" style="flex:1;" onclick="moverOnboarding(-1)">⬅ Atrás</button>
               <button class="btn btn-primary" style="flex:2;" onclick="finalizarOnboarding()">Sellar Ritual ✔</button>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -98,12 +90,10 @@
   <header>
     <img src="logo.png" alt="IronCore Nutrition" class="logo-img">
     <p>Elite Performance System (Cloud)</p>
-    
     <div id="user-welcome-box" style="display: none; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;">
       <img id="user-avatar" src="" alt="Avatar" style="width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--primary); display: none;">
       <span style="font-size: 11px; font-weight: 700; color: #fff;">Bienvenido, <b id="user-display-name" style="color: var(--primary);">Guerrero</b></span>
     </div>
-
     <div style="display: flex; justify-content: center; gap: 8px; margin-top: 6px; align-items: center;">
       <div class="user-rank" id="header-rank">Rango: <span style="color: #6b7c93;">ASHIGARU</span></div>
       <div class="user-streak" id="header-streak">🔥 Racha: 0 días</div>
@@ -113,46 +103,25 @@
   <main>
     <!-- 📊 DASHBOARD -->
     <section id="page-dashboard" class="page active">
-      <div class="coach-tip">
-        <span class="tip-icon">🧠</span>
-        <p id="daily-tip">Cargando...</p>
-      </div>
-
-      <button id="btn-checkin" class="btn btn-accent" style="width: 100%; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 10px;">
-        <span>📝</span> Registrar Check-in Diario
-      </button>
-
+      <div class="coach-tip"><span class="tip-icon">🧠</span><p id="daily-tip">Cargando...</p></div>
+      <button id="btn-checkin" class="btn btn-accent" style="width: 100%; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 10px;"><span>📝</span> Registrar Check-in Diario</button>
       <div class="card water-card">
         <h3>💧 Control de Hidratación</h3>
-        <div class="water-progress-container">
-          <div class="water-fill" id="water-fill-bar" style="height: 0%;"></div>
-          <span class="water-text" id="water-text-val">0 / 3000 ml</span>
-        </div>
-        <div class="water-btns">
-          <button class="btn-water" onclick="agregarAgua(250)">+250 ml</button>
-          <button class="btn-water" onclick="agregarAgua(500)">+500 ml</button>
-          <button class="btn-water reset" onclick="resetAgua()">Reset</button>
-        </div>
+        <div class="water-progress-container"><div class="water-fill" id="water-fill-bar" style="height: 0%;"></div><span class="water-text" id="water-text-val">0 / 3000 ml</span></div>
+        <div class="water-btns"><button class="btn-water" onclick="agregarAgua(250)">+250 ml</button><button class="btn-water" onclick="agregarAgua(500)">+500 ml</button><button class="btn-water reset" onclick="resetAgua()">Reset</button></div>
       </div>
-
       <div class="card card-main">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-          <h3 style="margin:0;">Balance Energético</h3>
-          <button class="btn-clear-history" onclick="reiniciarDiaActual()">🔄 Reiniciar Día</button>
+          <h3 style="margin:0;">Balance Energético</h3><button class="btn-clear-history" onclick="reiniciarDiaActual()">🔄 Reiniciar Día</button>
         </div>
         <p id="calorias-total">0 / 2500 kcal</p>
-        
         <div class="energy-breakdown">
           <div><span style="color:var(--text-muted); font-size:10px;">CONSUMIDAS</span><br><b id="en-consumidas" style="color:#00e5ff; font-size:14px;">0 kcal</b></div>
           <div><span style="color:var(--text-muted); font-size:10px;">QUEMADAS (EST.)</span><br><b id="en-quemadas" style="color:#ff3366; font-size:14px;">450 kcal</b></div>
           <div><span style="color:var(--text-muted); font-size:10px;">NETAS</span><br><b id="en-netas" style="color:#ffaa00; font-size:14px;">-450 kcal</b></div>
         </div>
-
-        <div class="chart-container" style="margin-top: 15px;">
-          <canvas id="macroChart"></canvas>
-        </div>
+        <div class="chart-container" style="margin-top: 15px;"><canvas id="macroChart"></canvas></div>
       </div>
-      
       <div class="macros">
         <div class="card macro"><h4 style="color: #ff3366;">Prot</h4><p id="prot-total">0g</p></div>
         <div class="card macro"><h4 style="color: #00e5ff;">Carb</h4><p id="carb-total">0g</p></div>
@@ -160,38 +129,53 @@
       </div>
     </section>
 
-    <!-- 🍎 DIETA -->
+    <!-- 🍎 DIETA & ORÁCULO -->
     <section id="page-diet" class="page">
       <h2 class="page-title">Nutrición Inteligente</h2>
       <div class="tab-container">
         <button class="tab-btn-diet active" data-tab="tab-registro">Registro</button>
-        <button class="tab-btn-diet" data-tab="tab-plan">Plan & Compras</button>
+        <button class="tab-btn-diet" data-tab="tab-plan">Oráculo Nutricional</button>
       </div>
 
       <div id="tab-registro" class="sub-tab-diet active">
         <div class="actions">
-          <button id="btn-abrir-manual" class="btn btn-primary">🔍 Buscar Alimento (FatSecret)</button>
+          <button id="btn-abrir-manual" class="btn btn-primary">🔍 Buscar Alimento (Manual)</button>
           <button id="btn-foto" class="btn btn-secondary">📸 Escáner IA (Próximamente)</button>
         </div>
-        <div class="log">
-          <h3>Historial de Hoy</h3>
-          <ul id="lista-comidas"></ul>
-        </div>
+        <div class="log"><h3>Historial de Hoy</h3><ul id="lista-comidas"></ul></div>
       </div>
 
+      <!-- ORÁCULO NUTRICIONAL (NUEVO) -->
       <div id="tab-plan" class="sub-tab-diet" style="display: none;">
-        <div class="card" style="text-align: left;">
-          <h3 style="color: #00e5ff; margin-top:0;">Coach Nutricional</h3>
-          <p style="font-size: 13px; color: var(--text-muted);">Genera tu estructura semanal y lista de compras en base a tu perfil biométrico.</p>
-          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Generar Plan Semanal</button>
+        <div class="card" style="text-align: left;" id="oracle-form-card">
+          <h3 style="color: #00e5ff; margin-top:0;">Evaluación Clínica</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">El Oráculo diseñará un plan matemático ajustado a tus <b id="oracle-target-cals">0</b> kcal diarias.</p>
+          
+          <label>Preferencia Dietética:</label>
+          <select id="oracle-diet-type" class="neon-input" style="margin-top:5px;">
+            <option value="normal">Normal (Omnívoro)</option>
+            <option value="lowcarb">Baja en Carbohidratos (Low-Carb)</option>
+            <option value="keto">Cetogénica (Keto)</option>
+            <option value="vegano">Vegana (Plant-based)</option>
+            <option value="vegetariano">Vegetariana (Incluye lácteos/huevos)</option>
+          </select>
+
+          <label style="margin-top:15px;">Alergias o Exclusiones (Opcional):</label>
+          <input type="text" id="oracle-allergies" class="neon-input" placeholder="Ej: maní, lactosa, mariscos, brócoli" style="margin-top:5px;">
+          
+          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 20px; box-shadow: 0 0 15px var(--primary-glow);">Consultar al Oráculo 🔮</button>
         </div>
+        
         <div id="plan-resultado" style="display: none;">
-          <h3 style="color: #fff; margin-top: 20px;">Estructura Sugerida</h3>
-          <div id="comidas-plan" class="card" style="text-align: left; font-size: 14px;"></div>
-          <h3 style="color: #fff; margin-top: 20px;">🛒 Lista de Compras</h3>
-          <div class="card" style="text-align: left;">
-            <ul id="lista-compras" class="check-list"></ul>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <h3 style="color: #fff; margin: 0;">Plan del Oráculo</h3>
+            <button class="btn-clear-history" onclick="document.getElementById('plan-resultado').style.display='none'; document.getElementById('oracle-form-card').style.display='block';">Volver</button>
           </div>
+          
+          <!-- Contenedor Dinámico del Plan -->
+          <div id="comidas-plan" style="margin-top:15px;"></div>
+          
+          <button class="btn btn-secondary" style="width:100%; margin-top:15px;" onclick="generarListaCompras()">🛒 Exportar Lista de Compras</button>
         </div>
       </div>
     </section>
@@ -220,10 +204,7 @@
         <div class="card" style="text-align: left;">
           <h3 style="color: #00e5ff; margin-top:0;">Cuaderno de Bitácora</h3>
           <button id="btn-registrar-serie" class="btn btn-primary" style="width: 100%; margin-bottom: 15px;">+ Registrar Ejercicio Realizado</button>
-          <div class="log">
-            <h3 style="font-size: 12px; color: var(--text-muted);">Series de Hoy</h3>
-            <ul id="lista-entrenos"></ul>
-          </div>
+          <div class="log"><h3 style="font-size: 12px; color: var(--text-muted);">Series de Hoy</h3><ul id="lista-entrenos"></ul></div>
         </div>
       </div>
 
@@ -256,10 +237,7 @@
             <h3 style="color: #00e5ff; margin:0;">Salón del Shōgun</h3>
             <button id="btn-refresh-leaderboard" class="btn-clear-history" style="border-color: var(--primary); color: var(--primary);">🔄 Actualizar</button>
           </div>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Guerreros ordenados por multiplicador de fuerza relativo a su peso corporal (BW).</p>
-          <div id="leaderboard-list">
-            <p style="font-size: 12px; color: var(--text-muted); text-align: center;">Cargando guerreros del dojo...</p>
-          </div>
+          <div id="leaderboard-list"><p style="font-size: 12px; color: var(--text-muted); text-align: center;">Cargando guerreros...</p></div>
         </div>
       </div>
     </section>
@@ -272,7 +250,6 @@
           <h3 style="color: #00e5ff; margin:0;">Historial de Jornadas</h3>
           <button class="btn-clear-history" onclick="borrarTodoHistorial()">Borrar Todo</button>
         </div>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Registros consolidados.</p>
         <div id="historial-container"><p style="font-size: 13px; color: var(--text-muted);">Aún no hay días archivados.</p></div>
       </div>
       <div class="card" style="text-align: left; margin-top: 20px;">
@@ -293,7 +270,7 @@
           </div>
         </div>
         <div class="chat-box" id="chat-messages">
-          <div class="chat-msg ai">"Bienvenido al dojo, guerrero. Mis ojos ven tus métricas y tu disciplina. ¿Qué dudas atormentan tu espíritu hoy?"</div>
+          <div class="chat-msg ai">"Bienvenido al dojo. ¿Qué dudas atormentan tu espíritu hoy?"</div>
         </div>
         <div class="chat-input-area">
           <input type="text" id="chat-input-text" class="neon-input" placeholder="Pregúntale al Shōgun..." style="margin:0;">
@@ -302,10 +279,9 @@
       </div>
     </section>
 
-    <!-- ⚙️ PERFIL (REDISEÑADO) -->
+    <!-- ⚙️ PERFIL -->
     <section id="page-profile" class="page">
       <h2 class="page-title">Credencial de Guerrero</h2>
-      
       <div class="card card-main" style="text-align: center; position: relative;">
         <img id="profile-card-avatar" src="logo.png" alt="Avatar" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--primary); margin-bottom: 10px; object-fit: cover;">
         <h2 id="profile-card-name" style="margin: 0; color: #fff; font-size: 22px;">GUERRERO</h2>
@@ -317,24 +293,20 @@
           <div class="macro" style="background:#141a26; padding:10px;"><label style="margin:0; font-size:9px;">Edad</label><b id="profile-val-edad" style="color:#fff;">--</b></div>
           <div class="macro" style="background:#141a26; padding:10px;"><label style="margin:0; font-size:9px;">Género</label><b id="profile-val-genero" style="color:#fff;">--</b></div>
         </div>
-
         <label style="margin-top: 20px; text-align:left;">Nivel de Actividad Diaria:</label>
         <div class="custom-select" id="select-actividad" data-val="1.55" style="margin-bottom: 20px;">Moderado (3-5 días)</div>
         
         <button id="btn-edit-profile" class="btn btn-primary" style="width: 100%; box-shadow: 0 0 15px var(--primary-glow);" onclick="window.abrirOnboarding(true)">⚙️ Editar Biometría y Metas</button>
         <button id="btn-logout-profile" class="btn btn-secondary" style="width: 100%; margin-top: 10px; border-color: #ff3366; color: #ff3366;">🚪 Cerrar Sesión</button>
       </div>
-
       <div class="card card-main">
         <h3>Proyección de Peso (4 Semanas)</h3>
-        <div class="chart-container" style="height: 180px;">
-          <canvas id="progressChart"></canvas>
-        </div>
+        <div class="chart-container" style="height: 180px;"><canvas id="progressChart"></canvas></div>
       </div>
     </section>
   </main>
 
-  <!-- MODALES Y BOTTOM SHEETS -->
+  <!-- MODALES -->
   <div id="sheet-overlay" class="sheet-overlay"></div>
   
   <div id="sheet-actividad" class="bottom-sheet">
@@ -394,6 +366,14 @@
     <label>Intensidad / RPE (Esfuerzo 1 al 10):</label>
     <input type="number" id="work-rpe" class="neon-input" placeholder="Ej: 8.5">
     <button id="btn-confirm-workout" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Guardar Serie</button>
+  </div>
+
+  <!-- MODAL DE LISTA DE COMPRAS -->
+  <div id="sheet-compras" class="bottom-sheet" style="max-height: 80vh; overflow-y: auto;">
+    <h3>🛒 Lista de Compras</h3>
+    <p style="font-size: 11px; color: var(--text-muted); margin-bottom:15px; text-align:center;">Ingredientes consolidados para la semana basados en tu Oráculo.</p>
+    <ul id="lista-compras-ui" class="check-list" style="text-align:left;"></ul>
+    <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="closeSheet()">Cerrar</button>
   </div>
 
   <nav class="bottom-nav">
