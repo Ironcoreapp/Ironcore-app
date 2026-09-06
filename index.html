@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- Pantalla de Login (Se oculta al iniciar sesión) -->
+  <!-- Pantalla de Login -->
   <div id="auth-screen" class="auth-screen">
     <div class="card card-main" style="max-width: 320px; width: 100%;">
       <img src="logo.png" alt="IronCore Nutrition" class="logo-img" style="max-width: 150px; margin: 0 auto 15px;">
@@ -29,7 +29,7 @@
     <img src="logo.png" alt="IronCore Nutrition" class="logo-img">
     <p>Elite Performance System (Cloud)</p>
     
-    <!-- CONTENEDOR DE BIENVENIDA -->
+    <!-- Contenedor de Bienvenida Personalizado -->
     <div id="user-welcome-box" style="display: none; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;">
       <img id="user-avatar" src="" alt="Avatar" style="width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--primary); display: none;">
       <span style="font-size: 11px; font-weight: 700; color: #fff;">Bienvenido, <b id="user-display-name" style="color: var(--primary);">Guerrero</b></span>
@@ -43,7 +43,7 @@
   </header>
 
   <main>
-    <!-- 📊 PÁGINA 1: DASHBOARD (RESUMEN) -->
+    <!-- 📊 PÁGINA 1: DASHBOARD -->
     <section id="page-dashboard" class="page active">
       <div class="coach-tip">
         <span class="tip-icon">🧠</span>
@@ -134,9 +134,11 @@
     <section id="page-training" class="page">
       <h2 class="page-title">Sistema de Combate</h2>
       
+      <!-- Pestañas horizontales de combate con Ranking -->
       <div class="tab-container">
         <button class="tab-btn-train active" data-tab="tab-rutina">Guía & Bitácora</button>
         <button class="tab-btn-train" data-tab="tab-rango">Camino del Shōgun</button>
+        <button class="tab-btn-train" data-tab="tab-leaderboard">🏆 Ranking</button>
       </div>
 
       <div id="tab-rutina" class="sub-tab-train active">
@@ -184,7 +186,21 @@
           <input type="number" id="rm-squat" class="neon-input" placeholder="Ej: 140">
           <label>Peso Muerto (kg)</label>
           <input type="number" id="rm-deadlift" class="neon-input" placeholder="Ej: 180">
-          <button id="btn-calcular-rango" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Evaluar Nivel de Poder</button>
+          <button id="btn-calcular-rango" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Evaluar y Publicar al Ranking</button>
+        </div>
+      </div>
+
+      <!-- Pestaña de Ranking Global -->
+      <div id="tab-leaderboard" class="sub-tab-train" style="display: none;">
+        <div class="card" style="text-align: left;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="color: #00e5ff; margin:0;">Salón del Shōgun</h3>
+            <button id="btn-refresh-leaderboard" class="btn-clear-history" style="border-color: var(--primary); color: var(--primary);">🔄 Actualizar</button>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Guerreros ordenados por multiplicador de fuerza relativo a su peso corporal (BW).</p>
+          <div id="leaderboard-list">
+            <p style="font-size: 12px; color: var(--text-muted); text-align: center;">Cargando guerreros del dojo...</p>
+          </div>
         </div>
       </div>
     </section>
@@ -348,7 +364,6 @@
     <button class="nav-item" data-target="page-profile"><span class="icon">⚙️</span><span class="text">Perfil</span></button>
   </nav>
 
-  <!-- Script cargado como módulo principal -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
