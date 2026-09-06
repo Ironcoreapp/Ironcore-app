@@ -1,4 +1,22 @@
-// --- CONFIGURACIÓN DE FIREBASE (TUS LLAVES REALES) ---
+// --- IMPORTACIÓN MODULAR DIRECTA DE FIREBASE ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signInWithRedirect, 
+  getRedirectResult, 
+  signOut, 
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  getDoc 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// --- CONFIGURACIÓN DE FIREBASE ---
 const firebaseConfig = {
   apiKey: "AIzaSyAK3QRT5FOqe9q-hxI3NWtTvZT2uGGLCTU",
   authDomain: "ironcoreapp-66a12.firebaseapp.com",
@@ -9,81 +27,88 @@ const firebaseConfig = {
   measurementId: "G-LBZ7JX8QQ2"
 };
 
-// Inicializar Firebase usando los módulos globales del HTML
-let app, auth, db;
-try {
-  app = window.firebaseModules.initializeApp(firebaseConfig);
-  auth = window.firebaseModules.getAuth(app);
-  db = window.firebaseModules.getFirestore(app);
-} catch(e) {
-  console.log("Esperando inicialización de Firebase...");
-}
+// Inicialización directa
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 let currentUser = null;
 
-// --- ESTADO INICIAL ---
+// --- ESTADO DE MÉTRICAS ---
 let totalCalorias = 0, totalProt = 0, totalCarb = 0, totalGrasa = 0, totalAgua = 0, userStreak = 1;
 let metaCalorias = 2500, metaProt = 165, metaCarb = 275, metaGrasa = 69, currentGoal = 300; 
-let tempFoodName = ""; 
 
 function showToast(msg) {
   const toast = document.getElementById('toast-notif');
+  if(!toast) return;
   toast.innerHTML = msg;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3500);
+  setTimeout(() => toast.classList.remove('show'), 4000);
 }
 
-// --- GESTIÓN DE AUTENTICACIÓN (GOOGLE SIGN-IN) ---
+// --- GESTIÓN DE AUTENTICACIÓN GOOGLE ---
 const authScreen = document.getElementById('auth-screen');
 const btnGoogleLogin = document.getElementById('btn-google-login');
 const btnLogout = document.getElementById('btn-logout');
 
+// Captura de redirección móvil si popup falla o recarga
+getRedirectResult(auth)
+  .then((result) => {
+    if (result && result.user) {
+      showToast('⚔️ ¡Acceso autorizado al Dojo!');
+    }
+  })
+  .catch((error) => {
+    console.error("Error en redirect:", error);
+  });
+
 if(btnGoogleLogin) {
   btnGoogleLogin.addEventListener('click', async () => {
-    showToast('🔄 Intentando conectar con Google...');
+    showToast('🔄 Conectando con Google...');
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+
     try {
-      if (!window.firebaseModules || !auth) {
-        showToast('⚠️ Error: Firebase no está inicializado.');
-        return;
-      }
-      const provider = new window.firebaseModules.GoogleAuthProvider();
-      await window.firebaseModules.signInWithPopup(auth, provider);
+      // Intento 1: Popup
+      await signInWithPopup(auth, provider);
       showToast('⚔️ ¡Acceso autorizado al Dojo!');
     } catch(error) {
-      showToast(`⚠️ Error: ${error.code || error.message}`);
-      console.error("Error detallado de Firebase Auth:", error);
+      console.warn("Popup bloqueado o fallido, ejecutando redirección:", error);
+      if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+        showToast('🔄 Redirigiendo a Google...');
+        await signInWithRedirect(auth, provider);
+      } else {
+        showToast(`⚠️ ${error.code || error.message}`);
+      }
     }
   });
 }
 
 if(btnLogout) {
   btnLogout.addEventListener('click', async () => {
-    await window.firebaseModules.signOut(auth);
+    await signOut(auth);
     if(authScreen) authScreen.style.display = 'flex';
     showToast('🚪 Sesión cerrada.');
   });
 }
 
-// Escuchar cambios de usuario
-if(auth) {
-  window.firebaseModules.onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      currentUser = user;
-      if(authScreen) authScreen.style.display = 'none';
-      await cargarDatosDesdeNube(user.uid);
-    } else {
-      currentUser = null;
-      if(authScreen) authScreen.style.display = 'flex';
-    }
-  });
-}
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    if(authScreen) authScreen.style.display = 'none';
+    await cargarDatosDesdeNube(user.uid);
+  } else {
+    currentUser = null;
+    if(authScreen) authScreen.style.display = 'flex';
+  }
+});
 
-// --- SINCRONIZACIÓN CON FIRESTORE ---
+// --- SINCRONIZACIÓN FIRESTORE ---
 async function guardarEstadoNube() {
   if(!currentUser || !db) return;
-  const userDocRef = window.firebaseModules.doc(db, "users", currentUser.uid);
+  const userDocRef = doc(db, "users", currentUser.uid);
   try {
-    await window.firebaseModules.setDoc(userDocRef, {
+    await setDoc(userDocRef, {
       calorias: totalCalorias,
       proteina: totalProt,
       carbos: totalCarb,
@@ -97,13 +122,13 @@ async function guardarEstadoNube() {
       streak: userStreak,
       ultimaFecha: localStorage.getItem('ic_ultima_fecha')
     }, { merge: true });
-  } catch(e) { console.error("Error guardando en la nube:", e); }
+  } catch(e) { console.error("Error guardando:", e); }
 }
 
 async function cargarDatosDesdeNube(uid) {
   if(!db) return;
-  const userDocRef = window.firebaseModules.doc(db, "users", uid);
-  const docSnap = await window.firebaseModules.getDoc(userDocRef);
+  const userDocRef = doc(db, "users", uid);
+  const docSnap = await getDoc(userDocRef);
   
   if (docSnap.exists()) {
     const data = docSnap.data();
@@ -123,7 +148,7 @@ async function cargarDatosDesdeNube(uid) {
   actualizarAguaUI();
 }
 
-// --- GENERADOR DE PARTÍCULAS SAKURA AZULES ---
+// --- GENERADOR SAKURA ---
 function iniciarSakuraBackground() {
   const container = document.getElementById('sakura-bg');
   if(!container) return;
@@ -141,7 +166,7 @@ function iniciarSakuraBackground() {
   }
 }
 
-// --- VERIFICACIÓN Y REINICIO DE DÍA ---
+// --- VERIFICACIÓN DÍA ---
 function verificarCambioDeDia() {
   const hoy = new Date().toDateString();
   const ultimoDiaGuardado = localStorage.getItem('ic_ultima_fecha');
@@ -153,7 +178,7 @@ function verificarCambioDeDia() {
     userStreak++;
     localStorage.setItem('ic_ultima_fecha', hoy);
     guardarEstadoNube();
-    showToast('🌙 Nuevo día en la nube. ¡Racha incrementada!');
+    showToast('🌙 Nuevo día. ¡Racha incrementada!');
   }
   const streakEl = document.getElementById('header-streak');
   if(streakEl) streakEl.innerText = `🔥 Racha: ${userStreak} días`;
@@ -166,9 +191,9 @@ window.reiniciarDiaActual = function() {
     document.getElementById('lista-comidas').innerHTML = '';
     showToast('🔄 Balance restablecido.');
   }
-}
+};
 
-// --- RENDERIZAR HISTORIALES ---
+// --- HISTORIAL ---
 function cargarSeccionHistorial() {
   const historialContainer = document.getElementById('historial-container');
   let historialHistorico = JSON.parse(localStorage.getItem('ic_historial_pasado')) || [];
@@ -214,29 +239,29 @@ function cargarSeccionHistorial() {
 }
 
 window.eliminarJornada = function(index) {
-  let historialHistorico = JSON.parse(localStorage.getItem('ic_historial_pasado')) || [];
-  historialHistorico.splice(index, 1);
-  localStorage.setItem('ic_historial_pasado', JSON.stringify(historialHistorico));
+  let historial = JSON.parse(localStorage.getItem('ic_historial_pasado')) || [];
+  historial.splice(index, 1);
+  localStorage.setItem('ic_historial_pasado', JSON.stringify(historial));
   cargarSeccionHistorial();
   showToast('🗑️ Jornada eliminada.');
-}
+};
 
 window.eliminarCheckin = function(index) {
-  let checkinsHistoricos = JSON.parse(localStorage.getItem('ic_checkins')) || [];
-  checkinsHistoricos.splice(index, 1);
-  localStorage.setItem('ic_checkins', JSON.stringify(checkinsHistoricos));
+  let checkins = JSON.parse(localStorage.getItem('ic_checkins')) || [];
+  checkins.splice(index, 1);
+  localStorage.setItem('ic_checkins', JSON.stringify(checkins));
   cargarSeccionHistorial();
   showToast('🗑️ Check-in eliminado.');
-}
+};
 
 window.borrarTodoHistorial = function() {
-  if(confirm("¿Estás seguro de restablecer todo el historial archivado?")) {
+  if(confirm("¿Restablecer todo el historial archivado?")) {
     localStorage.removeItem('ic_historial_pasado');
     localStorage.removeItem('ic_checkins');
     cargarSeccionHistorial();
     showToast('🧹 Historial restablecido.');
   }
-}
+};
 
 // --- NAVEGACIÓN ---
 const navItems = document.querySelectorAll('.nav-item');
@@ -287,8 +312,8 @@ function actualizarAguaUI() {
   if(textVal) textVal.innerText = `${totalAgua} / ${metaAgua} ml`;
   guardarEstadoNube();
 }
-window.agregarAgua = ml => { totalAgua += ml; actualizarAguaUI(); showToast(`💧 +${ml} ml añadidos.`); }
-window.resetAgua = () => { totalAgua = 0; actualizarAguaUI(); showToast(`🔄 Hidratación reiniciada.`); }
+window.agregarAgua = ml => { totalAgua += ml; actualizarAguaUI(); showToast(`💧 +${ml} ml añadidos.`); };
+window.resetAgua = () => { totalAgua = 0; actualizarAguaUI(); showToast(`🔄 Hidratación reiniciada.`); };
 
 // --- CHAT SHŌGUN AI ---
 const chatMessages = document.getElementById('chat-messages');
@@ -513,7 +538,7 @@ function actualizarDashboard() {
   }
 }
 
-// --- BUSCADOR FATSECRET + EDICIÓN MANUAL ---
+// --- BASE ALIMENTOS FATSECRET ---
 const fatSecretDB = [
   { nombre: "Pechuga de Pollo (100g)", cal: 165, prot: 31, carb: 0, gras: 3.6 },
   { nombre: "Arroz Blanco Cocido (100g)", cal: 130, prot: 2.7, carb: 28, gras: 0.3 },
@@ -650,15 +675,14 @@ const tips = [
 const dailyTip = document.getElementById('daily-tip');
 if(dailyTip) dailyTip.innerText = tips[Math.floor(Math.random() * tips.length)];
 
-// --- REGISTRO DE SERVICE WORKER PARA PWA ---
+// --- REGISTRO SERVICE WORKER PWA ---
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')
-      .then(() => console.log('Service Worker registrado con éxito.'))
-      .catch((err) => console.log('Error al registrar Service Worker:', err));
+      .then(() => console.log('SW activo'))
+      .catch((err) => console.log('SW error:', err));
   });
 }
 
-// --- INICIALIZAR ---
+// --- INICIALIZAR VISTA ---
 iniciarSakuraBackground();
-
