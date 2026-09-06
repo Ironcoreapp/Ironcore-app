@@ -13,7 +13,11 @@ import {
   getFirestore, 
   doc, 
   setDoc, 
-  getDoc 
+  getDoc,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // --- CONFIGURACIÓN DE FIREBASE ---
@@ -27,7 +31,7 @@ const firebaseConfig = {
   measurementId: "G-LBZ7JX8QQ2"
 };
 
-// Inicialización directa
+// Inicialización
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -37,6 +41,11 @@ let currentUser = null;
 // --- ESTADO DE MÉTRICAS ---
 let totalCalorias = 0, totalProt = 0, totalCarb = 0, totalGrasa = 0, totalAgua = 0, userStreak = 1;
 let metaCalorias = 2500, metaProt = 165, metaCarb = 275, metaGrasa = 69, currentGoal = 300; 
+
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 function showToast(msg) {
   const toast = document.getElementById('toast-notif');
@@ -51,16 +60,13 @@ const authScreen = document.getElementById('auth-screen');
 const btnGoogleLogin = document.getElementById('btn-google-login');
 const btnLogout = document.getElementById('btn-logout');
 
-// Captura de redirección móvil si popup falla o recarga
 getRedirectResult(auth)
   .then((result) => {
     if (result && result.user) {
       showToast('⚔️ ¡Acceso autorizado al Dojo!');
     }
   })
-  .catch((error) => {
-    console.error("Error en redirect:", error);
-  });
+  .catch((error) => console.error("Error en redirect:", error));
 
 if(btnGoogleLogin) {
   btnGoogleLogin.addEventListener('click', async () => {
@@ -100,14 +106,11 @@ onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     if (authScreen) authScreen.style.display = 'none';
 
-    // Saludo personalizado con el primer nombre de Google
     if (userNameEl) {
       const nombreCompleto = user.displayName || "Guerrero";
-      const primerNombre = nombreCompleto.split(' ')[0]; 
-      userNameEl.innerText = primerNombre;
+      userNameEl.innerText = nombreCompleto.split(' ')[0];
     }
 
-    // Avatar de perfil de Google
     if (userAvatarEl && user.photoURL) {
       userAvatarEl.src = user.photoURL;
       userAvatarEl.style.display = 'inline-block';
@@ -142,7 +145,7 @@ async function guardarEstadoNube() {
       streak: userStreak,
       ultimaFecha: localStorage.getItem('ic_ultima_fecha')
     }, { merge: true });
-  } catch(e) { console.error("Error guardando:", e); }
+  } catch(e) { console.error("Error guardando métricas:", e); }
 }
 
 async function cargarDatosDesdeNube(uid) {
@@ -166,6 +169,154 @@ async function cargarDatosDesdeNube(uid) {
   verificarCambioDeDia();
   actualizarDashboard();
   actualizarAguaUI();
+  await cargarRegistrosDelDia(uid);
+}
+
+// --- PERSISTENCIA DE LISTAS (COMIDAS Y ENTRENOS) ---
+async function cargarRegistrosDelDia(uid) {
+  const hoyKey = getTodayKey();
+  
+  // 1. Cargar comidas
+  const listaComidas = document.getElementById('lista-comidas');
+  if(listaComidas) {
+    listaComidas.innerHTML = '';
+    const mealsColl = collection(db, "users", uid, "days", hoyKey, "meals");
+    const snapshot = await getDocs(mealsColl);
+    snapshot.forEach(docSnap => {
+      const item = docSnap.data();
+      renderizarComidaEnUI(item.nombre, item.cal, item.prot, item.carb, item.gras, docSnap.id);
+    });
+  }
+
+  // 2. Cargar entrenos
+  const listaEntrenos = document.getElementById('lista-entrenos');
+  if(listaEntrenos) {
+    listaEntrenos.innerHTML = '';
+    const workColl = collection(db, "users", uid, "days", hoyKey, "workouts");
+    const snapshot = await getDocs(workColl);
+    snapshot.forEach(docSnap => {
+      const item = docSnap.data();
+      renderizarEntrenoEnUI(item.nombre, item.sets, item.weight, item.rpe, docSnap.id);
+    });
+  }
+}
+
+function renderizarComidaEnUI(nombre, cal, prot, carb, gras, docId = null) {
+  const listaComidas = document.getElementById('lista-comidas');
+  if(!listaComidas) return;
+  const li = document.createElement('li');
+  if(docId) li.setAttribute('data-id', docId);
+  li.innerHTML = `
+    <span style="color:#fff; font-weight:800;">${nombre}</span>
+    <button class="btn-delete-item" onclick="eliminarComidaNube('${docId}', ${cal}, ${prot}, ${carb}, ${gras}, this)">🗑️</button>
+    <br> 
+    <span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">
+      🔥 ${cal} kcal &nbsp;|&nbsp; <span style="color:#ff3366;">P: ${prot}g</span> &nbsp;|&nbsp; <span style="color:#00e5ff;">C: ${carb}g</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">G: ${gras}g</span>
+    </span>`;
+  listaComidas.appendChild(li);
+}
+
+function renderizarEntrenoEnUI(nombre, sets, weight, rpe, docId = null) {
+  const listaEntrenos = document.getElementById('lista-entrenos');
+  if(!listaEntrenos) return;
+  const li = document.createElement('li');
+  if(docId) li.setAttribute('data-id', docId);
+  li.innerHTML = `
+    <span style="color:#fff; font-weight:800;">${nombre.toUpperCase()}</span>
+    <button class="btn-delete-item" onclick="eliminarEntrenoNube('${docId}', this)">🗑️</button>
+    <br> 
+    <span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">
+      🏋️ Sets: ${sets} &nbsp;|&nbsp; <span style="color:#00e5ff;">Peso: ${weight} kg</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">RPE: ${rpe}</span>
+    </span>`;
+  listaEntrenos.appendChild(li);
+}
+
+window.eliminarComidaNube = async function(docId, cal, prot, carb, gras, btnElement) {
+  if(!confirm("¿Eliminar este alimento del registro?")) return;
+  
+  totalCalorias = Math.max(0, totalCalorias - cal);
+  totalProt = Math.max(0, totalProt - prot);
+  totalCarb = Math.max(0, totalCarb - carb);
+  totalGrasa = Math.max(0, totalGrasa - gras);
+  
+  btnElement.closest('li').remove();
+  guardarEstadoNube();
+  actualizarDashboard();
+
+  if(currentUser && db && docId) {
+    try {
+      const hoyKey = getTodayKey();
+      await deleteDoc(doc(db, "users", currentUser.uid, "days", hoyKey, "meals", docId));
+      showToast('🗑️ Registro eliminado de la nube.');
+    } catch(e) {
+      console.error("Error eliminando comida:", e);
+    }
+  }
+};
+
+window.eliminarEntrenoNube = async function(docId, btnElement) {
+  if(!confirm("¿Eliminar esta serie de la bitácora?")) return;
+  
+  btnElement.closest('li').remove();
+
+  if(currentUser && db && docId) {
+    try {
+      const hoyKey = getTodayKey();
+      await deleteDoc(doc(db, "users", currentUser.uid, "days", hoyKey, "workouts", docId));
+      showToast('🗑️ Serie eliminada de la nube.');
+    } catch(e) {
+      console.error("Error eliminando entreno:", e);
+    }
+  }
+};
+
+async function registrarComidaNube(cal, prot, carb, gras, nombreDisplay) {
+  totalCalorias += cal;
+  totalProt += prot;
+  totalCarb += carb;
+  totalGrasa += gras;
+  
+  guardarEstadoNube();
+  actualizarDashboard();
+
+  let docId = null;
+  if(currentUser && db) {
+    try {
+      const hoyKey = getTodayKey();
+      const mealsColl = collection(db, "users", currentUser.uid, "days", hoyKey, "meals");
+      const docRef = await addDoc(mealsColl, {
+        nombre: nombreDisplay,
+        cal, prot, carb, gras,
+        timestamp: Date.now()
+      });
+      docId = docRef.id;
+    } catch(e) {
+      console.error("Error guardando comida en Firestore:", e);
+    }
+  }
+
+  renderizarComidaEnUI(nombreDisplay, cal, prot, carb, gras, docId);
+  const dashboardTab = document.querySelector('[data-target="page-dashboard"]');
+  if(dashboardTab) dashboardTab.click();
+}
+
+async function registrarEntrenoNube(nombre, sets, weight, rpe) {
+  let docId = null;
+  if(currentUser && db) {
+    try {
+      const hoyKey = getTodayKey();
+      const workColl = collection(db, "users", currentUser.uid, "days", hoyKey, "workouts");
+      const docRef = await addDoc(workColl, {
+        nombre, sets, weight, rpe,
+        timestamp: Date.now()
+      });
+      docId = docRef.id;
+    } catch(e) {
+      console.error("Error guardando entreno en Firestore:", e);
+    }
+  }
+
+  renderizarEntrenoEnUI(nombre, sets, weight, rpe, docId);
 }
 
 // --- GENERADOR SAKURA ---
@@ -213,7 +364,7 @@ window.reiniciarDiaActual = function() {
   }
 };
 
-// --- HISTORIAL ---
+// --- HISTORIAL ARCHIVADO LOCAL ---
 function cargarSeccionHistorial() {
   const historialContainer = document.getElementById('historial-container');
   let historialHistorico = JSON.parse(localStorage.getItem('ic_historial_pasado')) || [];
@@ -451,19 +602,16 @@ if(btnRegistrarSerie) {
 
 const btnConfirmWorkout = document.getElementById('btn-confirm-workout');
 if(btnConfirmWorkout) {
-  btnConfirmWorkout.addEventListener('click', () => {
+  btnConfirmWorkout.addEventListener('click', async () => {
     const nombre = document.getElementById('work-name').value;
     const sets = document.getElementById('work-sets').value;
     const weight = document.getElementById('work-weight').value;
     const rpe = document.getElementById('work-rpe').value || '8';
     if(!nombre || !sets || !weight) { showToast('⚠️ Completa los campos.'); return; }
 
-    const li = document.createElement('li');
-    li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre.toUpperCase()}</span> <br> 
-    <span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">
-      🏋️ Sets: ${sets} &nbsp;|&nbsp; <span style="color:#00e5ff;">Peso: ${weight} kg</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">RPE: ${rpe}</span>
-    </span>`;
-    document.getElementById('lista-entrenos').appendChild(li); closeSheet(); showToast('💪 Serie registrada.');
+    await registrarEntrenoNube(nombre, sets, weight, rpe);
+    closeSheet(); 
+    showToast('💪 Serie sincronizada en la nube.');
   });
 }
 
@@ -619,7 +767,7 @@ if(editQty) {
 
 const btnConfirmFoodFinal = document.getElementById('btn-confirm-food-final');
 if(btnConfirmFoodFinal) {
-  btnConfirmFoodFinal.addEventListener('click', () => {
+  btnConfirmFoodFinal.addEventListener('click', async () => {
     let mealTime = document.getElementById('food-meal-time').value;
     let nombreDisp = document.getElementById('food-search').value || "Alimento Personalizado";
     let cal = parseInt(document.getElementById('edit-cal').value) || 0;
@@ -628,25 +776,11 @@ if(btnConfirmFoodFinal) {
     let gras = parseInt(document.getElementById('edit-gras').value) || 0;
 
     if(cal === 0 && prot === 0) { showToast('⚠️ Ingresa calorías o proteína.'); return; }
-    sumarMacros(cal, prot, carb, gras, `[${mealTime}] ${nombreDisp}`);
-    closeSheet(); showToast(`✅ ${nombreDisp.toUpperCase()} registrado.`);
+    
+    await registrarComidaNube(cal, prot, carb, gras, `[${mealTime}] ${nombreDisp}`);
+    closeSheet(); 
+    showToast(`✅ ${nombreDisp.toUpperCase()} sincronizado.`);
   });
-}
-
-function sumarMacros(cal, prot, carb, gras, nombreDisplay) {
-  totalCalorias += cal; totalProt += prot; totalCarb += carb; totalGrasa += gras;
-  guardarEstadoNube(); actualizarDashboard();
-  const listaComidas = document.getElementById('lista-comidas');
-  if(listaComidas) {
-    const li = document.createElement('li');
-    li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombreDisplay}</span> <br> 
-    <span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">
-      🔥 ${cal} kcal &nbsp;|&nbsp; <span style="color:#ff3366;">P: ${prot}g</span> &nbsp;|&nbsp; <span style="color:#00e5ff;">C: ${carb}g</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">G: ${gras}g</span>
-    </span>`;
-    listaComidas.appendChild(li);
-  }
-  const dashboardTab = document.querySelector('[data-target="page-dashboard"]');
-  if(dashboardTab) dashboardTab.click();
 }
 
 // --- CHECK-IN ---
