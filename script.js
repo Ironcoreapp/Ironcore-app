@@ -1,8 +1,8 @@
 // ============================================================================
-// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM Y REDISEÑO DE HEADER ---
+// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM, DASHBOARD Y MODAL ---
 // ============================================================================
 const customCSS = `
-  /* Rediseño del Header Superior (Barra Horizontal) */
+  /* Rediseño del Header Superior */
   header, .top-header, #main-header {
     display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important;
     padding: 10px 20px !important; background: rgba(20, 26, 38, 0.98) !important; border-bottom: 1px solid rgba(0,229,255,0.2) !important;
@@ -27,6 +27,18 @@ const customCSS = `
   .history-day-header { padding: 15px; background: linear-gradient(90deg, rgba(0,229,255,0.1) 0%, transparent 100%); font-weight: 800; color: #00e5ff; display: flex; justify-content: space-between; cursor: pointer; font-size: 14px; transition: background 0.3s; }
   .history-day-header:hover { background: rgba(0,229,255,0.2); }
   .history-day-content { padding: 15px; display: none; background: rgba(0,0,0,0.3); }
+
+  /* Modal de Bienvenida Motivacional */
+  .iron-welcome-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 15, 25, 0.85); z-index: 9999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; backdrop-filter: blur(8px); }
+  .iron-welcome-overlay.active { opacity: 1; pointer-events: auto; }
+  .iron-welcome-modal { background: linear-gradient(145deg, #1a2130, #11151f); padding: 35px 25px; border-radius: 15px; border: 1px solid #00e5ff; box-shadow: 0 10px 40px rgba(0, 229, 255, 0.15); text-align: center; max-width: 90%; width: 380px; transform: translateY(30px); transition: transform 0.4s ease; }
+  .iron-welcome-overlay.active .iron-welcome-modal { transform: translateY(0); }
+  .iron-welcome-title { font-size: 18px; font-weight: 900; color: #fff; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
+  .iron-welcome-quote { font-size: 14px; color: #a0aec0; font-style: italic; margin-bottom: 25px; line-height: 1.6; }
+  
+  /* Progress Bars Dashboard */
+  .macro-progress-container { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 6px; overflow: hidden; }
+  .macro-progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease-out; }
 `;
 const styleEl = document.createElement('style'); styleEl.innerHTML = customCSS; document.head.appendChild(styleEl);
 
@@ -39,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // Reestructurar los badges del header para que quepan en la barra
   const rankElem = document.getElementById('header-rank');
   const streakElem = document.getElementById('header-streak');
   if(rankElem && streakElem) {
@@ -49,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     streakElem.classList.add('user-badge-mini');
   }
 
-  // Inyectar controles de Calentamiento/Enfriamiento
   const genBtn = document.getElementById('btn-generar-rutina');
   if(genBtn && !document.getElementById('check-warmup')) {
     const fasesDiv = document.createElement('div');
@@ -95,9 +105,50 @@ let userProfile = { perfilCompleto: false, nickname: "", genero: "M", edad: 25, 
 function getTodayKey() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 function showToast(msg) { const toast = document.getElementById('toast-notif'); if(!toast) return; toast.innerHTML = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3500); }
 
-const ironCoreTips = ["⚡ La creatina (5g) funciona por acumulación.", "🥩 Consume entre 1.8g y 2.2g de proteína por kilo.", "💧 Toma 1 litro por cada 25kg de peso.", "💤 Duerme 8 horas para reparar tu SNC.", "🔥 Prioriza alimentos voluminosos en déficit."];
-window.addEventListener('DOMContentLoaded', () => { const dt = document.getElementById('daily-tip'); if(dt) dt.innerText = ironCoreTips[Math.floor(Math.random() * ironCoreTips.length)]; });
+// --- BASE DE CONOCIMIENTOS (TIPS REPARADOS) ---
+const ironCoreTips = [
+  "⚡ La creatina (5g) funciona por acumulación. Tómatela a diario.",
+  "🥩 Hipertrofia: Consume entre 1.8g y 2.2g de proteína por kilo.",
+  "💧 Hidratación: Toma 1 litro por cada 25kg de peso corporal.",
+  "💤 El músculo crece mientras duermes. Busca 7-8 horas de descanso.",
+  "🔥 En déficit, prioriza alimentos voluminosos para engañar la saciedad."
+];
+function setDailyTip() { const dt = document.getElementById('daily-tip'); if(dt) dt.innerText = ironCoreTips[Math.floor(Math.random() * ironCoreTips.length)]; }
+if(document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', setDailyTip); } else { setDailyTip(); }
 
+// --- 50 MENSAJES MOTIVACIONALES (EL ORÁCULO HABLA) ---
+const oraculoQuotes = [
+  "La disciplina es el puente entre tus metas y tus logros.", "El hierro no miente. Te da exactamente lo que le pones.", "Un verdadero Shōgun no nace, se forja en el fragor de la batalla.", "Cada repetición es un paso más hacia tu mejor versión.", "La fuerza de un guerrero no está en su arma, sino en su voluntad de no rendirse.",
+  "Controla tu cuerpo en el espacio. La gravedad es solo otra resistencia a vencer.", "Para tomar la curva perfecta, debes frenar a tiempo y acelerar sin miedo.", "Tu cuerpo es el sistema más complejo. Calíbralo, mídolo y optimízalo.", "El dolor de hoy es la victoria del mañana.", "No mires el final de la pista, enfócate en el siguiente vértice.",
+  "La constancia siempre vence a la intensidad esporádica.", "Tu mente se rendirá mil veces antes de que tu cuerpo realmente falle.", "Un guerrero sin maestro debe ser su propio juez más estricto.", "Forja tu núcleo con la misma presión que crea los diamantes.", "Si quieres ir más rápido, primero debes aprender a controlar la tracción.",
+  "El crecimiento está al otro lado de la incomodidad.", "Cada gota de sudor es debilidad abandonando tu sistema.", "Eres el arquitecto de tu propia armadura.", "La automatización funciona en las máquinas, no en el gimnasio. Haz el trabajo.", "No hay atajos hacia ningún lugar que valga la pena.",
+  "Conecta tu mente con el músculo, como la telemetría conecta a la máquina.", "Sé implacable. Como el oleaje constante contra la roca.", "La motivación es la chispa, pero la disciplina es el motor.", "El éxito es 100% paciencia y 100% esfuerzo continuo.", "Golpea tus debilidades hasta que se conviertan en tus fortalezas.",
+  "La verdadera maestría es dominar lo básico repetidamente.", "Tu único rival real es la persona que eras ayer.", "El fallo muscular no es el fin, es el inicio de la adaptación.", "La fuerza viene de superar lo que pensabas que no podías.", "Construye tu base técnica antes de levantar la carga máxima.",
+  "El descanso es el calibrador del progreso. No lo subestimes.", "Tu cuerpo refleja el estándar que aceptas de ti mismo.", "No entrenes hasta que lo hagas bien, entrena hasta que no puedas hacerlo mal.", "Respira, visualiza y ejecuta con precisión.", "Las excusas no queman calorías.",
+  "Un líder empuja a su equipo, pero primero debe exigirse a sí mismo.", "Convierte la presión operativa en potencia de empuje.", "La nutrición es el combustible; el entrenamiento es el acelerador.", "Nada detiene a una mente enfocada y decidida.", "Incluso en el caos de la serie pesada, mantén tu técnica inquebrantable.",
+  "Si fuera fácil, todos lo harían. Pero tú estás aquí.", "El hierro te enseñará resiliencia. Escúchalo.", "No pidas cargas más ligeras, construye una espalda más fuerte.", "Visualiza el éxito milisegundos antes de tocar la barra.", "La excelencia no es un acto, es un hábito forjado a diario.",
+  "Suda hoy, sonríe mañana ante los resultados.", "Tu potencial es un límite móvil. Empújalo un poco más cada día.", "La fatiga es solo una señal de que el sistema se está actualizando.", "El coraje es sacar una repetición más cuando todo quema.", "Levántate, ajusta tu enfoque y domina tu jornada."
+];
+
+function mostrarMensajeMotivacional() {
+  if (sessionStorage.getItem('ironcore_welcome_shown')) return; // Solo una vez por sesión
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'iron-welcome-overlay';
+  overlay.innerHTML = `
+    <div class="iron-welcome-modal">
+      <div class="iron-welcome-title">⚔️ LA JORNADA COMIENZA</div>
+      <div class="iron-welcome-quote">"${oraculoQuotes[Math.floor(Math.random() * oraculoQuotes.length)]}"</div>
+      <button class="iron-welcome-btn" onclick="this.parentElement.parentElement.classList.remove('active'); setTimeout(() => this.parentElement.parentElement.remove(), 400);">Entendido</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  
+  setTimeout(() => { overlay.classList.add('active'); }, 100);
+  sessionStorage.setItem('ironcore_welcome_shown', 'true');
+}
+
+// --- AUTENTICACIÓN GOOGLE ---
 const authScreen = document.getElementById('auth-screen');
 getRedirectResult(auth).then((result) => { if (result && result.user) showToast('⚔️ ¡Acceso autorizado al Dojo!'); }).catch(console.error);
 
@@ -106,14 +157,15 @@ document.getElementById('btn-google-login')?.addEventListener('click', async () 
   try { await signInWithPopup(auth, provider); showToast('⚔️ ¡Acceso autorizado!'); } catch(error) { await signInWithRedirect(auth, provider); }
 });
 
-document.getElementById('btn-logout')?.addEventListener('click', () => signOut(auth));
-document.getElementById('btn-logout-profile')?.addEventListener('click', () => signOut(auth));
+document.getElementById('btn-logout')?.addEventListener('click', () => { sessionStorage.removeItem('ironcore_welcome_shown'); signOut(auth); });
+document.getElementById('btn-logout-profile')?.addEventListener('click', () => { sessionStorage.removeItem('ironcore_welcome_shown'); signOut(auth); });
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user; if(authScreen) authScreen.style.display = 'none'; 
     const nickElem = document.getElementById('ob-nickname'); if(nickElem) nickElem.value = (user.displayName || "Guerrero").split(' ')[0]; 
     await cargarDatosDesdeNube(user.uid);
+    mostrarMensajeMotivacional(); // Disparar Modal
   } else { 
     currentUser = null; if(authScreen) authScreen.style.display = 'flex'; 
     const wb = document.getElementById('user-welcome-box'); if(wb) wb.style.display = 'none'; 
@@ -249,7 +301,7 @@ function recalcularMacros() { if(currentSearchFoodBase) { let q = parseFloat(doc
 document.getElementById('btn-confirm-food-final')?.addEventListener('click', async function() { if (this.disabled) return; this.disabled = true; let mt = document.getElementById('food-meal-time').value; let n = document.getElementById('food-selected-name').innerText || "Alimento"; let c = parseInt(document.getElementById('edit-cal').value)||0; let p = parseInt(document.getElementById('edit-prot').value)||0; let cb = parseInt(document.getElementById('edit-carb').value)||0; let g = parseInt(document.getElementById('edit-gras').value)||0; let qtyVal = document.getElementById('edit-qty').value; let unitSelect = document.getElementById('edit-unit'); let unitText = unitSelect.options[unitSelect.selectedIndex].text.split(' ')[0]; if(!c && !p) { showToast('⚠️ Ingresa cantidad.'); this.disabled = false; return; } let nombreFinalRegistro = `${n} (${qtyVal} ${unitText})`; await registrarComidaNube(c, p, cb, g, `[${mt}] ${nombreFinalRegistro}`); window.closeSheet(); showToast(`✅ Registrado.`); this.disabled = false; });
 
 // ============================================================================
-// --- ORÁCULO DE COMBATE Y MODO ENTRENAMIENTO EN VIVO (CON FASES Y CALORÍAS) ---
+// --- ORÁCULO DE COMBATE Y MODO ENTRENAMIENTO EN VIVO ---
 // ============================================================================
 let currentWorkoutRoutine = [];
 let workoutSwapTargetIndex = -1;
@@ -262,13 +314,11 @@ document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
   const focus = document.getElementById('train-focus')?.value || 'fullbody';
   currentWorkoutRoutine = [];
 
-  // 1. Agregar Calentamiento Opcional
   const checkWarm = document.getElementById('check-warmup');
   if(checkWarm && checkWarm.checked) {
     currentWorkoutRoutine.push({ id: 'warmup', nombre: '🔥 Calentamiento Articular', grupo: 'cardio', musculoPrincipal: 'Todo el cuerpo', equipamiento: ['corporal'], tips: '5 a 10 min de movilidad y cardio ligero.', imagen: 'https://dummyimage.com/400x400/141a26/ffaa00&text=Calentamiento', loggedSets: [], isPhase: true });
   }
 
-  // 2. Lógica de ejercicios principales
   const getRandomEx = (grupoReq) => {
     const valid = exercisesDB.filter(ex => {
       const matchGrupo = ex.grupo?.toLowerCase() === grupoReq.toLowerCase();
@@ -291,11 +341,11 @@ document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
     let ex = getRandomEx(g);
     if(ex && !currentWorkoutRoutine.find(e => e.id === ex.id)) {
       ex.loggedSets = []; 
+      ex.estimatedCals = Math.floor(Math.random() * 20) + 35;
       currentWorkoutRoutine.push(ex);
     }
   });
 
-  // 3. Agregar Enfriamiento Opcional
   const checkCool = document.getElementById('check-cooldown');
   if(checkCool && checkCool.checked) {
     currentWorkoutRoutine.push({ id: 'cooldown', nombre: '❄️ Enfriamiento y Estiramiento', grupo: 'cardio', musculoPrincipal: 'Recuperación', equipamiento: ['corporal'], tips: '10 min de zona 2 (baja intensidad) y elongación estática.', imagen: 'https://dummyimage.com/400x400/141a26/00e5ff&text=Enfriamiento', loggedSets: [], isPhase: true });
@@ -371,7 +421,6 @@ window.registrarSerieIndividual = function(idx) {
   const repsInput = document.getElementById(`reps-${idx}`);
   const pesoInput = document.getElementById(`peso-${idx}`);
   const descansoInput = document.getElementById(`descanso-${idx}`);
-
   const ex = currentWorkoutRoutine[idx];
   const reps = parseInt(repsInput.value);
   const peso = pesoInput ? (parseFloat(pesoInput.value) || 0) : 0;
@@ -430,7 +479,7 @@ document.getElementById('btn-cancel-workout')?.addEventListener('click', () => {
   document.getElementById('btn-start-workout').style.display = 'block'; document.getElementById('btn-finish-workout').style.display = 'none'; currentWorkoutRoutine = [];
 });
 
-// Guardado y Cálculo de Calorías
+// Guardado y Cálculo Dinámico de Calorías
 document.getElementById('btn-finish-workout')?.addEventListener('click', async function() {
   if (this.disabled) return; this.disabled = true; 
   let validExercises = 0; let sessionCals = 0;
@@ -442,19 +491,18 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async f
       const detalles = ex.loggedSets.map((s, idx) => `S${idx+1}: ${s.reps}${ex.isPhase?'min':`x${s.peso}kg`}`).join(' | ');
       const weightHighestOrLast = ex.loggedSets[ex.loggedSets.length - 1].peso; 
       
-      // Matemática calórica
+      let exCals = 0;
       if(ex.isPhase) {
-        // Cardio o Calentamiento: aprox 8 kcal por minuto
         let totalMins = 0; ex.loggedSets.forEach(s => totalMins += s.reps);
-        sessionCals += (totalMins * 8);
+        exCals = totalMins * 8;
       } else {
-        // Ejercicio de fuerza: 15 kcal base por serie + esfuerzo (peso x repes x factor)
-        ex.loggedSets.forEach(s => {
-          sessionCals += 15 + (s.peso * s.reps * 0.03);
-        });
+        ex.loggedSets.forEach(s => { exCals += 15 + (s.peso * s.reps * 0.03); });
       }
+      exCals = Math.round(exCals);
+      sessionCals += exCals;
 
-      await registrarEntrenoNube(ex.nombre, `${totalSets} series (${detalles})`, weightHighestOrLast, "N/A");
+      // ¡NUEVO! Guardamos la variable "cals" quemada en Firebase para que aparezca en la bitácora
+      await registrarEntrenoNube(ex.nombre, `${totalSets} series (${detalles})`, weightHighestOrLast, "N/A", exCals);
       validExercises++;
     }
   }
@@ -466,7 +514,7 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async f
     totalQuemadas += sessionCals;
     await guardarEstadoNube();
     actualizarDashboard();
-    showToast(`✅ Entrenamiento finalizado. ${validExercises} ejercicios listos. 🔥 ~${sessionCals} kcal quemadas.`);
+    showToast(`✅ Entrenamiento finalizado. 🔥 ~${sessionCals} kcal quemadas.`);
   } else {
     showToast('⚠️ No registraste series. Descartado.');
   }
@@ -481,15 +529,17 @@ document.getElementById('btn-confirm-workout')?.addEventListener('click', async 
   if (this.disabled) return; this.disabled = true;
   const n = document.getElementById('work-name').value; const s = document.getElementById('work-sets').value; const w = document.getElementById('work-weight').value; const r = document.getElementById('work-rpe').value || '8'; 
   if(!n || !s) { showToast('⚠️ Completa los campos.'); this.disabled = false; return; } 
-  await registrarEntrenoNube(n, s, w || 0, r); window.closeSheet(); showToast('💪 Ejercicio guardado.'); this.disabled = false; 
+  // Ejercicio manual: Estimado genérico de calorías
+  const manualCals = Math.floor(Math.random() * 20) + 35;
+  await registrarEntrenoNube(n, s, w || 0, r, manualCals); window.closeSheet(); showToast('💪 Ejercicio guardado.'); this.disabled = false; 
 });
 
-// --- PERSISTENCIA, DASHBOARD E HISTORIAL DESPLEGABLE ---
+// --- PERSISTENCIA, DASHBOARD E HISTORIAL ---
 async function cargarRegistrosDelDia(uid) {
   const hoyKey = getTodayKey(); const listaComidas = document.getElementById('lista-comidas');
   if(listaComidas) { listaComidas.innerHTML = ''; const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "meals")); snapshot.forEach(docSnap => { const i = docSnap.data(); renderizarComidaEnUI(i.nombre, i.cal, i.prot, i.carb, i.gras, docSnap.id); }); }
   const listaEntrenos = document.getElementById('lista-entrenos');
-  if(listaEntrenos) { listaEntrenos.innerHTML = ''; const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "workouts")); snapshot.forEach(docSnap => { const i = docSnap.data(); renderizarEntrenoEnUI(i.nombre, i.sets, i.weight, i.rpe, docSnap.id); }); }
+  if(listaEntrenos) { listaEntrenos.innerHTML = ''; const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "workouts")); snapshot.forEach(docSnap => { const i = docSnap.data(); renderizarEntrenoEnUI(i.nombre, i.sets, i.weight, i.rpe, i.cals || 0, docSnap.id); }); }
 }
 
 async function cargarHistorialYCheckins(uid) {
@@ -514,7 +564,15 @@ async function cargarHistorialYCheckins(uid) {
 }
 
 function renderizarComidaEnUI(nombre, cal, prot, carb, gras, docId = null) { const l = document.getElementById('lista-comidas'); if(!l) return; const li = document.createElement('li'); if(docId) li.setAttribute('data-id', docId); li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre}</span><button class="btn-delete-item" onclick="window.eliminarComidaNube('${docId}', ${cal}, ${prot}, ${carb}, ${gras}, this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🔥 ${cal} kcal &nbsp;|&nbsp; <span style="color:#ff3366;">P: ${prot}g</span> &nbsp;|&nbsp; <span style="color:#00e5ff;">C: ${carb}g</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">G: ${gras}g</span></span>`; l.appendChild(li); }
-function renderizarEntrenoEnUI(nombre, sets, weight, rpe, docId = null) { const l = document.getElementById('lista-entrenos'); if(!l) return; const li = document.createElement('li'); if(docId) li.setAttribute('data-id', docId); li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre.toUpperCase()}</span><button class="btn-delete-item" onclick="window.eliminarEntrenoNube('${docId}', this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🏋️ ${sets} &nbsp;|&nbsp; <span style="color:#00e5ff;">Peso Máx: ${weight} kg</span></span>`; l.appendChild(li); }
+
+// ¡NUEVO! Bitácora con Calorías Quemas Rojas Integradas
+function renderizarEntrenoEnUI(nombre, sets, weight, rpe, cals = 0, docId = null) { 
+  const l = document.getElementById('lista-entrenos'); if(!l) return; 
+  const li = document.createElement('li'); if(docId) li.setAttribute('data-id', docId); 
+  li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre.toUpperCase()}</span><button class="btn-delete-item" onclick="window.eliminarEntrenoNube('${docId}', this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:flex; gap:10px; align-items:center;"><span>🏋️ ${sets}</span><span>Peso Máx: ${weight} kg</span><span style="color:#ff3366; font-weight:800;">🔥 ~${cals} kcal</span></span>`; 
+  l.appendChild(li); 
+}
+
 window.eliminarComidaNube = async function(docId, cal, prot, carb, gras, btnElement) { if(!confirm("¿Eliminar?")) return; totalCalorias = Math.max(0, totalCalorias - cal); totalProt = Math.max(0, totalProt - prot); totalCarb = Math.max(0, totalCarb - carb); totalGrasa = Math.max(0, totalGrasa - gras); btnElement.closest('li')?.remove(); guardarEstadoNube(); actualizarDashboard(); if(currentUser && db && docId) await deleteDoc(doc(db, "users", currentUser.uid, "days", getTodayKey(), "meals", docId)); };
 window.eliminarEntrenoNube = async function(docId, btnElement) { if(!confirm("¿Eliminar?")) return; btnElement.closest('li')?.remove(); if(currentUser && db && docId) await deleteDoc(doc(db, "users", currentUser.uid, "days", getTodayKey(), "workouts", docId)); };
 
@@ -523,9 +581,10 @@ async function registrarComidaNube(cal, prot, carb, gras, nombreDisplay) {
   if(currentUser && db) { const d = await addDoc(collection(db, "users", currentUser.uid, "days", getTodayKey(), "meals"), { nombre: nombreDisplay, cal, prot, carb, gras, timestamp: Date.now() }); docId = d.id; await addDoc(collection(db, "users", currentUser.uid, "history"), { tipo: 'comida', nombre: nombreDisplay, detalle: `🔥 ${cal} kcal | P:${prot}g C:${carb}g G:${gras}g`, date: getTodayKey(), timestamp: Date.now() }); } 
   renderizarComidaEnUI(nombreDisplay, cal, prot, carb, gras, docId); document.querySelector('[data-target="page-dashboard"]')?.click(); if(currentUser) cargarHistorialYCheckins(currentUser.uid);
 }
-async function registrarEntrenoNube(nombre, sets, weight, rpe) { 
-  let docId = null; if(currentUser && db) { const d = await addDoc(collection(db, "users", currentUser.uid, "days", getTodayKey(), "workouts"), { nombre, sets, weight, rpe, timestamp: Date.now() }); docId = d.id; await addDoc(collection(db, "users", currentUser.uid, "history"), { tipo: 'entreno', nombre: nombre.toUpperCase(), detalle: `${sets}`, date: getTodayKey(), timestamp: Date.now() }); } 
-  renderizarEntrenoEnUI(nombre, sets, weight, rpe, docId); if(currentUser) cargarHistorialYCheckins(currentUser.uid);
+
+async function registrarEntrenoNube(nombre, sets, weight, rpe, cals = 0) { 
+  let docId = null; if(currentUser && db) { const d = await addDoc(collection(db, "users", currentUser.uid, "days", getTodayKey(), "workouts"), { nombre, sets, weight, rpe, cals, timestamp: Date.now() }); docId = d.id; await addDoc(collection(db, "users", currentUser.uid, "history"), { tipo: 'entreno', nombre: nombre.toUpperCase(), detalle: `${sets} | 🔥 ${cals} kcal`, date: getTodayKey(), timestamp: Date.now() }); } 
+  renderizarEntrenoEnUI(nombre, sets, weight, rpe, cals, docId); if(currentUser) cargarHistorialYCheckins(currentUser.uid);
 }
 
 function iniciarSakuraBackground() { const c = document.getElementById('sakura-bg'); if(!c) return; c.innerHTML = ''; for(let i=0; i<15; i++) { const p = document.createElement('div'); p.className = 'sakura-petal'; const s = Math.random() * 8 + 4; p.style.width = `${s}px`; p.style.height = `${s*1.4}px`; p.style.left = `${Math.random()*100}vw`; p.style.animationDuration = `${Math.random()*10+8}s`; p.style.animationDelay = `${Math.random()*5}s`; c.appendChild(p); } }
@@ -536,8 +595,40 @@ window.borrarTodoHistorial = function() { if(confirm("¿Restablecer historial ar
 function actualizarAguaUI() { const metaAgua = 3000; let pct = Math.min(100, Math.round((totalAgua/metaAgua)*100)); const wb = document.getElementById('water-fill-bar'); if(wb) wb.style.height = `${pct}%`; const wt = document.getElementById('water-text-val'); if(wt) wt.innerText = `${totalAgua} / ${metaAgua} ml`; guardarEstadoNube(); }
 window.agregarAgua = ml => { totalAgua += ml; actualizarAguaUI(); showToast(`💧 +${ml} ml añadidos.`); }; window.resetAgua = () => { totalAgua = 0; actualizarAguaUI(); showToast(`🔄 Hidratación reiniciada.`); };
 
-document.getElementById('btn-send-chat')?.addEventListener('click', enviarMensajeShogun); document.getElementById('chat-input-text')?.addEventListener('keypress', e => { if(e.key === 'Enter') enviarMensajeShogun(); });
-function enviarMensajeShogun() { const inp = document.getElementById('chat-input-text'); const txt = inp?.value.trim(); if(!txt) return; const box = document.getElementById('chat-messages'); if(!box) return; box.innerHTML += `<div class="chat-msg user">${txt}</div>`; inp.value = ''; box.scrollTop = box.scrollHeight; setTimeout(() => { box.innerHTML += `<div class="chat-msg ai">"La disciplina vence a la motivación. Céntrate en tus macros y el hierro hará el resto."</div>`; box.scrollTop = box.scrollHeight; }, 800); }
+// --- DASHBOARD EMBELLECIDO ULTRA-INTERACTIVO ---
+function actualizarDashboard() { 
+  const calT = document.getElementById('calorias-total'); if(calT) calT.innerHTML = `<span style="font-size:26px; font-weight:900; color:#00e5ff; text-shadow: 0 0 10px rgba(0,229,255,0.4);">${totalCalorias}</span><span style="font-size:13px; color:#a0aec0; font-weight:normal;"> / ${metaCalorias} kcal</span>`; 
+  
+  // Progress Bars para Macros
+  const prPct = Math.min(100, (totalProt/metaProt)*100) || 0;
+  const cbPct = Math.min(100, (totalCarb/metaCarb)*100) || 0;
+  const grPct = Math.min(100, (totalGrasa/metaGrasa)*100) || 0;
+
+  const prT = document.getElementById('prot-total'); if(prT) prT.innerHTML = `<div style="display:flex; justify-content:space-between; font-size:12px;"><span>Prot</span><span>${totalProt}/${metaProt}g</span></div><div class="macro-progress-container"><div class="macro-progress-fill" style="width:${prPct}%; background:#ff3366;"></div></div>`; 
+  const cbT = document.getElementById('carb-total'); if(cbT) cbT.innerHTML = `<div style="display:flex; justify-content:space-between; font-size:12px;"><span>Carb</span><span>${totalCarb}/${metaCarb}g</span></div><div class="macro-progress-container"><div class="macro-progress-fill" style="width:${cbPct}%; background:#00e5ff;"></div></div>`; 
+  const grT = document.getElementById('gras-total'); if(grT) grT.innerHTML = `<div style="display:flex; justify-content:space-between; font-size:12px;"><span>Gras</span><span>${totalGrasa}/${metaGrasa}g</span></div><div class="macro-progress-container"><div class="macro-progress-fill" style="width:${grPct}%; background:#ffaa00;"></div></div>`; 
+  
+  const ec = document.getElementById('en-consumidas'); if(ec) ec.innerText = `${totalCalorias} kcal`; 
+  const eq = document.getElementById('en-quemadas'); if(eq) eq.innerText = `${totalQuemadas} kcal`;
+  
+  const calNetas = Math.max(0, totalCalorias - totalQuemadas);
+  const colorNetas = calNetas > metaCalorias ? '#ff3366' : '#00e5ff'; // Rojo si te pasas
+  const en = document.getElementById('en-netas'); if(en) en.innerHTML = `<span style="color:${colorNetas};">${calNetas} kcal</span>`; 
+  
+  if(macroChart && (totalProt > 0 || totalCarb > 0 || totalGrasa > 0)) { macroChart.data.datasets[0].data = [totalProt, totalCarb, totalGrasa]; macroChart.update(); } 
+}
+
+document.getElementById('btn-checkin')?.addEventListener('click', () => window.openSheet('sheet-checkin'));
+document.getElementById('btn-confirm-checkin')?.addEventListener('click', async function() { 
+  if (this.disabled) return; this.disabled = true;
+  const pesoInp = document.getElementById('checkin-peso'); const pesoVal = pesoInp ? parseFloat(pesoInp.value) : 0;
+  if(!pesoVal) { showToast('⚠️ Por favor ingresa tu peso.'); this.disabled = false; return; }
+  if(currentUser && db) {
+    await addDoc(collection(db, "users", currentUser.uid, "checkins"), { peso: pesoVal, fecha: getTodayKey(), timestamp: Date.now() });
+    userProfile.peso = pesoVal; await guardarEstadoNube(); actualizarUIPerfil(); cargarHistorialYCheckins(currentUser.uid); 
+  }
+  window.closeSheet(); if(pesoInp) pesoInp.value = ''; showToast('📈 Check-in guardado.'); this.disabled = false;
+});
 
 const overlay = document.getElementById('sheet-overlay'); let activeSheet = null;
 window.openSheet = function(sheetId) { activeSheet = document.getElementById(sheetId); if(overlay) overlay.style.display = 'block'; if(activeSheet) { activeSheet.classList.add('open'); setTimeout(() => activeSheet.style.bottom = '0', 10); } };
@@ -556,30 +647,5 @@ async function cargarLeaderboard() { const container = document.getElementById('
 let macroChart = null; const ctxDonut = document.getElementById('macroChart'); if(ctxDonut) { macroChart = new Chart(ctxDonut.getContext('2d'), { type: 'doughnut', data: { labels: ['Prot', 'Carb', 'Gras'], datasets: [{ data: [0.1, 0.1, 0.1], backgroundColor: ['#ff3366', '#00e5ff', '#ffaa00'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '82%', plugins: { legend: { display: false } } } }); }
 let progressChart = null; const ctxLine = document.getElementById('progressChart'); if(ctxLine) { progressChart = new Chart(ctxLine.getContext('2d'), { type: 'line', data: { labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'], datasets: [{ label: 'Proyección (kg)', data: [75, 75, 75, 75], borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.1)', borderWidth: 3, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } } }); }
 function actualizarGraficoProyeccion(pesoActual, variacionObj) { if(!progressChart) return; let vSemana = variacionObj / 1000; progressChart.data.datasets[0].data = [pesoActual, pesoActual + vSemana, pesoActual + (vSemana * 2), pesoActual + (vSemana * 3)]; progressChart.update(); }
-
-// --- DASHBOARD EMBELLECIDO Y DINÁMICO ---
-function actualizarDashboard() { 
-  const calT = document.getElementById('calorias-total'); if(calT) calT.innerHTML = `<span style="font-size:26px; font-weight:900; color:#00e5ff; text-shadow: 0 0 10px rgba(0,229,255,0.4);">${totalCalorias}</span><span style="font-size:13px; color:#a0aec0; font-weight:normal;"> / ${metaCalorias} kcal</span>`; 
-  const prT = document.getElementById('prot-total'); if(prT) prT.innerHTML = `<span style="color:#ff3366; font-size:16px; font-weight:800;">${totalProt}g</span> <span style="font-size:11px; color:#a0aec0;">/ ${metaProt}g</span>`; 
-  const cbT = document.getElementById('carb-total'); if(cbT) cbT.innerHTML = `<span style="color:#00e5ff; font-size:16px; font-weight:800;">${totalCarb}g</span> <span style="font-size:11px; color:#a0aec0;">/ ${metaCarb}g</span>`; 
-  const grT = document.getElementById('gras-total'); if(grT) grT.innerHTML = `<span style="color:#ffaa00; font-size:16px; font-weight:800;">${totalGrasa}g</span> <span style="font-size:11px; color:#a0aec0;">/ ${metaGrasa}g</span>`; 
-  
-  const ec = document.getElementById('en-consumidas'); if(ec) ec.innerText = `${totalCalorias} kcal`; 
-  const eq = document.getElementById('en-quemadas'); if(eq) eq.innerText = `${totalQuemadas} kcal`;
-  const en = document.getElementById('en-netas'); if(en) en.innerText = `${Math.max(0, totalCalorias - totalQuemadas)} kcal`; 
-  if(macroChart && (totalProt > 0 || totalCarb > 0 || totalGrasa > 0)) { macroChart.data.datasets[0].data = [totalProt, totalCarb, totalGrasa]; macroChart.update(); } 
-}
-
-document.getElementById('btn-checkin')?.addEventListener('click', () => window.openSheet('sheet-checkin'));
-document.getElementById('btn-confirm-checkin')?.addEventListener('click', async function() { 
-  if (this.disabled) return; this.disabled = true;
-  const pesoInp = document.getElementById('checkin-peso'); const pesoVal = pesoInp ? parseFloat(pesoInp.value) : 0;
-  if(!pesoVal) { showToast('⚠️ Por favor ingresa tu peso.'); this.disabled = false; return; }
-  if(currentUser && db) {
-    await addDoc(collection(db, "users", currentUser.uid, "checkins"), { peso: pesoVal, fecha: getTodayKey(), timestamp: Date.now() });
-    userProfile.peso = pesoVal; await guardarEstadoNube(); actualizarUIPerfil(); cargarHistorialYCheckins(currentUser.uid); 
-  }
-  window.closeSheet(); if(pesoInp) pesoInp.value = ''; showToast('📈 Check-in guardado.'); this.disabled = false;
-});
 
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(console.log); }); }
