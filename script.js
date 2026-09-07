@@ -322,3 +322,21 @@ window.eliminarAmigo = async (friendDocId, friendUid) => { if(!confirm("¿Cortar
 
 // INITIALIZE PWA SERVICE WORKER
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(console.log); }); }
+
+// --- VINCULACIÓN DIRECTA DEL BOTÓN DE GOOGLE ---
+document.addEventListener('DOMContentLoaded', () => {
+  const loginBtn = document.getElementById('btn-google-login');
+  if (loginBtn) {
+    loginBtn.onclick = async () => {
+      window.showToast('🔄 Conectando con Google...');
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      try {
+        await signInWithPopup(window.auth, provider);
+      } catch (error) {
+        console.warn('Popup bloqueado o fallido, intentando por redirección...', error);
+        await signInWithRedirect(window.auth, provider);
+      }
+    };
+  }
+});
