@@ -20,6 +20,7 @@ let currentUser = null;
 // --- ESTADO Y BIOMETRÍA ---
 let totalCalorias = 0, totalProt = 0, totalCarb = 0, totalGrasa = 0, totalAgua = 0, userStreak = 1;
 let metaCalorias = 2500, metaProt = 165, metaCarb = 275, metaGrasa = 69;
+let currentRankName = "Ashigaru";
 
 let userProfile = {
   perfilCompleto: false, nickname: "", genero: "M", edad: 25, peso: 75, altura: 175, metaObj: 0, actividad: 1.55 
@@ -28,21 +29,30 @@ let userProfile = {
 function getTodayKey() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 function showToast(msg) { const toast = document.getElementById('toast-notif'); if(!toast) return; toast.innerHTML = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3500); }
 
-// --- GESTIÓN DE AUTENTICACIÓN GOOGLE ---
+// --- TIPS DEL COACH (REEMPLAZA "CARGANDO...") ---
+const ironCoreTips = [
+  "⚡ La creatina (5g) funciona por acumulación. Tómala a cualquier hora, idealmente con carbohidratos.",
+  "🥩 Hipertrofia: Consume entre 1.8g y 2.2g de proteína por cada kilo de tu peso corporal.",
+  "💧 La hidratación lubrica tus articulaciones. Intenta tomar 1 litro por cada 25kg de peso.",
+  "💤 Tanto en el hierro como compitiendo en nivel Contender con NiceTry Alpha, el descanso es vital: duerme 8 horas para reparar tu SNC.",
+  "🔥 Si estás en déficit agresivo, prioriza alimentos voluminosos como verduras verdes para engañar la saciedad."
+];
+function cargarTipDiario() {
+  const tip = ironCoreTips[Math.floor(Math.random() * ironCoreTips.length)];
+  document.getElementById('daily-tip').innerText = tip;
+}
+window.addEventListener('DOMContentLoaded', cargarTipDiario);
+
+
+// --- GESTIÓN DE AUTENTICACIÓN ---
 const authScreen = document.getElementById('auth-screen');
 getRedirectResult(auth).then((result) => { if (result && result.user) showToast('⚔️ ¡Acceso autorizado al Dojo!'); }).catch(console.error);
 
 document.getElementById('btn-google-login')?.addEventListener('click', async () => {
   showToast('🔄 Conectando con Google...');
   const provider = new GoogleAuthProvider(); provider.setCustomParameters({ prompt: 'select_account' });
-  try { 
-    await signInWithPopup(auth, provider); 
-    showToast('⚔️ ¡Acceso autorizado al Dojo!'); 
-  } catch(error) { 
-    console.warn("Fallo el Popup, forzando redirección directa:", error);
-    showToast('🔄 Abriendo portal seguro...');
-    await signInWithRedirect(auth, provider); 
-  }
+  try { await signInWithPopup(auth, provider); showToast('⚔️ ¡Acceso autorizado!'); } 
+  catch(error) { showToast('🔄 Abriendo portal seguro...'); await signInWithRedirect(auth, provider); }
 });
 
 document.getElementById('btn-logout')?.addEventListener('click', () => signOut(auth));
@@ -52,7 +62,6 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
     if (authScreen) authScreen.style.display = 'none';
-    document.getElementById('ob-avatar').src = user.photoURL || 'logo.png';
     document.getElementById('ob-nickname').value = (user.displayName || "Guerrero").split(' ')[0];
     await cargarDatosDesdeNube(user.uid);
   } else {
@@ -62,7 +71,20 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// --- LÓGICA DE ONBOARDING ---
+// --- GENERADOR DE AVATARES DINÁMICOS "IRON SHOGUN" ---
+function generarAvatarPorRango(nickname, rango) {
+  // Utilizamos la API de DiceBear para crear un avatar Cyberpunk/Bot basado en el rango
+  let seed = `${nickname}-${rango}`;
+  let bg = "1a2130"; 
+  if(rango === "Rōnin") bg = "ffaa00";
+  if(rango === "Samurái") bg = "ff3366";
+  if(rango === "Daimyō") bg = "9933ff";
+  if(rango === "IRON SHŌGUN") bg = "00e5ff";
+  
+  return `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}&backgroundColor=${bg}`;
+}
+
+// --- LÓGICA DE ONBOARDING Y PERFIL ---
 let currentObStep = 0;
 const obScreen = document.getElementById('onboarding-screen');
 const obTrack = document.getElementById('ob-track');
@@ -71,13 +93,9 @@ const obBar = document.getElementById('ob-bar');
 window.abrirOnboarding = function(isEdit = false) {
   obScreen.style.display = 'flex'; currentObStep = 0; obTrack.style.transform = `translateX(0%)`; obBar.style.width = '33.33%';
   if(isEdit) {
-    document.getElementById('ob-title').innerText = "Editar Credencial";
-    document.getElementById('ob-nickname').value = userProfile.nickname;
-    window.seleccionarGenero(userProfile.genero); document.getElementById('ob-edad').value = userProfile.edad;
-    document.getElementById('ob-peso').value = userProfile.peso; document.getElementById('ob-altura').value = userProfile.altura;
-    document.querySelectorAll('.ob-goal-card').forEach(c => {
-      c.classList.remove('active'); if(parseInt(c.getAttribute('data-val')) === userProfile.metaObj) c.classList.add('active');
-    });
+    document.getElementById('ob-title').innerText = "Editar Credencial"; document.getElementById('ob-nickname').value = userProfile.nickname;
+    window.seleccionarGenero(userProfile.genero); document.getElementById('ob-edad').value = userProfile.edad; document.getElementById('ob-peso').value = userProfile.peso; document.getElementById('ob-altura').value = userProfile.altura;
+    document.querySelectorAll('.ob-goal-card').forEach(c => { c.classList.remove('active'); if(parseInt(c.getAttribute('data-val')) === userProfile.metaObj) c.classList.add('active'); });
   } else { document.getElementById('ob-title').innerText = "Ritual de Iniciación"; }
 };
 
@@ -104,21 +122,13 @@ window.finalizarOnboarding = async function() {
   metaGrasa = Math.round((metaCalorias * 0.25) / 9); metaCarb = Math.round((metaCalorias - ((metaProt * 4) + (metaGrasa * 9))) / 4);
 
   await guardarEstadoNube(); 
-  actualizarUIHeader(); 
-  actualizarUIPerfil(); 
-  actualizarDashboard(); 
-  actualizarGraficoProyeccion(userProfile.peso, userProfile.metaObj);
-  actualizarLabelMetaIA(); 
-  
-  obScreen.style.display = 'none'; showToast(`✅ Credencial Sincronizada`);
-  document.querySelector('[data-target="page-dashboard"]').click();
+  actualizarUIHeader(); actualizarUIPerfil(); actualizarDashboard(); actualizarGraficoProyeccion(userProfile.peso, userProfile.metaObj); actualizarLabelMetaIA(); 
+  obScreen.style.display = 'none'; showToast(`✅ Credencial Sincronizada`); document.querySelector('[data-target="page-dashboard"]').click();
 };
 
-// --- SINCRONIZACIÓN FIRESTORE ---
 async function guardarEstadoNube() {
   if(!currentUser || !db) return;
-  try { await setDoc(doc(db, "users", currentUser.uid), { calorias: totalCalorias, proteina: totalProt, carbos: totalCarb, grasa: totalGrasa, agua: totalAgua, metaCal: metaCalorias, metaProt: metaProt, metaCarb: metaCarb, metaGrasa: metaGrasa, streak: userStreak, ultimaFecha: localStorage.getItem('ic_ultima_fecha'), ...userProfile }, { merge: true });
-  } catch(e) { console.error(e); }
+  try { await setDoc(doc(db, "users", currentUser.uid), { calorias: totalCalorias, proteina: totalProt, carbos: totalCarb, grasa: totalGrasa, agua: totalAgua, metaCal: metaCalorias, metaProt: metaProt, metaCarb: metaCarb, metaGrasa: metaGrasa, streak: userStreak, ultimaFecha: localStorage.getItem('ic_ultima_fecha'), currentRankName, ...userProfile }, { merge: true }); } catch(e) { console.error(e); }
 }
 
 async function cargarDatosDesdeNube(uid) {
@@ -129,6 +139,7 @@ async function cargarDatosDesdeNube(uid) {
     totalCalorias = d.calorias || 0; totalProt = d.proteina || 0; totalCarb = d.carbos || 0; totalGrasa = d.grasa || 0; totalAgua = d.agua || 0;
     metaCalorias = d.metaCal || 2500; metaProt = d.metaProt || 165; metaCarb = d.metaCarb || 275; metaGrasa = d.metaGrasa || 69; userStreak = d.streak || 1;
     userProfile.perfilCompleto = d.perfilCompleto || false; userProfile.nickname = d.nickname || ""; userProfile.genero = d.genero || "M"; userProfile.edad = d.edad || 25; userProfile.peso = d.peso || 75; userProfile.altura = d.altura || 175; userProfile.metaObj = d.metaObj !== undefined ? d.metaObj : 0; userProfile.actividad = d.actividad || 1.55;
+    currentRankName = d.currentRankName || "Ashigaru";
   }
   if(!userProfile.perfilCompleto) { window.abrirOnboarding(false); } else { actualizarUIHeader(); actualizarUIPerfil(); actualizarLabelMetaIA(); }
   iniciarSakuraBackground(); verificarCambioDeDia(); actualizarDashboard(); actualizarAguaUI(); await cargarRegistrosDelDia(uid); actualizarGraficoProyeccion(userProfile.peso, userProfile.metaObj);
@@ -136,7 +147,9 @@ async function cargarDatosDesdeNube(uid) {
 
 function actualizarUIHeader() {
   document.getElementById('user-display-name').innerText = userProfile.nickname.toUpperCase();
-  const avatar = document.getElementById('user-avatar'); if(currentUser && currentUser.photoURL) { avatar.src = currentUser.photoURL; avatar.style.display = 'inline-block'; }
+  const avatarHeader = document.getElementById('user-avatar'); 
+  const dynamicImg = generarAvatarPorRango(userProfile.nickname, currentRankName);
+  avatarHeader.src = dynamicImg; avatarHeader.style.display = 'inline-block';
   document.getElementById('user-welcome-box').style.display = 'flex';
 }
 
@@ -145,19 +158,21 @@ function actualizarUIPerfil() {
   document.getElementById('profile-val-peso').innerText = `${userProfile.peso} kg`; document.getElementById('profile-val-altura').innerText = `${userProfile.altura} cm`; document.getElementById('profile-val-edad').innerText = `${userProfile.edad} años`; document.getElementById('profile-val-genero').innerText = userProfile.genero === 'M' ? 'Hombre' : 'Mujer';
   let labelMeta = "Mantenimiento"; if(userProfile.metaObj === -500) labelMeta = "Déficit Agresivo"; if(userProfile.metaObj === -300) labelMeta = "Definición"; if(userProfile.metaObj === 300) labelMeta = "Volumen";
   document.getElementById('profile-card-goal').innerText = `Meta: ${labelMeta}`;
-  if(currentUser && currentUser.photoURL) document.getElementById('profile-card-avatar').src = currentUser.photoURL;
+  document.getElementById('profile-card-avatar').src = generarAvatarPorRango(userProfile.nickname, currentRankName);
 }
 
-// --- EL ORÁCULO NUTRICIONAL (IA CLÍNICA AVANZADA CON JSON EXTERNO) ---
+// --- EL ORÁCULO NUTRICIONAL (IA CLÍNICA AVANZADA CON PARCHE MÓVIL) ---
 let oracleDB = []; 
 let dynamicDays = [];
 
 async function inicializarOraculo() {
   try {
-    const respuesta = await fetch('alimentos.json');
+    // Parche para móviles: Agregamos timestamp para romper la memoria caché del celular
+    const noCacheUrl = 'alimentos.json?v=' + new Date().getTime();
+    const respuesta = await fetch(noCacheUrl);
     if (!respuesta.ok) throw new Error('No se pudo cargar la base de datos nutricional.');
     oracleDB = await respuesta.json();
-    console.log(`🔮 Oráculo inicializado con ${oracleDB.length} recetas desde JSON.`);
+    console.log(`🔮 Oráculo inicializado con ${oracleDB.length} recetas.`);
   } catch (error) { console.error("Error al cargar alimentos.json:", error); }
 }
 window.addEventListener('DOMContentLoaded', inicializarOraculo);
@@ -195,28 +210,17 @@ function actualizarLabelMetaIA() {
   const calsLabel = document.getElementById('oracle-target-cals'); if(calsLabel) calsLabel.innerText = metaCalorias;
 }
 
-// Generador de fechas reales
 function calcularFechasSemana() {
-  dynamicDays = [];
-  const date = new Date();
-  const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-  
+  dynamicDays = []; const date = new Date(); const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']; const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
   for(let i=0; i<7; i++) {
-    let d = new Date(date);
-    d.setDate(d.getDate() + i);
-    dynamicDays.push({
-      index: i,
-      shortName: dayNames[d.getDay()],
-      fullName: `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}`
-    });
+    let d = new Date(date); d.setDate(d.getDate() + i);
+    dynamicDays.push({ index: i, shortName: dayNames[d.getDay()], fullName: `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}` });
   }
 }
 
 document.getElementById('btn-generar-plan')?.addEventListener('click', () => {
   if (oracleDB.length === 0) { showToast("⚠️ Sincronizando base de datos... Espera un segundo."); return; }
-  calcularFechasSemana();
-  generarPlanSemanal();
+  calcularFechasSemana(); generarPlanSemanal();
   document.getElementById('oracle-form-card').style.display = 'none'; 
   document.getElementById('plan-resultado').style.display = 'block'; 
   showToast('🤖 IA: Plan clínico generado.');
@@ -233,17 +237,12 @@ window.seleccionarDiaPlan = function(index) {
 function generarPlanSemanal() {
   weeklyPlan = []; const distribution = [ { tipo: 'desayuno', cals: metaCalorias * 0.25 }, { tipo: 'almuerzo', cals: metaCalorias * 0.35 }, { tipo: 'cena', cals: metaCalorias * 0.30 }, { tipo: 'snack', cals: metaCalorias * 0.10 } ];
   for(let i=0; i<7; i++) { let dayMeals = distribution.map(slot => obtenerComidaAlgoritmo(slot.tipo, slot.cals, [])); weeklyPlan.push(dayMeals); }
-  
-  const scrollContainer = document.getElementById('day-selector-container');
-  scrollContainer.innerHTML = '';
-  dynamicDays.forEach(day => {
-    scrollContainer.innerHTML += `<button class="day-chip ${day.index === 0 ? 'active' : ''}" data-day="${day.index}" onclick="window.seleccionarDiaPlan(${day.index})">${day.shortName}</button>`;
-  });
-  
+  const scrollContainer = document.getElementById('day-selector-container'); scrollContainer.innerHTML = '';
+  dynamicDays.forEach(day => { scrollContainer.innerHTML += `<button class="day-chip ${day.index === 0 ? 'active' : ''}" data-day="${day.index}" onclick="window.seleccionarDiaPlan(${day.index})">${day.shortName}</button>`; });
   window.seleccionarDiaPlan(0);
 }
 
-function obtenerComidaAlgoritmo(tipo, targetCals, excludesId) {
+function filtrarBaseDatos(tipo, excludesId) {
   let currentDietType = document.getElementById('oracle-diet-type').value;
   let isCeliac = document.getElementById('oracle-celiac').checked;
   let isLactose = document.getElementById('oracle-lactose').checked;
@@ -252,7 +251,7 @@ function obtenerComidaAlgoritmo(tipo, targetCals, excludesId) {
   let candidatos = oracleDB.filter(m => {
     if(m.tipo !== tipo) return false; 
     if(!m.dietas.includes(currentDietType)) return false; 
-    if(excludesId.includes(m.id)) return false; 
+    if(excludesId && excludesId.includes(m.id)) return false; 
     
     if(isCeliac && m.glutenFree === false) return false;
     if(isLactose && m.lactoseFree === false) return false;
@@ -264,23 +263,29 @@ function obtenerComidaAlgoritmo(tipo, targetCals, excludesId) {
   });
 
   if(candidatos.length === 0) candidatos = oracleDB.filter(m => m.tipo === tipo); 
-  
   let bestCandidates = [];
   if(userProfile.metaObj > 0) { bestCandidates = candidatos.filter(m => m.isDense === true); } else if (userProfile.metaObj < 0) { bestCandidates = candidatos.filter(m => m.isVolume === true); }
   if(bestCandidates.length > 0) candidatos = bestCandidates;
   
-  if(candidatos.length === 0) return { id: 0, tipo: tipo, name: "Amplía tus filtros", cals: targetCals, prot: 0, carb: 0, gras: 0, ingredientes: [] };
+  return candidatos;
+}
 
-  const selected = candidatos[Math.floor(Math.random() * candidatos.length)];
-  const factor = targetCals / selected.calBase;
-  
-  let ingredientesAdaptados = selected.ingredientes.map(ing => {
+function calcularMacrosPorcion(comidaBase, targetCals) {
+  const factor = targetCals / comidaBase.calBase;
+  let ingredientesAdaptados = comidaBase.ingredientes.map(ing => {
     let qtyCalculada = ing.baseQty * factor;
     qtyCalculada = ing.unidad === 'unidades' || ing.unidad === 'scoops' || ing.unidad === 'rebanadas' || ing.unidad === 'porción' ? parseFloat(qtyCalculada.toFixed(1)) : Math.round(qtyCalculada);
     return { nombre: ing.nombre, cantidad: qtyCalculada, unidad: ing.unidad };
   });
 
-  return { id: selected.id, tipo: selected.tipo, name: selected.name, cals: Math.round(selected.calBase * factor), prot: Math.round(selected.prot * factor), carb: Math.round(selected.carb * factor), gras: Math.round(selected.gras * factor), ingredientes: ingredientesAdaptados };
+  return { id: comidaBase.id, tipo: comidaBase.tipo, name: comidaBase.name, cals: Math.round(comidaBase.calBase * factor), prot: Math.round(comidaBase.prot * factor), carb: Math.round(comidaBase.carb * factor), gras: Math.round(comidaBase.gras * factor), ingredientes: ingredientesAdaptados };
+}
+
+function obtenerComidaAlgoritmo(tipo, targetCals, excludesId) {
+  const candidatos = filtrarBaseDatos(tipo, excludesId);
+  if(candidatos.length === 0) return { id: 0, tipo: tipo, name: "Sin Opciones", cals: targetCals, prot: 0, carb: 0, gras: 0, ingredientes: [] };
+  const selected = candidatos[Math.floor(Math.random() * candidatos.length)];
+  return calcularMacrosPorcion(selected, targetCals);
 }
 
 function renderizarDiaSeleccionado() {
@@ -292,7 +297,7 @@ function renderizarDiaSeleccionado() {
       <div class="plan-meal-card">
         <div class="plan-meal-header">
           <span class="plan-meal-title">${meal.tipo}</span>
-          <button class="btn-swap" onclick="window.swapMealPlan(${idx})">🔄 Cambiar</button>
+          <button class="btn-swap" onclick="window.abrirMenuReemplazo(${idx})">🔄 Cambiar</button>
         </div>
         <div class="plan-meal-desc">
           <b>${meal.name}</b>
@@ -307,7 +312,51 @@ function renderizarDiaSeleccionado() {
   });
 }
 
-window.swapMealPlan = function(mealIndex) { const oldMeal = weeklyPlan[selectedDayIndex][mealIndex]; const newMeal = obtenerComidaAlgoritmo(oldMeal.tipo, oldMeal.cals, [oldMeal.id]); weeklyPlan[selectedDayIndex][mealIndex] = newMeal; renderizarDiaSeleccionado(); showToast(`🔄 Plato modificado.`); };
+// --- MENÚ DE REEMPLAZO INTERACTIVO ---
+let swapTargetIndex = -1;
+window.abrirMenuReemplazo = function(mealIndex) {
+  swapTargetIndex = mealIndex;
+  const oldMeal = weeklyPlan[selectedDayIndex][mealIndex];
+  const targetCals = oldMeal.cals;
+  
+  // Buscar opciones de la misma categoría que cumplan los filtros
+  let candidatos = filtrarBaseDatos(oldMeal.tipo, [oldMeal.id]);
+  
+  const listContainer = document.getElementById('sheet-swap-list');
+  listContainer.innerHTML = '';
+  
+  if(candidatos.length === 0) {
+    listContainer.innerHTML = `<p style="font-size:12px; color:#ff3366;">No hay más opciones para tus filtros actuales.</p>`;
+  } else {
+    // Mostramos un máximo de 5 opciones para no saturar la pantalla del celular
+    const maxOpciones = Math.min(5, candidatos.length);
+    for(let i=0; i<maxOpciones; i++) {
+      let opcionEscalada = calcularMacrosPorcion(candidatos[i], targetCals);
+      // Guardar el objeto en JSON para pasarlo a la función
+      let objData = encodeURIComponent(JSON.stringify(opcionEscalada));
+      
+      listContainer.innerHTML += `
+        <div class="swap-option-card" onclick="window.confirmarReemplazo('${objData}')">
+          <b>${opcionEscalada.name}</b>
+          <span>🔥 ${opcionEscalada.cals} kcal | P: ${opcionEscalada.prot}g | C: ${opcionEscalada.carb}g | G: ${opcionEscalada.gras}g</span>
+        </div>
+      `;
+    }
+  }
+  
+  window.openSheet('sheet-swap-meal');
+};
+
+window.confirmarReemplazo = function(encodedData) {
+  if(swapTargetIndex > -1) {
+    const newMeal = JSON.parse(decodeURIComponent(encodedData));
+    weeklyPlan[selectedDayIndex][swapTargetIndex] = newMeal;
+    renderizarDiaSeleccionado();
+    window.closeSheet();
+    showToast(`✅ Plato actualizado con éxito.`);
+  }
+};
+
 window.generarListaCompras = function() {
   const ul = document.getElementById('lista-compras-ui'); if(!ul) return; let listaConsolidada = {};
   weeklyPlan.forEach(dia => { dia.forEach(comida => { comida.ingredientes.forEach(ing => { let key = `${ing.nombre} (${ing.unidad})`; listaConsolidada[key] = (listaConsolidada[key] || 0) + ing.cantidad; }); }); });
@@ -320,7 +369,7 @@ window.generarListaCompras = function() {
   window.openSheet('sheet-compras');
 };
 
-// --- BASE DE DATOS GLOBAL (OPEN FOOD FACTS API CON PROXY ANTI-ADBLOCK) ---
+// --- BASE DE DATOS GLOBAL (OPEN FOOD FACTS API) ---
 let currentSearchFoodBase = null;
 
 const fallbackDB = [
@@ -392,7 +441,7 @@ function renderizarResultadosBusqueda(productos, contenedor) {
   });
 }
 
-// --- CONVERSIÓN DE MEDIDAS MANUALES ---
+// CONVERSIÓN DE MEDIDAS MANUALES
 document.getElementById('edit-qty')?.addEventListener('input', recalcularMacros);
 document.getElementById('edit-unit')?.addEventListener('change', recalcularMacros);
 
@@ -425,7 +474,7 @@ document.getElementById('btn-confirm-food-final')?.addEventListener('click', asy
 });
 
 
-// --- LECTOR DE CÓDIGO DE BARRAS (HTML5-QRCODE) ---
+// --- LECTOR DE CÓDIGO DE BARRAS ---
 let html5QrcodeScanner = null;
 
 document.getElementById('btn-foto')?.addEventListener('click', () => {
@@ -480,10 +529,10 @@ async function onScanSuccess(decodedText, decodedResult) {
   }
 }
 
-function onScanFailure(error) { /* Se ignora cuando no detecta frame a frame */ }
+function onScanFailure(error) { }
 
 
-// --- PERSISTENCIA DE LISTAS DIARIAS (COMIDAS Y ENTRENOS) ---
+// --- PERSISTENCIA DE LISTAS DIARIAS ---
 async function cargarRegistrosDelDia(uid) {
   const hoyKey = getTodayKey(); const listaComidas = document.getElementById('lista-comidas');
   if(listaComidas) { listaComidas.innerHTML = ''; const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "meals")); snapshot.forEach(docSnap => { const i = docSnap.data(); renderizarComidaEnUI(i.nombre, i.cal, i.prot, i.carb, i.gras, docSnap.id); }); }
@@ -509,7 +558,7 @@ window.agregarAgua = ml => { totalAgua += ml; actualizarAguaUI(); showToast(`�
 document.getElementById('btn-send-chat')?.addEventListener('click', enviarMensajeShogun); document.getElementById('chat-input-text')?.addEventListener('keypress', e => { if(e.key === 'Enter') enviarMensajeShogun(); });
 function enviarMensajeShogun() { const inp = document.getElementById('chat-input-text'); const txt = inp.value.trim(); if(!txt) return; const box = document.getElementById('chat-messages'); box.innerHTML += `<div class="chat-msg user">${txt}</div>`; inp.value = ''; box.scrollTop = box.scrollHeight; setTimeout(() => { box.innerHTML += `<div class="chat-msg ai">"La disciplina vence a la motivación. Céntrate en tus macros y el hierro hará el resto."</div>`; box.scrollTop = box.scrollHeight; }, 800); }
 
-// --- BOTTOM SHEETS ---
+// --- BOTTOM SHEETS Y TABS ---
 const overlay = document.getElementById('sheet-overlay'); let activeSheet = null;
 window.openSheet = function(sheetId) { activeSheet = document.getElementById(sheetId); if(overlay) overlay.style.display = 'block'; if(activeSheet) { activeSheet.classList.add('open'); setTimeout(() => activeSheet.style.bottom = '0', 10); } }
 window.closeSheet = function() { if(activeSheet) { activeSheet.style.bottom = '-100%'; setTimeout(() => { activeSheet.classList.remove('open'); if(overlay) overlay.style.display = 'none'; }, 300); } }
@@ -524,8 +573,8 @@ setupTabs('tab-btn-diet', 'sub-tab-diet'); setupTabs('tab-btn-train', 'sub-tab-t
 
 // --- LEADERBOARD Y RANGOS ---
 const rangos = [ { nombre: "Ashigaru", minRatio: 0, color: "#6b7c93", msg: "Primer paso." }, { nombre: "Rōnin", minRatio: 1.5, color: "#ffaa00", msg: "Camino propio." }, { nombre: "Samurái", minRatio: 2.5, color: "#ff3366", msg: "Honor y disciplina." }, { nombre: "Daimyō", minRatio: 3.5, color: "#9933ff", msg: "Élite del hierro." }, { nombre: "IRON SHŌGUN", minRatio: 4.5, color: "#00e5ff", msg: "Comandante Supremo." } ];
-document.getElementById('btn-calcular-rango')?.addEventListener('click', async () => { const bench = parseFloat(document.getElementById('rm-bench').value) || 0; const squat = parseFloat(document.getElementById('rm-squat').value) || 0; const deadlift = parseFloat(document.getElementById('rm-deadlift').value) || 0; if(bench === 0 && squat === 0 && deadlift === 0) { showToast('⚠️ Ingresa marcas.'); return; } const total = bench + squat + deadlift; const ratio = parseFloat((total / userProfile.peso).toFixed(2)); let rango = rangos[0], prog = 0; for(let i=0; i<rangos.length; i++) { if(ratio >= rangos[i].minRatio) { rango = rangos[i]; prog = i < rangos.length - 1 ? ((ratio - rangos[i].minRatio) / (rangos[i+1].minRatio - rangos[i].minRatio)) * 100 : 100; } } document.getElementById('rango-titulo').innerText = rango.nombre; document.getElementById('rango-titulo').style.color = rango.color; document.getElementById('rango-multi').innerText = `${ratio}x`; document.getElementById('rango-total').innerText = total; document.getElementById('rango-progreso').style.width = `${prog}%`; document.getElementById('rango-progreso').style.backgroundColor = rango.color; document.getElementById('header-rank').innerHTML = `Rango: <span style="color: ${rango.color};">${rango.nombre.toUpperCase()}</span>`; if(currentUser && db) { try { await setDoc(doc(db, "leaderboard", currentUser.uid), { userId: currentUser.uid, nombre: userProfile.nickname, foto: currentUser.photoURL || "", multiplicador: ratio, totalKg: total, pesoCorporal: userProfile.peso, rango: rango.nombre, colorRango: rango.color, updatedAt: Date.now() }, { merge: true }); showToast(`⚔️ ¡Ranking Actualizado!`); } catch(e) { console.error(e); } } });
-async function cargarLeaderboard() { const container = document.getElementById('leaderboard-list'); if(!container || !db) return; container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">Cargando guerreros...</p>`; try { const q = query(collection(db, "leaderboard"), orderBy("multiplicador", "desc"), limit(20)); const snapshot = await getDocs(q); if(snapshot.empty) { container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">El dojo está vacío.</p>`; return; } let html = "", pos = 1; snapshot.forEach(docSnap => { const d = docSnap.data(); const topClass = pos===1?"top-1":pos===2?"top-2":pos===3?"top-3":""; const medal = pos===1?"🥇":pos===2?"🥈":pos===3?"🥉":`#${pos}`; html += `<div class="leaderboard-item ${topClass}"><div class="lb-rank-num">${medal}</div><div class="lb-user-info"><img class="lb-avatar" src="${d.foto||'logo.png'}"><div><span class="lb-name">${d.nombre}</span><span class="lb-badge" style="color: ${d.colorRango};">${d.rango}</span></div></div><div class="lb-score"><span class="lb-multiplier">${d.multiplicador}x</span><span class="lb-kg">${d.totalKg} kg</span></div></div>`; pos++; }); container.innerHTML = html; } catch(e) { container.innerHTML = `<p style="font-size: 12px; color: #ff3366; text-align: center;">Error al cargar.</p>`; } }
+document.getElementById('btn-calcular-rango')?.addEventListener('click', async () => { const bench = parseFloat(document.getElementById('rm-bench').value) || 0; const squat = parseFloat(document.getElementById('rm-squat').value) || 0; const deadlift = parseFloat(document.getElementById('rm-deadlift').value) || 0; if(bench === 0 && squat === 0 && deadlift === 0) { showToast('⚠️ Ingresa marcas.'); return; } const total = bench + squat + deadlift; const ratio = parseFloat((total / userProfile.peso).toFixed(2)); let rango = rangos[0], prog = 0; for(let i=0; i<rangos.length; i++) { if(ratio >= rangos[i].minRatio) { rango = rangos[i]; prog = i < rangos.length - 1 ? ((ratio - rangos[i].minRatio) / (rangos[i+1].minRatio - rangos[i].minRatio)) * 100 : 100; } } document.getElementById('rango-titulo').innerText = rango.nombre; document.getElementById('rango-titulo').style.color = rango.color; document.getElementById('rango-multi').innerText = `${ratio}x`; document.getElementById('rango-total').innerText = total; document.getElementById('rango-progreso').style.width = `${prog}%`; document.getElementById('rango-progreso').style.backgroundColor = rango.color; document.getElementById('header-rank').innerHTML = `Rango: <span style="color: ${rango.color};">${rango.nombre.toUpperCase()}</span>`; currentRankName = rango.nombre; actualizarUIHeader(); actualizarUIPerfil(); if(currentUser && db) { try { await setDoc(doc(db, "leaderboard", currentUser.uid), { userId: currentUser.uid, nombre: userProfile.nickname, foto: currentUser.photoURL || "", multiplicador: ratio, totalKg: total, pesoCorporal: userProfile.peso, rango: rango.nombre, colorRango: rango.color, updatedAt: Date.now() }, { merge: true }); showToast(`⚔️ ¡Ranking Actualizado!`); await guardarEstadoNube(); } catch(e) { console.error(e); } } });
+async function cargarLeaderboard() { const container = document.getElementById('leaderboard-list'); if(!container || !db) return; container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">Cargando guerreros...</p>`; try { const q = query(collection(db, "leaderboard"), orderBy("multiplicador", "desc"), limit(20)); const snapshot = await getDocs(q); if(snapshot.empty) { container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">El dojo está vacío.</p>`; return; } let html = "", pos = 1; snapshot.forEach(docSnap => { const d = docSnap.data(); const topClass = pos===1?"top-1":pos===2?"top-2":pos===3?"top-3":""; const medal = pos===1?"🥇":pos===2?"🥈":pos===3?"🥉":`#${pos}`; html += `<div class="leaderboard-item ${topClass}"><div class="lb-rank-num">${medal}</div><div class="lb-user-info"><img class="lb-avatar" src="${generarAvatarPorRango(d.nombre, d.rango)}"><div><span class="lb-name">${d.nombre}</span><span class="lb-badge" style="color: ${d.colorRango};">${d.rango}</span></div></div><div class="lb-score"><span class="lb-multiplier">${d.multiplicador}x</span><span class="lb-kg">${d.totalKg} kg</span></div></div>`; pos++; }); container.innerHTML = html; } catch(e) { container.innerHTML = `<p style="font-size: 12px; color: #ff3366; text-align: center;">Error al cargar.</p>`; } }
 document.getElementById('btn-refresh-leaderboard')?.addEventListener('click', cargarLeaderboard);
 
 let macroChart = null; const ctxDonut = document.getElementById('macroChart'); if(ctxDonut) { macroChart = new Chart(ctxDonut.getContext('2d'), { type: 'doughnut', data: { labels: ['Prot', 'Carb', 'Gras'], datasets: [{ data: [0.1, 0.1, 0.1], backgroundColor: ['#ff3366', '#00e5ff', '#ffaa00'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '82%', plugins: { legend: { display: false } } } }); }
