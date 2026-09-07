@@ -1,152 +1,152 @@
 [
   {
     "id": 1,
-    "nombre": "Sentadilla Libre con Barra",
-    "grupo": "piernas",
-    "musculoPrincipal": "Cuádriceps / Glúteos",
-    "equipamiento": ["gimnasio", "barra"],
-    "nivel": "intermedio",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Sentadilla+Barra",
-    "tips": "Rompe el paralelo si tu movilidad lo permite. Mantén el pecho arriba y la mirada al frente."
+    "nombre": "3/4 Sit-Up",
+    "grupo": "core",
+    "musculoPrincipal": "Abdomen",
+    "equipamiento": ["corporal"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=3%2F4+Sit-Up",
+    "tips": "Mantén la tensión en el abdomen y evita tirones con el cuello."
   },
   {
     "id": 2,
-    "nombre": "Flexiones de Brazo (Push-ups)",
+    "nombre": "45° Side Bend",
+    "grupo": "core",
+    "musculoPrincipal": "Oblicuos",
+    "equipamiento": ["corporal"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=45+Side+Bend",
+    "tips": "Controla el descenso y contrae el lateral al subir."
+  },
+  {
+    "id": 3,
+    "nombre": "Air Bike",
+    "grupo": "core",
+    "musculoPrincipal": "Abdomen",
+    "equipamiento": ["corporal"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Air+Bike",
+    "tips": "Toca codo con rodilla opuesta manteniendo la zona lumbar pegada al suelo."
+  },
+  {
+    "id": 4,
+    "nombre": "Barbell Bench Press",
+    "grupo": "pecho",
+    "musculoPrincipal": "Pectorales",
+    "equipamiento": ["gimnasio", "barra"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Barbell+Bench+Press",
+    "tips": "Retracción escapular firme y pies bien apoyados en el suelo."
+  },
+  {
+    "id": 5,
+    "nombre": "Barbell Squat",
+    "grupo": "piernas",
+    "musculoPrincipal": "Cuádriceps",
+    "equipamiento": ["gimnasio", "barra"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Barbell+Squat",
+    "tips": "Espalda recta, pecho expandido y rodillas alineadas con la punta de los pies."
+  },
+  {
+    "id": 6,
+    "nombre": "Barbell Deadlift",
+    "grupo": "piernas",
+    "musculoPrincipal": "Glúteos / Isquios",
+    "equipamiento": ["gimnasio", "barra"],
+    "nivel": "avanzado",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Barbell+Deadlift",
+    "tips": "La barra roza tus piernas; empuja el suelo con fuerza."
+  },
+  {
+    "id": 7,
+    "nombre": "Dumbbell Biceps Curl",
+    "grupo": "brazos",
+    "musculoPrincipal": "Bíceps",
+    "equipamiento": ["gimnasio", "mancuernas"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Dumbbell+Biceps+Curl",
+    "tips": "Evita balancear el torso; mantén los codos fijos a los costados."
+  },
+  {
+    "id": 8,
+    "nombre": "Dumbbell Shoulder Press",
+    "grupo": "hombros",
+    "musculoPrincipal": "Deltoides",
+    "equipamiento": ["gimnasio", "mancuernas"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Dumbbell+Shoulder+Press",
+    "tips": "No bloquees bruscamente los codos arriba."
+  },
+  {
+    "id": 9,
+    "nombre": "Pull-Up",
+    "grupo": "espalda",
+    "musculoPrincipal": "Dorsal Ancho",
+    "equipamiento": ["corporal", "gimnasio"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Pull-Up",
+    "tips": "Inicia el movimiento con los codos hacia abajo y atrás."
+  },
+  {
+    "id": 10,
+    "nombre": "Push-Up",
     "grupo": "pecho",
     "musculoPrincipal": "Pectoral Mayor",
     "equipamiento": ["corporal"],
     "nivel": "principiante",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Push-ups",
-    "tips": "Baja controlado. Mantén el core apretado para no curvar la zona lumbar."
-  },
-  {
-    "id": 3,
-    "nombre": "Dominadas Estrictas (Pull-ups)",
-    "grupo": "espalda",
-    "musculoPrincipal": "Dorsal Ancho",
-    "equipamiento": ["corporal", "gimnasio"],
-    "nivel": "intermedio",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Dominadas",
-    "tips": "Inicia el movimiento juntando las escápulas. Rango de movimiento completo."
-  },
-  {
-    "id": 4,
-    "nombre": "Press de Banca Plano",
-    "grupo": "pecho",
-    "musculoPrincipal": "Pectoral Mayor / Tríceps",
-    "equipamiento": ["gimnasio", "barra"],
-    "nivel": "intermedio",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Press+Banca",
-    "tips": "Haz retracción escapular y planta los pies firmes en el suelo (Leg Drive)."
-  },
-  {
-    "id": 5,
-    "nombre": "Peso Muerto Convencional",
-    "grupo": "piernas",
-    "musculoPrincipal": "Isquiosurales / Espalda Baja",
-    "equipamiento": ["gimnasio", "barra"],
-    "nivel": "avanzado",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Peso+Muerto",
-    "tips": "La barra debe rozar tus tibias. Tira con las piernas, no jales con la espalda."
-  },
-  {
-    "id": 6,
-    "nombre": "Press Militar con Mancuernas",
-    "grupo": "hombros",
-    "musculoPrincipal": "Deltoides Anterior",
-    "equipamiento": ["gimnasio", "mancuernas"],
-    "nivel": "principiante",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Press+Militar",
-    "tips": "No arquees la espalda baja. Controla la fase excéntrica (bajada)."
-  },
-  {
-    "id": 7,
-    "nombre": "Sentadilla Búlgara",
-    "grupo": "piernas",
-    "musculoPrincipal": "Cuádriceps / Glúteos",
-    "equipamiento": ["gimnasio", "mancuernas", "corporal"],
-    "nivel": "intermedio",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Bulgaras",
-    "tips": "Si inclinas el torso hacia adelante, enfocarás más el trabajo en el glúteo."
-  },
-  {
-    "id": 8,
-    "nombre": "Fondos en Paralelas (Dips)",
-    "grupo": "pecho",
-    "musculoPrincipal": "Pectoral Inferior / Tríceps",
-    "equipamiento": ["corporal", "gimnasio"],
-    "nivel": "intermedio",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Fondos+Dips",
-    "tips": "Inclínate hacia adelante para enfocar el pecho. Mantente recto para tríceps."
-  },
-  {
-    "id": 9,
-    "nombre": "Remo con Mancuerna a Una Mano",
-    "grupo": "espalda",
-    "musculoPrincipal": "Dorsal Ancho",
-    "equipamiento": ["gimnasio", "mancuernas"],
-    "nivel": "principiante",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Remo+Mancuerna",
-    "tips": "Lleva el codo hacia la cadera en lugar de subirlo directo hacia el techo."
-  },
-  {
-    "id": 10,
-    "nombre": "Plancha Abdominal (Plank)",
-    "grupo": "core",
-    "musculoPrincipal": "Recto Abdominal",
-    "equipamiento": ["corporal"],
-    "nivel": "principiante",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Plank",
-    "tips": "Aprieta los glúteos y haz retroversión pélvica para máxima activación."
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Push-Up",
+    "tips": "Mantén el cuerpo completamente alineado como una tabla."
   },
   {
     "id": 11,
-    "nombre": "Curl de Bíceps con Mancuernas",
-    "grupo": "brazos",
-    "musculoPrincipal": "Bíceps Braquial",
-    "equipamiento": ["gimnasio", "mancuernas"],
-    "nivel": "principiante",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Curl+Biceps",
-    "tips": "Mantén los codos pegados a las costillas. No uses el impulso de la espalda."
+    "nombre": "Cable Crossover",
+    "grupo": "pecho",
+    "musculoPrincipal": "Pectorales",
+    "equipamiento": ["gimnasio", "polea"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Cable+Crossover",
+    "tips": "Cruza ligeramente las manos al frente para máxima contracción."
   },
   {
     "id": 12,
-    "nombre": "Extensión de Tríceps en Polea",
-    "grupo": "brazos",
-    "musculoPrincipal": "Tríceps Braquial",
-    "equipamiento": ["gimnasio", "polea"],
-    "nivel": "principiante",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Triceps+Polea",
-    "tips": "Abre la cuerda al final del movimiento para una contracción máxima."
-  },
-  {
-    "id": 13,
-    "nombre": "Prensa de Piernas (Leg Press)",
+    "nombre": "Leg Press",
     "grupo": "piernas",
     "musculoPrincipal": "Cuádriceps",
     "equipamiento": ["gimnasio", "maquina"],
     "nivel": "principiante",
     "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Leg+Press",
-    "tips": "No bloquees ni trabes las rodillas al estirar las piernas. Mantén tensión constante."
+    "tips": "Coloca los pies a la anchura de los hombros en la plataforma."
+  },
+  {
+    "id": 13,
+    "nombre": "Lat Pulldown",
+    "grupo": "espalda",
+    "musculoPrincipal": "Dorsal Ancho",
+    "equipamiento": ["gimnasio", "polea"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Lat+Pulldown",
+    "tips": "Tira de la barra hacia la parte superior del pecho."
   },
   {
     "id": 14,
-    "nombre": "Remo en Máquina Sentado",
+    "nombre": "Seated Cable Row",
     "grupo": "espalda",
-    "musculoPrincipal": "Dorsal y Romboides",
-    "equipamiento": ["gimnasio", "maquina"],
+    "musculoPrincipal": "Romboides / Dorsal",
+    "equipamiento": ["gimnasio", "polea"],
     "nivel": "principiante",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Remo+Maquina",
-    "tips": "Mantén el pecho pegado a la almohadilla y tira desde los codos."
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Seated+Cable+Row",
+    "tips": "Mantén el pecho erguido y lleva los codos pegados al cuerpo."
   },
   {
     "id": 15,
-    "nombre": "Elevaciones Laterales",
-    "grupo": "hombros",
-    "musculoPrincipal": "Deltoides Lateral",
-    "equipamiento": ["gimnasio", "mancuernas", "polea"],
-    "nivel": "intermedio",
-    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Elevaciones+Lat",
-    "tips": "Sube el peso como si estuvieras vaciando una jarra de agua. Ligeramente hacia adelante."
+    "nombre": "Triceps Pushdown",
+    "grupo": "brazos",
+    "musculoPrincipal": "Tríceps",
+    "equipamiento": ["gimnasio", "polea"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Triceps+Pushdown",
+    "tips": "Extiende completamente los brazos abajo sin mover los codos."
   }
 ]
