@@ -145,11 +145,11 @@
         <div class="log"><h3>Historial de Hoy</h3><ul id="lista-comidas"></ul></div>
       </div>
 
-<!-- ORÁCULO NUTRICIONAL (SEMANAL Y EXACTO) -->
+<!-- ORÁCULO NUTRICIONAL (SEMANAL E IA) -->
       <div id="tab-plan" class="sub-tab-diet" style="display: none;">
         <div class="card" style="text-align: left;" id="oracle-form-card">
-          <h3 style="color: #00e5ff; margin-top:0;">Consulta Clínica Semanal</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">El Oráculo estructurará tus 7 días ajustados a <b id="oracle-target-cals">0</b> kcal/día.</p>
+          <h3 style="color: #00e5ff; margin-top:0;">Motor de Inteligencia Clínica</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">La IA estructurará tus 7 días ajustados a <b id="oracle-target-cals">0</b> kcal/día, basándose en tu meta de <span id="oracle-target-goal" style="color:var(--primary); font-weight:800;">Mantenimiento</span>.</p>
           
           <label>Preferencia Dietética:</label>
           <select id="oracle-diet-type" class="neon-input" style="margin-top:5px;">
@@ -160,10 +160,16 @@
             <option value="vegetariano">Vegetariana (Huevos/Lácteos)</option>
           </select>
 
-          <label style="margin-top:15px;">Alergias o Exclusiones (Opcional):</label>
-          <input type="text" id="oracle-allergies" class="neon-input" placeholder="Ej: maní, lactosa, mariscos, brócoli" style="margin-top:5px;">
+          <label style="margin-top:15px;">Condición Médica:</label>
+          <div style="display:flex; align-items:center; gap:10px; margin-top:8px; background:#141a26; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+            <input type="checkbox" id="oracle-celiac" style="width:20px; height:20px; accent-color:#ff3366;">
+            <span style="font-size:13px; color:#fff; font-weight:600;">Libre de Gluten (Celíaco)</span>
+          </div>
+
+          <label style="margin-top:15px;">Otras Alergias (Opcional):</label>
+          <input type="text" id="oracle-allergies" class="neon-input" placeholder="Ej: maní, lactosa, mariscos" style="margin-top:5px;">
           
-          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 20px; box-shadow: 0 0 15px var(--primary-glow);">Generar Plan Semanal 🔮</button>
+          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 20px; box-shadow: 0 0 15px var(--primary-glow);">Generar Plan con IA 🔮</button>
         </div>
         
         <div id="plan-resultado" style="display: none;">
@@ -172,7 +178,6 @@
             <button class="btn-clear-history" onclick="document.getElementById('plan-resultado').style.display='none'; document.getElementById('oracle-form-card').style.display='block';">Volver</button>
           </div>
           
-          <!-- Selector de Días de la Semana -->
           <select id="oracle-day-selector" class="custom-select" style="margin-top: 15px; font-weight:800; color:var(--primary); border-color:var(--primary);">
             <option value="0">📅 Lunes</option>
             <option value="1">📅 Martes</option>
@@ -183,7 +188,6 @@
             <option value="6">📅 Domingo</option>
           </select>
 
-          <!-- Contenedor Dinámico de las Comidas del Día Seleccionado -->
           <div id="comidas-plan" style="margin-top:15px;"></div>
           
           <button class="btn btn-secondary" style="width:100%; margin-top:15px; border-color:#ffaa00; color:#ffaa00;" onclick="generarListaCompras()">🛒 Lista de Compras (7 Días)</button>
