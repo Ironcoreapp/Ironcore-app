@@ -1,5 +1,5 @@
 // ============================================================================
-// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM, DASHBOARD GRID Y SOCIAL ---
+// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM, DASHBOARD GRID Y RED SOCIAL ---
 // ============================================================================
 const customCSS = `
   header, .top-header, #main-header {
@@ -47,6 +47,13 @@ const customCSS = `
   
   .macro-progress-container { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 6px; overflow: hidden; }
   .macro-progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease-out; }
+
+  /* Estilos del Muro Social */
+  .social-post-card { background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+  .social-post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .social-post-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #00e5ff; }
+  .social-post-body { font-size: 13px; color: #e5e7eb; line-height: 1.5; margin-bottom: 10px; }
+  .social-post-img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1); }
 `;
 const styleEl = document.createElement('style'); styleEl.innerHTML = customCSS; document.head.appendChild(styleEl);
 
@@ -62,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     rankElem.classList.add('user-badge-mini'); streakElem.classList.add('user-badge-mini');
   }
 
+  // Inyectar Pestaña o Sección Social en el menú si se desea, o dejarla en Perfil
   const genBtn = document.getElementById('btn-generar-rutina');
   if(genBtn && !document.getElementById('check-warmup')) {
     const fasesDiv = document.createElement('div');
@@ -246,7 +254,6 @@ function actualizarUIHeader() {
   const wb = document.getElementById('user-welcome-box'); if(wb) wb.style.display = 'flex'; 
 }
 
-// CORRECCIÓN COMPLETA DE PERFIL (ASIGNA ALTURA, EDAD Y GÉNERO)
 function actualizarUIPerfil() { 
   const cn = document.getElementById('profile-card-name'); if(cn) cn.innerText = userProfile.nickname.toUpperCase(); 
   const vp = document.getElementById('profile-val-peso'); if(vp) vp.innerText = `${userProfile.peso} kg`; 
@@ -312,7 +319,7 @@ function dibujarGraficoPerfil(historialPesos) {
   });
 }
 
-// --- LEADERBOARD COMPLETO (RESTAURADO) ---
+// --- LEADERBOARD COMPLETO ---
 const rangos = [ 
   { nombre: "Ashigaru", minRatio: 0, color: "#6b7c93" }, 
   { nombre: "Rōnin", minRatio: 1.5, color: "#ffaa00" }, 
@@ -382,7 +389,7 @@ async function cargarLeaderboard() {
 }
 document.getElementById('btn-refresh-leaderboard')?.addEventListener('click', cargarLeaderboard);
 
-// --- MÓDULO SOCIAL: AGREGAR Y CONSULTAR AMIGOS ---
+// --- MÓDULO SOCIAL Y SOLICITUDES DE AMISTAD ---
 function inyectarModuloSocial() {
   const tabProfile = document.getElementById('page-profile');
   if(!tabProfile || document.getElementById('social-friends-card')) return;
@@ -392,11 +399,17 @@ function inyectarModuloSocial() {
   socialCard.innerHTML = `
     <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
       <h4 style="font-size: 12px; color: #00e5ff; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 12px;">👥 Cofradía de Amigos (Social)</h4>
-      <div style="display:flex; gap:8px;">
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
         <input type="text" id="input-search-friend" class="iron-input-modern" placeholder="Apodo exacto del amigo..." style="font-size:12px; padding:8px 12px;">
         <button id="btn-search-friend" class="iron-btn-primary" style="width:auto; margin-top:0; padding:8px 15px; font-size:12px;">Buscar</button>
       </div>
-      <div id="friend-search-result" style="margin-top:12px;"></div>
+      <div id="friend-search-result" style="margin-bottom:15px;"></div>
+      
+      <h5 style="font-size: 11px; color: #ffaa00; text-transform: uppercase; font-weight: 800; margin-bottom: 8px;">📩 Solicitudes Pendientes</h5>
+      <div id="friend-requests-list" style="font-size:12px; color:#9ca3af;">Buscando solicitudes...</div>
+      
+      <h5 style="font-size: 11px; color: #00e5ff; text-transform: uppercase; font-weight: 800; margin: 15px 0 8px 0;">⚔️ Tus Amigos Conectados</h5>
+      <div id="my-friends-list" style="font-size:12px; color:#9ca3af;">No hay amigos en la cofradía aún.</div>
     </div>
   `;
   tabProfile.appendChild(socialCard);
@@ -411,24 +424,120 @@ function inyectarModuloSocial() {
       const q = query(collection(db, "users"), where("nickname_lower", "==", val));
       const snap = await getDocs(q);
       if(snap.empty) {
-        resBox.innerHTML = '<p style="font-size:11px; color:#ff3366;">❌ No se encontró ningún guerrero con ese apodo.</p>';
+        resBox.innerHTML = '<p style="font-size:11px; color:#ff3366;">❌ No se encontró ningún guerrero.</p>';
         return;
       }
+      const friendDocId = snap.docs[0].id;
       const friendData = snap.docs[0].data();
+
+      if(friendDocId === currentUser.uid) {
+        resBox.innerHTML = '<p style="font-size:11px; color:#ffaa00;">⚠️ ¡Ese eres tú mismo!</p>';
+        return;
+      }
+
       resBox.innerHTML = `
-        <div style="background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.2); padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.2); padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
           <div>
-            <b style="color:#fff; font-size:14px;">${friendData.nickname}</b><br>
-            <span style="font-size:10px; color:#ffaa00; font-weight:800;">Rango: ${friendData.currentRankName || 'Ashigaru'}</span>
+            <b style="color:#fff; font-size:13px;">${friendData.nickname}</b><br>
+            <span style="font-size:10px; color:#ffaa00;">Rango: ${friendData.currentRankName || 'Ashigaru'}</span>
           </div>
-          <button class="iron-btn-warning" style="width:auto; padding:6px 12px; font-size:11px;" onclick="showToast('🤝 Solicitud enviada a ${friendData.nickname}')">+ Conectar</button>
+          <button id="btn-send-req" class="iron-btn-warning" style="width:auto; padding:5px 10px; font-size:11px;">+ Enviar Solicitud</button>
         </div>
       `;
+
+      document.getElementById('btn-send-req').onclick = async () => {
+        // Crear documento de solicitud en subcolección de amigo
+        await addDoc(collection(db, "users", friendDocId, "friend_requests"), {
+          fromUid: currentUser.uid,
+          fromNickname: userProfile.nickname,
+          status: "pendiente",
+          timestamp: Date.now()
+        });
+        showToast("✅ Solicitud enviada con éxito.");
+        resBox.innerHTML = '';
+      };
+
     } catch(err) {
       resBox.innerHTML = '<p style="font-size:11px; color:#ff3366;">Error de conexión.</p>';
     }
   });
+
+  cargarSolicitudesYAmigos();
 }
+
+async function cargarSolicitudesYAmigos() {
+  if(!currentUser || !db) return;
+  const reqContainer = document.getElementById('friend-requests-list');
+  const friendsContainer = document.getElementById('my-friends-list');
+
+  // 1. Cargar Solicitudes Entrantes
+  const reqSnap = await getDocs(collection(db, "users", currentUser.uid, "friend_requests"));
+  let reqHtml = '';
+  reqSnap.forEach(d => {
+    let req = d.data();
+    if(req.status === 'pendiente') {
+      reqHtml += `
+        <div style="background:rgba(255,170,0,0.05); border:1px solid rgba(255,170,0,0.2); padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+          <span><b>${req.fromNickname}</b> quiere unirse a tu cofradía</span>
+          <div>
+            <button onclick="window.aceptarSolicitud('${d.id}', '${req.fromUid}', '${req.fromNickname}')" style="background:#00e5ff; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer;">Aceptar</button>
+          </div>
+        </div>
+      `;
+    }
+  });
+  if(reqContainer) reqContainer.innerHTML = reqHtml || 'No hay solicitudes pendientes.';
+
+  // 2. Cargar Amigos Aceptados
+  const friendsSnap = await getDocs(collection(db, "users", currentUser.uid, "friends"));
+  let friendHtml = '';
+  friendsSnap.forEach(d => {
+    let f = d.data();
+    friendHtml += `
+      <div style="background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.2); padding:8px; border-radius:6px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+        <span>⚔️ <b>${f.friendNickname}</b></span>
+        <button onclick="window.verPerfilAmigo('${f.friendUid}')" style="background:transparent; color:#00e5ff; border:1px solid #00e5ff; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">Ver Perfil</button>
+      </div>
+    `;
+  });
+  if(friendsContainer) friendsContainer.innerHTML = friendHtml || 'Aún no tienes amigos en la cofradía.';
+}
+
+window.aceptarSolicitud = async function(reqDocId, fromUid, fromNickname) {
+  // Añadir a amigos del usuario actual
+  await addDoc(collection(db, "users", currentUser.uid, "friends"), { friendUid: fromUid, friendNickname: fromNickname, timestamp: Date.now() });
+  // Añadir al usuario actual en la lista de amigos del solicitante
+  await addDoc(collection(db, "users", fromUid, "friends"), { friendUid: currentUser.uid, friendNickname: userProfile.nickname, timestamp: Date.now() });
+  // Borrar la solicitud
+  await deleteDoc(doc(db, "users", currentUser.uid, "friend_requests", reqDocId));
+  
+  showToast(`⚔️ ¡Ahora ${fromNickname} es parte de tu cofradía!`);
+  cargarHistorialYCheckins(currentUser.uid);
+};
+
+window.verPerfilAmigo = async function(friendUid) {
+  const docSnap = await getDoc(doc(db, "users", friendUid));
+  if(!docSnap.exists()) { showToast("⚠️ No se encontró al usuario."); return; }
+  const data = docSnap.data();
+
+  // Abrir un sheet o modal mostrando sus datos básicos y última rutina
+  const container = document.getElementById('sheet-workout');
+  if(!container) return;
+  container.innerHTML = `
+    <div style="padding:20px; text-align:center;">
+      <img src="${generarAvatarPorRango(data.nickname, data.currentRankName || 'Ashigaru')}" style="width:70px; height:70px; border-radius:50%; border:2px solid #00e5ff; margin-bottom:10px;">
+      <h3 style="color:#fff; font-weight:900; text-transform:uppercase;">${data.nickname}</h3>
+      <p style="color:#ffaa00; font-size:12px; font-weight:bold; margin-bottom:15px;">Rango: ${data.currentRankName || 'Ashigaru'}</p>
+      <div style="background:#111827; padding:12px; border-radius:8px; text-align:left; font-size:12px; color:#9ca3af;">
+        <p><b>Peso Actual:</b> ${data.peso || '--'} kg</p>
+        <p><b>Altura:</b> ${data.altura || '--'} cm</p>
+        <p><b>Meta:</b> ${data.metaObj === 300 ? 'Volumen' : 'Definición / Mantenimiento'}</p>
+      </div>
+      <button class="iron-btn-primary" onclick="window.closeSheet()" style="margin-top:20px;">Cerrar Expediente</button>
+    </div>
+  `;
+  window.openSheet('sheet-workout');
+};
 
 // --- MODO ENTRENAMIENTO EN VIVO ---
 let currentWorkoutRoutine = [];
@@ -542,7 +651,8 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async f
   if(validExercises > 0) { sessionCals = Math.round(sessionCals); totalQuemadas += sessionCals; await guardarEstadoNube(); actualizarDashboard(); showToast(`✅ Entrenamiento finalizado. 🔥 ~${sessionCals} kcal quemadas.`); } 
   else { showToast('⚠️ Entrenamiento descartado.'); }
   document.getElementById('workout-live-container').style.display = 'none'; document.getElementById('workout-generator-card').style.display = 'block';
-  document.getElementById('btn-start-workout').style.display = 'block'; document.getElementById('btn-finish-workout').style.display = 'none'; currentWorkoutRoutine = []; this.disabled = false; 
+  document.getElementById('btn-start-workout').style.display = 'block'; document.getElementById('btn-finish-workout').style.display = 'none';
+  currentWorkoutRoutine = []; this.disabled = false; 
 });
 
 // --- BUSCADOR INTELIGENTE PARA SERIES MANUALES ---
