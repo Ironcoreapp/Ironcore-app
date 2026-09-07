@@ -78,7 +78,7 @@ async function cargarDatosDesdeNube(uid) { if(!db) return; const docSnap = await
 function actualizarUIHeader() { document.getElementById('user-display-name').innerText = userProfile.nickname.toUpperCase(); const avatarHeader = document.getElementById('user-avatar'); avatarHeader.src = generarAvatarPorRango(userProfile.nickname, currentRankName); avatarHeader.style.display = 'inline-block'; document.getElementById('user-welcome-box').style.display = 'flex'; }
 function actualizarUIPerfil() { document.getElementById('profile-card-name').innerText = userProfile.nickname.toUpperCase(); document.getElementById('profile-val-peso').innerText = `${userProfile.peso} kg`; document.getElementById('profile-val-altura').innerText = `${userProfile.altura} cm`; document.getElementById('profile-val-edad').innerText = `${userProfile.edad} años`; document.getElementById('profile-val-genero').innerText = userProfile.genero === 'M' ? 'Hombre' : 'Mujer'; let labelMeta = "Mantenimiento"; if(userProfile.metaObj === -500) labelMeta = "Déficit Agresivo"; if(userProfile.metaObj === -300) labelMeta = "Definición"; if(userProfile.metaObj === 300) labelMeta = "Volumen"; document.getElementById('profile-card-goal').innerText = `Meta: ${labelMeta}`; document.getElementById('profile-card-avatar').src = generarAvatarPorRango(userProfile.nickname, currentRankName); }
 
-// --- BASES DE DATOS EXTERNAS (ALIMENTOS JSON Y EJERCICIOS CSV DIRECTO) ---
+// --- BASES DE DATOS EXTERNAS (ALIMENTOS JSON Y EJERCICIOS JSON DIRECTO EN ESPAÑOL) ---
 let oracleDB = []; 
 let exercisesDB = [];
 
@@ -89,71 +89,18 @@ async function inicializarBases() {
     if (resFood.ok) oracleDB = await resFood.json();
   } catch (error) { console.error("Error Alimentos JSON:", error); }
   
-  // 2. Cargar Ejercicios CSV Directo (Los 1.324 ejercicios)
+  // 2. Cargar Ejercicios JSON (Apuntando directamente al archivo ejercicios.json en español)
   try {
-    const resEx = await fetch('exercises.csv?v=' + new Date().getTime());
-    if (!resEx.ok) throw new Error('No se pudo cargar exercises.csv');
-    const csvText = await resEx.text();
-    exercisesDB = parseCSVToExercises(csvText);
-    console.log(`⚔️ Base de Combate sincronizada con ${exercisesDB.length} ejercicios desde el CSV.`);
+    const resEx = await fetch('ejercicios.json?v=' + new Date().getTime());
+    if (!resEx.ok) throw new Error('No se pudo cargar ejercicios.json');
+    exercisesDB = await resEx.json();
+    console.log(`⚔️ Base de Combate sincronizada con ${exercisesDB.length} ejercicios desde ejercicios.json.`);
   } catch (error) { 
-    console.error("Error cargando CSV, usando respaldo local:", error);
+    console.error("Error cargando ejercicios.json:", error);
+    showToast("⚠️ Error al cargar el catálogo de ejercicios en español.");
   }
 }
 window.addEventListener('DOMContentLoaded', inicializarBases);
-
-// --- CONVERSOR NATIVO DE CSV A OBJETOS DE ENTRENAMIENTO ---
-function parseCSVToExercises(text) {
-  const lines = text.split('\n');
-  if(lines.length < 2) return [];
-  
-  const headers = lines[0].split(',').map(h => h.trim());
-  let results = [];
-
-  const bodyMap = { 'waist': 'core', 'upper legs': 'piernas', 'back': 'espalda', 'lower legs': 'piernas', 'chest': 'pecho', 'upper arms': 'brazos', 'shoulders': 'hombros', 'lower arms': 'brazos', 'neck': 'hombros', 'cardio': 'cardio' };
-  const equipMap = { 'body weight': ['corporal'], 'cable': ['gimnasio', 'polea'], 'leverage machine': ['gimnasio', 'maquina'], 'assisted': ['gimnasio', 'maquina'], 'barbell': ['gimnasio', 'barra'], 'dumbbell': ['gimnasio', 'mancuernas'], 'medicine ball': ['gimnasio'], 'stability ball': ['gimnasio'], 'band': ['gimnasio'], 'rope': ['gimnasio', 'polea'], 'smith machine': ['gimnasio', 'maquina'], 'ez barbell': ['gimnasio', 'barra'], 'kettlebell': ['gimnasio', 'mancuernas'] };
-
-  for(let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if(!line) continue;
-    
-    // Parseo simple separado por comas respetando comillas básicas del CSV
-    const row = [];
-    let inQuotes = false; let current = '';
-    for(let char of line) {
-      if(char === '"') { inQuotes = !inQuotes; }
-      else if(char === ',' && !inQuotes) { row.push(current); current = ''; }
-      else { current += char; }
-    }
-    row.push(current);
-
-    if(row.length >= 5) {
-      let bodyPart = (row[0] || '').trim().toLowerCase();
-      let equipment = (row[1] || '').trim().toLowerCase();
-      let exId = parseInt(row[2]) || i;
-      let name = (row[3] || 'Ejercicio').trim().replace(/^"|"$/g, '');
-      let target = (row[4] || 'General').trim().replace(/^"|"$/g, '');
-      let instruction = row[7] ? row[7].trim().replace(/^"|"$/g, '') : "Mantén la técnica estricta.";
-
-      let grupo = bodyMap[bodyPart] || 'general';
-      let equip = equipMap[equipment] || ['gimnasio'];
-      let formattedName = name.charAt(0).toUpperCase() + name.slice(1);
-      let imgText = formattedName.replace(/ /g, '+');
-
-      results.push({
-        id: exId,
-        nombre: formattedName,
-        grupo: grupo,
-        musculoPrincipal: target.charAt(0).toUpperCase() + target.slice(1),
-        equipamiento: equip,
-        nivel: "intermedio",
-        imagen: `https://dummyimage.com/400x400/141a26/00e5ff&text=${imgText}`,
-        tips: instruction !== "nan" ? instruction : "Controla la fase excéntrica del movimiento."
-      });
-    }
-  }
-  return results;
-}
 
 // --- ORÁCULO DE NUTRICIÓN (PREVIO) ---
 let weeklyPlan = []; let selectedDayIndex = 0; let activeAllergies = [];
@@ -194,7 +141,7 @@ function recalcularMacros() { if(currentSearchFoodBase) { let q = parseFloat(doc
 document.getElementById('btn-confirm-food-final')?.addEventListener('click', async () => { let mt = document.getElementById('food-meal-time').value; let n = document.getElementById('food-selected-name').innerText || "Alimento"; let c = parseInt(document.getElementById('edit-cal').value)||0; let p = parseInt(document.getElementById('edit-prot').value)||0; let cb = parseInt(document.getElementById('edit-carb').value)||0; let g = parseInt(document.getElementById('edit-gras').value)||0; let qtyVal = document.getElementById('edit-qty').value; let unitSelect = document.getElementById('edit-unit'); let unitText = unitSelect.options[unitSelect.selectedIndex].text.split(' ')[0]; if(!c && !p) { showToast('⚠️ Ingresa cantidad.'); return; } let nombreFinalRegistro = `${n} (${qtyVal} ${unitText})`; await registrarComidaNube(c, p, cb, g, `[${mt}] ${nombreFinalRegistro}`); window.closeSheet(); showToast(`✅ Registrado.`); });
 
 // ============================================================================
-// --- ORÁCULO DE COMBATE Y MODO ENTRENAMIENTO EN VIVO (NUEVO) ---
+// --- ORÁCULO DE COMBATE Y MODO ENTRENAMIENTO EN VIVO ---
 // ============================================================================
 let currentWorkoutRoutine = [];
 let workoutSwapTargetIndex = -1;
@@ -206,14 +153,12 @@ document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
   const focus = document.getElementById('train-focus').value;
   currentWorkoutRoutine = [];
 
-  // Función interna para sacar un ejercicio aleatorio que cumpla grupo y equipamiento
   const getRandomEx = (grupoReq) => {
     const valid = exercisesDB.filter(ex => ex.grupo === grupoReq && ex.equipamiento.includes(equip));
     if(valid.length === 0) return null;
     return valid[Math.floor(Math.random() * valid.length)];
   };
 
-  // Lógica de armado según Foco
   let structure = [];
   if(focus === "fullbody") structure = ["piernas", "pecho", "espalda", "hombros", "core"];
   if(focus === "superior") structure = ["pecho", "espalda", "hombros", "brazos", "core"];
@@ -221,7 +166,6 @@ document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
 
   structure.forEach(g => {
     let ex = getRandomEx(g);
-    // Para evitar repetidos en "piernas" si solo hay 1 en la base de datos
     if(ex && !currentWorkoutRoutine.find(e => e.id === ex.id)) {
       currentWorkoutRoutine.push(ex);
     }
@@ -242,7 +186,6 @@ function renderizarRutina(isLiveMode) {
   container.innerHTML = '';
   
   currentWorkoutRoutine.forEach((ex, idx) => {
-    // Si estamos en vivo, ocultamos el botón de cambiar y mostramos los inputs
     const displaySwap = isLiveMode ? 'none' : 'block';
     const displayInputs = isLiveMode ? 'grid' : 'none';
     
@@ -253,13 +196,12 @@ function renderizarRutina(isLiveMode) {
           <button class="btn-swap" style="display:${displaySwap};" onclick="window.abrirMenuReemplazoEj(${idx})">🔄 Cambiar</button>
         </div>
         <div style="display:flex; gap:12px; align-items:center;">
-          <img src="${ex.imagen}" style="width:70px; height:70px; border-radius:10px; object-fit:cover; border:1px solid rgba(0,229,255,0.3);">
+          <img src="${ex.imagen}" style="width:70px; height:70px; border-radius:10px; object-fit:cover; border:1px solid rgba(0,229,255,0.3);" onerror="this.src='https://dummyimage.com/400x400/141a26/00e5ff&text=IronCore';">
           <div>
             <p style="font-size:11px; color:var(--primary); margin:0 0 5px 0; font-weight:800; text-transform:uppercase;">🎯 ${ex.musculoPrincipal}</p>
             <p style="font-size:11px; color:#a0aec0; margin:0; line-height:1.4;">💡 ${ex.tips}</p>
           </div>
         </div>
-        <!-- INPUTS DEL MODO EN VIVO -->
         <div class="workout-inputs" style="display:${displayInputs};">
           <div><label style="font-size:9px;">Series (Sets)</label><input type="number" class="neon-input ex-sets" placeholder="Ej: 4"></div>
           <div><label style="font-size:9px;">Repes</label><input type="number" class="neon-input ex-reps" placeholder="Ej: 10"></div>
@@ -270,14 +212,12 @@ function renderizarRutina(isLiveMode) {
   });
 }
 
-// Reemplazar ejercicio específico
 window.abrirMenuReemplazoEj = function(index) {
   workoutSwapTargetIndex = index;
   const currentEx = currentWorkoutRoutine[index];
   const equip = document.getElementById('train-equip').value;
   
   const alternativas = exercisesDB.filter(e => e.grupo === currentEx.grupo && e.equipamiento.includes(equip) && e.id !== currentEx.id);
-  
   const listContainer = document.getElementById('sheet-swap-ex-list');
   listContainer.innerHTML = '';
   
@@ -307,15 +247,13 @@ window.confirmarReemplazoEj = function(encodedData) {
   }
 };
 
-// Activar Modo Foco
 document.getElementById('btn-start-workout')?.addEventListener('click', () => {
-  renderizarRutina(true); // Redibuja con inputs visibles y botones ocultos
+  renderizarRutina(true);
   document.getElementById('btn-start-workout').style.display = 'none';
   document.getElementById('btn-finish-workout').style.display = 'block';
   showToast('🔥 ¡A darlo todo, Guerrero!');
 });
 
-// Descartar Rutina
 document.getElementById('btn-cancel-workout')?.addEventListener('click', () => {
   document.getElementById('workout-live-container').style.display = 'none';
   document.getElementById('workout-generator-card').style.display = 'block';
@@ -324,7 +262,6 @@ document.getElementById('btn-cancel-workout')?.addEventListener('click', () => {
   currentWorkoutRoutine = [];
 });
 
-// Terminar y Guardar
 document.getElementById('btn-finish-workout')?.addEventListener('click', async () => {
   const cards = document.querySelectorAll('.workout-card');
   let validExercises = 0;
@@ -335,9 +272,7 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async (
     const reps = card.querySelector('.ex-reps').value;
     const weight = card.querySelector('.ex-weight').value;
 
-    // Solo guarda si el usuario anotó al menos los Sets
     if(sets && sets > 0) {
-      // Guardamos al estilo de tu base actual: "Nombre", "Series x Reps", "Peso"
       let setsStr = `${sets} x ${reps || 'Max'}`;
       await registrarEntrenoNube(name, setsStr, weight || 0, "N/A");
       validExercises++;
@@ -350,7 +285,6 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async (
     showToast('⚠️ No registraste series. Entrenamiento descartado.');
   }
 
-  // Reset UI
   document.getElementById('workout-live-container').style.display = 'none';
   document.getElementById('workout-generator-card').style.display = 'block';
   document.getElementById('btn-start-workout').style.display = 'block';
@@ -358,10 +292,8 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async (
   currentWorkoutRoutine = [];
 });
 
-// Guardado manual estándar (el botón de abajo)
 document.getElementById('btn-registrar-serie')?.addEventListener('click', () => { document.getElementById('work-name').value = ''; document.getElementById('work-sets').value = ''; document.getElementById('work-weight').value = ''; window.openSheet('sheet-workout'); });
 document.getElementById('btn-confirm-workout')?.addEventListener('click', async () => { const n = document.getElementById('work-name').value; const s = document.getElementById('work-sets').value; const w = document.getElementById('work-weight').value; const r = document.getElementById('work-rpe').value || '8'; if(!n || !s) { showToast('⚠️ Completa los campos.'); return; } await registrarEntrenoNube(n, s, w || 0, r); window.closeSheet(); showToast('💪 Ejercicio guardado.'); });
-
 
 // --- PERSISTENCIA Y DASHBOARD ---
 async function cargarRegistrosDelDia(uid) {
