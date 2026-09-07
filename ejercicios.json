@@ -148,5 +148,55 @@
     "nivel": "principiante",
     "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Triceps+Pushdown",
     "tips": "Extiende completamente los brazos abajo sin mover los codos."
+  },
+  {
+    "id": 16,
+    "nombre": "Dumbbell Lateral Raise",
+    "grupo": "hombros",
+    "musculoPrincipal": "Deltoides Lateral",
+    "equipamiento": ["gimnasio", "mancuernas"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Dumbbell+Lateral+Raise",
+    "tips": "Sube de forma controlada guiando el movimiento con los codos."
+  },
+  {
+    "id": 17,
+    "nombre": "Incline Dumbbell Press",
+    "grupo": "pecho",
+    "musculoPrincipal": "Pectoral Superior",
+    "equipamiento": ["gimnasio", "mancuernas"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Incline+Dumbbell+Press",
+    "tips": "Alinea el banco a unos 30-45 grados para reclutar las fibras superiores."
+  },
+  {
+    "id": 18,
+    "nombre": "Romanian Deadlift",
+    "grupo": "piernas",
+    "musculoPrincipal": "Isquiotibiales",
+    "equipamiento": ["gimnasio", "barra", "mancuernas"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Romanian+Deadlift",
+    "tips": "Flexiona levemente las rodillas y lleva la cadera hacia atrás sintiendo el estiramiento."
+  },
+  {
+    "id": 19,
+    "nombre": "Plank",
+    "grupo": "core",
+    "musculoPrincipal": "Core / Abdomen",
+    "equipamiento": ["corporal"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Plank",
+    "tips": "Aprieta glúteos y abdomen para evitar que la cadera caiga."
+  },
+  {
+    "id": 20,
+    "nombre": "Dumbbell Lunge",
+    "grupo": "piernas",
+    "musculoPrincipal": "Cuádriceps / Glúteos",
+    "equipamiento": ["gimnasio", "mancuernas"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Dumbbell+Lunge",
+    "tips": "Da un paso amplio y baja la rodilla trasera casi rozando el suelo."
   }
 ]
