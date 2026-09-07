@@ -1,5 +1,5 @@
 // ============================================================================
-// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM, PESTAÑA SOCIAL Y PRE-ALFA ---
+// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM, DASHBOARD Y RED SOCIAL ---
 // ============================================================================
 const customCSS = `
   header, .top-header, #main-header {
@@ -51,53 +51,20 @@ const customCSS = `
 const styleEl = document.createElement('style'); styleEl.innerHTML = customCSS; document.head.appendChild(styleEl);
 
 document.addEventListener('DOMContentLoaded', () => {
-  const allElements = document.querySelectorAll('span, p, div, h1, h2, h3, h4, h5, h6');
-  allElements.forEach(el => {
-    if(el.childNodes.length === 1 && el.innerText && el.innerText.toUpperCase().includes('ELITE PERFORMANCE SYSTEM')) { 
-      el.innerHTML = '⚡ IRONCORE // PRE-ALFA TESTNET (ENV)';
-      el.style.color = '#ffaa00';
-      el.style.fontSize = '10px';
-      el.style.letterSpacing = '1px';
-    }
-  });
-  
   const rankElem = document.getElementById('header-rank'); const streakElem = document.getElementById('header-streak');
   if(rankElem && streakElem) {
     const parent = rankElem.parentElement; parent.classList.add('user-badges-row');
     rankElem.classList.add('user-badge-mini'); streakElem.classList.add('user-badge-mini');
   }
 
-  // Creación automática de la Pestaña Social en la barra de navegación inferior
-  const navContainer = document.querySelector('.bottom-nav') || document.querySelector('nav');
-  if(navContainer && !document.getElementById('nav-social-tab')) {
-    const socialNavBtn = document.createElement('button');
-    socialNavBtn.id = 'nav-social-tab';
-    socialNavBtn.className = 'nav-item';
-    socialNavBtn.setAttribute('data-target', 'page-social');
-    socialNavBtn.innerHTML = `<span>👥</span><span style="font-size:9px;">Cofradía</span>`;
-    navContainer.appendChild(socialNavBtn);
-  }
-
-  // Creación del contenedor de la página social
-  if(!document.getElementById('page-social')) {
-    const mainContainer = document.querySelector('main') || document.body;
-    const socialPage = document.createElement('div');
-    socialPage.id = 'page-social';
-    socialPage.className = 'page';
-    socialPage.style.display = 'none';
-    socialPage.innerHTML = `
-      <div style="padding: 20px; max-width: 600px; margin: 0 auto; padding-bottom: 80px;">
-        <h2 style="color:#00e5ff; font-weight:900; text-transform:uppercase; margin-bottom:15px; font-size:18px;">Cofradía & Muro Social</h2>
-        <div id="social-tab-content-root"></div>
-      </div>
-    `;
-    mainContainer.appendChild(socialPage);
-
-    // Evento de navegación
-    document.getElementById('nav-social-tab')?.addEventListener('click', () => {
+  // Sincronizar el botón de la barra inferior con la pestaña social inyectada
+  const socialNavBtn = document.getElementById('nav-social-tab');
+  const socialPage = document.getElementById('page-social');
+  if(socialNavBtn && socialPage) {
+    socialNavBtn.addEventListener('click', () => {
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
-      document.getElementById('nav-social-tab').classList.add('active');
+      socialNavBtn.classList.add('active');
       socialPage.classList.add('active');
       socialPage.style.display = 'block';
       cargarModuloSocialCompleto();
@@ -415,7 +382,6 @@ async function cargarLeaderboard() {
 }
 document.getElementById('btn-refresh-leaderboard')?.addEventListener('click', cargarLeaderboard);
 
-// --- MÓDULO SOCIAL DEDICADO Y PRIVADO ---
 function cargarModuloSocialCompleto() {
   const root = document.getElementById('social-tab-content-root');
   if(!root) return;
