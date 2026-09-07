@@ -1,5 +1,5 @@
 // ============================================================================
-// --- MOTOR PRINCIPAL DE IRONCORE (PRE-ALFA TESTNET - CÓDIGO MAESTRO UNIFICADO) ---
+// --- MOTOR PRINCIPAL DE IRONCORE (PRE-ALFA TESTNET - CORRECCIÓN CALORÍAS Y GRÁFICO) ---
 // ============================================================================
 const customCSS = `
   header, .top-header, #main-header {
@@ -19,6 +19,7 @@ const customCSS = `
   .stat-title { font-size: 10px; color: #9ca3af; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
   .stat-value { font-size: 24px; font-weight: 900; color: #fff; }
   .stat-value.primary { color: #00e5ff; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
+  .stat-value.danger { color: #ff3366; }
 
   .iron-btn-primary { width: 100%; padding: 14px; margin-top: 12px; background: linear-gradient(135deg, #00e5ff 0%, #007acc 100%); color: #fff; font-size: 14px; font-weight: 900; border: none; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,229,255,0.4); text-transform: uppercase; cursor: pointer; letter-spacing: 1px; transition: all 0.2s ease; }
   .iron-btn-primary:active { transform: scale(0.98); }
@@ -65,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const tgt = document.getElementById(btn.getAttribute('data-target'));
       if(tgt) { tgt.classList.add('active'); tgt.style.display = 'block'; }
       if(btn.getAttribute('data-target') === 'page-social') {
-        cargarModuloSocialCompleto();
+        window.cargarModuloSocialCompleto();
       }
     });
   });
@@ -635,6 +636,21 @@ document.getElementById('btn-confirm-food-final')?.addEventListener('click', asy
   this.disabled = false;
 });
 
+// --- PERFIL ---
+function actualizarUIPerfil() { 
+  const cn = document.getElementById('profile-card-name'); if(cn) cn.innerText = userProfile.nickname.toUpperCase(); 
+  const vp = document.getElementById('profile-val-peso'); if(vp) vp.innerText = `${userProfile.peso} kg`; 
+  const va = document.getElementById('profile-val-altura'); if(va) va.innerText = `${userProfile.altura} cm`; 
+  const ve = document.getElementById('profile-val-edad'); if(ve) ve.innerText = `${userProfile.edad} años`; 
+  const vg = document.getElementById('profile-val-genero'); if(vg) vg.innerText = userProfile.genero === 'M' ? 'Hombre' : 'Mujer'; 
+  let labelMeta = "Mantenimiento"; 
+  if(userProfile.metaObj === -500) labelMeta = "Déficit Agresivo"; 
+  if(userProfile.metaObj === -300) labelMeta = "Definición"; 
+  if(userProfile.metaObj === 300) labelMeta = "Volumen"; 
+  const cg = document.getElementById('profile-card-goal'); if(cg) cg.innerText = `Meta: ${labelMeta}`; 
+  const ca = document.getElementById('profile-card-avatar'); if(ca) ca.src = generarAvatarPorRango(userProfile.nickname, currentRankName); 
+}
+
 // --- MÓDULO SOCIAL Y COFRADÍA COMPLETO ---
 function cargarModuloSocialCompleto() {
   const root = document.getElementById('social-tab-content-root');
@@ -1058,8 +1074,15 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async f
     }
   }
   for (let idx in activeTimers) clearInterval(activeTimers[idx].interval); activeTimers = {};
-  if(validExercises > 0) { sessionCals = Math.round(sessionCals); totalQuemadas += sessionCals; await guardarEstadoNube(); actualizarDashboard(); showToast(`✅ Entrenamiento finalizado. 🔥 ~${sessionCals} kcal.`); } 
-  else { showToast('⚠️ Sin series registradas.'); }
+  if(validExercises > 0) { 
+    sessionCals = Math.round(sessionCals); 
+    totalQuemadas += sessionCals; 
+    await guardarEstadoNube(); 
+    actualizarDashboard(); 
+    showToast(`✅ Entrenamiento finalizado. 🔥 ~${sessionCals} kcal.`); 
+  } else { 
+    showToast('⚠️ Sin series registradas.'); 
+  }
   document.getElementById('workout-live-container').style.display = 'none'; 
   document.getElementById('workout-generator-card').style.display = 'block';
   document.getElementById('btn-start-workout').style.display = 'block'; 
@@ -1147,7 +1170,7 @@ window.abrirBuscadorManual = function() {
 
 document.getElementById('btn-registrar-serie')?.addEventListener('click', window.abrirBuscadorManual);
 
-// --- DASHBOARD GRID ---
+// --- DASHBOARD GRID CORREGIDO (SIN 450 KCAL FANTASMA) ---
 function actualizarDashboard() { 
   const dashboardContainer = document.getElementById('dashboard-tab');
   if(!dashboardContainer) return;
@@ -1235,8 +1258,17 @@ async function registrarComidaNube(cal, prot, carb, gras, nombreDisplay) {
 }
 
 async function registrarEntrenoNube(nombre, sets, weight, rpe, cals = 0) { 
-  let docId = null; if(currentUser && db) { const d = await addDoc(collection(db, "users", currentUser.uid, "days", getTodayKey(), "workouts"), { nombre, sets, weight, rpe, cals, timestamp: Date.now() }); docId = d.id; await addDoc(collection(db, "users", currentUser.uid, "history"), { tipo: 'entreno', nombre: nombre.toUpperCase(), detalle: `${sets} | 🔥 ${cals} kcal`, date: getTodayKey(), timestamp: Date.now() }); } 
-  renderizarEntrenoEnUI(nombre, sets, weight, rpe, cals, docId); if(currentUser) cargarHistorialYCheckins(currentUser.uid);
+  totalQuemadas += cals; // Suma directa al total quemado del día
+  guardarEstadoNube(); 
+  actualizarDashboard();
+  let docId = null; 
+  if(currentUser && db) { 
+    const d = await addDoc(collection(db, "users", currentUser.uid, "days", getTodayKey(), "workouts"), { nombre, sets, weight, rpe, cals, timestamp: Date.now() }); 
+    docId = d.id; 
+    await addDoc(collection(db, "users", currentUser.uid, "history"), { tipo: 'entreno', nombre: nombre.toUpperCase(), detalle: `${sets} | 🔥 ${cals} kcal`, date: getTodayKey(), timestamp: Date.now() }); 
+  } 
+  renderizarEntrenoEnUI(nombre, sets, weight, rpe, cals, docId); 
+  if(currentUser) cargarHistorialYCheckins(currentUser.uid);
 }
 
 function iniciarSakuraBackground() { const c = document.getElementById('sakura-bg'); if(!c) return; c.innerHTML = ''; for(let i=0; i<15; i++) { const p = document.createElement('div'); p.className = 'sakura-petal'; const s = Math.random() * 8 + 4; p.style.width = `${s}px`; p.style.height = `${s*1.4}px`; p.style.left = `${Math.random()*100}vw`; p.style.animationDuration = `${Math.random()*10+8}s`; p.style.animationDelay = `${Math.random()*5}s`; c.appendChild(p); } }
