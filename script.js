@@ -98,7 +98,7 @@ window.finalizarOnboarding = async function() {
   metaGrasa = Math.round((metaCalorias * 0.25) / 9); metaCarb = Math.round((metaCalorias - ((metaProt * 4) + (metaGrasa * 9))) / 4);
 
   await guardarEstadoNube(); actualizarUIHeader(); actualizarUIPerfil(); actualizarDashboard(); actualizarGraficoProyeccion(userProfile.peso, userProfile.metaObj);
-  document.getElementById('oracle-target-cals').innerText = metaCalorias; // Act Oraculo
+  actualizarLabelMetaIA(); // Act Oraculo
   
   obScreen.style.display = 'none'; showToast(`✅ Credencial Sincronizada`);
   document.querySelector('[data-target="page-dashboard"]').click();
@@ -120,7 +120,7 @@ async function cargarDatosDesdeNube(uid) {
     metaCalorias = d.metaCal || 2500; metaProt = d.metaProt || 165; metaCarb = d.metaCarb || 275; metaGrasa = d.metaGrasa || 69; userStreak = d.streak || 1;
     userProfile.perfilCompleto = d.perfilCompleto || false; userProfile.nickname = d.nickname || ""; userProfile.genero = d.genero || "M"; userProfile.edad = d.edad || 25; userProfile.peso = d.peso || 75; userProfile.altura = d.altura || 175; userProfile.metaObj = d.metaObj !== undefined ? d.metaObj : 0; userProfile.actividad = d.actividad || 1.55;
   }
-  if(!userProfile.perfilCompleto) { window.abrirOnboarding(false); } else { actualizarUIHeader(); actualizarUIPerfil(); document.getElementById('oracle-target-cals').innerText = metaCalorias; }
+  if(!userProfile.perfilCompleto) { window.abrirOnboarding(false); } else { actualizarUIHeader(); actualizarUIPerfil(); actualizarLabelMetaIA(); }
   iniciarSakuraBackground(); verificarCambioDeDia(); actualizarDashboard(); actualizarAguaUI(); await cargarRegistrosDelDia(uid); actualizarGraficoProyeccion(userProfile.peso, userProfile.metaObj);
 }
 
@@ -138,44 +138,26 @@ function actualizarUIPerfil() {
   if(currentUser && currentUser.photoURL) document.getElementById('profile-card-avatar').src = currentUser.photoURL;
 }
 
-// --- EL ORÁCULO NUTRICIONAL (IA CLÍNICA Y BASE DE DATOS) ---
+// --- EL ORÁCULO NUTRICIONAL (MOTOR CON JSON EXTERNO) ---
 
-// Base de datos inteligente: Note los tags "isDense", "isVolume" y "glutenFree"
-const oracleDB = [
-  // 🌅 DESAYUNOS
-  { id: 1, tipo: 'desayuno', dietas: ['normal', 'lowcarb', 'vegetariano'], name: 'Huevos Revueltos con Palta', calBase: 400, prot: 24, carb: 15, gras: 28, glutenFree: true, isVolume: true, isDense: false,
-    ingredientes: [ { nombre: 'Huevos enteros', baseQty: 3, unidad: 'unidades' }, { nombre: 'Palta Hass', baseQty: 50, unidad: 'g' }, { nombre: 'Pan sin gluten / Arepa', baseQty: 1, unidad: 'porción' } ] },
-  { id: 2, tipo: 'desayuno', dietas: ['normal', 'vegetariano'], name: 'Avena Proteica Densidad', calBase: 500, prot: 30, carb: 65, gras: 12, glutenFree: false, isVolume: false, isDense: true,
-    ingredientes: [ { nombre: 'Avena tradicional', baseQty: 80, unidad: 'g' }, { nombre: 'Proteína Whey', baseQty: 1, unidad: 'scoop' }, { nombre: 'Mantequilla de maní', baseQty: 15, unidad: 'g' } ] },
-  { id: 3, tipo: 'desayuno', dietas: ['vegano', 'lowcarb'], name: 'Tofu Scramble', calBase: 350, prot: 25, carb: 12, gras: 20, glutenFree: true, isVolume: true, isDense: false,
-    ingredientes: [ { nombre: 'Tofu firme', baseQty: 150, unidad: 'g' }, { nombre: 'Espinaca fresca', baseQty: 100, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 10, unidad: 'ml' } ] },
-  
-  // 🍽️ ALMUERZOS
-  { id: 4, tipo: 'almuerzo', dietas: ['normal'], name: 'Pollo y Arroz Clásico', calBase: 600, prot: 55, carb: 70, gras: 10, glutenFree: true, isVolume: false, isDense: true,
-    ingredientes: [ { nombre: 'Pechuga de pollo magra', baseQty: 200, unidad: 'g' }, { nombre: 'Arroz blanco crudo', baseQty: 80, unidad: 'g' }, { nombre: 'Brócoli', baseQty: 100, unidad: 'g' } ] },
-  { id: 5, tipo: 'almuerzo', dietas: ['normal'], name: 'Pasta Boloñesa de Volumen', calBase: 800, prot: 50, carb: 100, gras: 20, glutenFree: false, isVolume: false, isDense: true,
-    ingredientes: [ { nombre: 'Fideos / Pasta seca', baseQty: 120, unidad: 'g' }, { nombre: 'Carne molida magra', baseQty: 180, unidad: 'g' }, { nombre: 'Salsa de tomate natural', baseQty: 100, unidad: 'ml' } ] },
-  { id: 6, tipo: 'almuerzo', dietas: ['normal', 'lowcarb'], name: 'Pescado Blanco con Ensalada Gigante', calBase: 400, prot: 45, carb: 10, gras: 15, glutenFree: true, isVolume: true, isDense: false,
-    ingredientes: [ { nombre: 'Pescado blanco (Merluza/Reineta)', baseQty: 250, unidad: 'g' }, { nombre: 'Mix de lechuga y pepino', baseQty: 200, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 10, unidad: 'ml' } ] },
-  { id: 7, tipo: 'almuerzo', dietas: ['vegano', 'vegetariano'], name: 'Guiso de Lentejas y Quinoa', calBase: 600, prot: 35, carb: 90, gras: 12, glutenFree: true, isVolume: true, isDense: false,
-    ingredientes: [ { nombre: 'Lentejas crudas', baseQty: 80, unidad: 'g' }, { nombre: 'Quinoa cruda', baseQty: 50, unidad: 'g' }, { nombre: 'Zanahoria', baseQty: 50, unidad: 'g' } ] },
+let oracleDB = []; // Inicia vacío, se llenará desde alimentos.json
 
-  // 🌙 CENAS
-  { id: 8, tipo: 'cena', dietas: ['normal', 'lowcarb'], name: 'Filete Magro y Verduras Verdes', calBase: 450, prot: 50, carb: 10, gras: 20, glutenFree: true, isVolume: true, isDense: false,
-    ingredientes: [ { nombre: 'Posta rosada o filete magro', baseQty: 180, unidad: 'g' }, { nombre: 'Espinaca y lechuga', baseQty: 150, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 10, unidad: 'ml' } ] },
-  { id: 9, tipo: 'cena', dietas: ['normal'], name: 'Fajitas de Pollo', calBase: 550, prot: 45, carb: 50, gras: 15, glutenFree: false, isVolume: false, isDense: true,
-    ingredientes: [ { nombre: 'Pechuga en tiras', baseQty: 180, unidad: 'g' }, { nombre: 'Tortillas de trigo', baseQty: 2, unidad: 'unidades' }, { nombre: 'Palta Hass', baseQty: 40, unidad: 'g' } ] },
-  { id: 10, tipo: 'cena', dietas: ['keto'], name: 'Omelette Relleno de Queso', calBase: 500, prot: 35, carb: 4, gras: 39, glutenFree: true, isVolume: false, isDense: true,
-    ingredientes: [ { nombre: 'Huevos enteros', baseQty: 3, unidad: 'unidades' }, { nombre: 'Queso mantecoso/gauda', baseQty: 60, unidad: 'g' } ] },
+// Descargar la base de datos externa al iniciar
+async function inicializarOraculo() {
+  try {
+    // Busca el archivo alimentos.json en el mismo directorio de GitHub
+    const respuesta = await fetch('alimentos.json');
+    if (!respuesta.ok) throw new Error('No se pudo cargar la base de datos nutricional.');
+    oracleDB = await respuesta.json();
+    console.log(`🔮 Oráculo inicializado con ${oracleDB.length} recetas desde archivo JSON.`);
+  } catch (error) {
+    console.error("Error al cargar alimentos.json:", error);
+    showToast("⚠️ Fallo en la red de datos del Oráculo. Verifica que alimentos.json esté subido.");
+  }
+}
 
-  // 🍎 SNACKS
-  { id: 11, tipo: 'snack', dietas: ['normal', 'vegetariano', 'lowcarb'], name: 'Batido Proteico Cero Carbos', calBase: 200, prot: 30, carb: 3, gras: 2, glutenFree: true, isVolume: true, isDense: false,
-    ingredientes: [ { nombre: 'Proteína Whey Isolate', baseQty: 1.5, unidad: 'scoops' }, { nombre: 'Agua fría', baseQty: 300, unidad: 'ml' } ] },
-  { id: 12, tipo: 'snack', dietas: ['normal', 'vegetariano'], name: 'Snack de Volumen: Nueces y Plátano', calBase: 400, prot: 10, carb: 40, gras: 25, glutenFree: true, isVolume: false, isDense: true,
-    ingredientes: [ { nombre: 'Nueces o Almendras', baseQty: 40, unidad: 'g' }, { nombre: 'Plátano', baseQty: 1, unidad: 'unidades' } ] },
-  { id: 13, tipo: 'snack', dietas: ['vegano'], name: 'Galletas de Arroz y Hummus', calBase: 250, prot: 8, carb: 35, gras: 8, glutenFree: true, isVolume: true, isDense: false,
-    ingredientes: [ { nombre: 'Galletas de arroz inflado', baseQty: 3, unidad: 'unidades' }, { nombre: 'Hummus de garbanzo', baseQty: 40, unidad: 'g' } ] }
-];
+// Llamar a la inicialización al cargar la app
+window.addEventListener('DOMContentLoaded', inicializarOraculo);
 
 let weeklyPlan = [];
 let currentDietType = 'normal';
@@ -183,21 +165,24 @@ let isCeliac = false;
 let currentAllergies = [];
 let selectedDayIndex = 0;
 
-// Actualizar UI para mostrar a la IA la meta del usuario
 function actualizarLabelMetaIA() {
   let label = "Mantenimiento";
   if(userProfile.metaObj < 0) label = "Déficit Agresivo / Definición (Prioridad: Saciedad)";
-  if(userProfile.metaObj > 0) label = "Volumen / Hipertrofia (Prioridad: Densidad Energética)";
+  if(userProfile.metaObj > 0) label = "Volumen / Hipertrofia (Prioridad: Densidad)";
   const metaLabel = document.getElementById('oracle-target-goal');
   if(metaLabel) metaLabel.innerText = label;
+  const calsLabel = document.getElementById('oracle-target-cals');
+  if(calsLabel) calsLabel.innerText = metaCalorias;
 }
-// Asegúrate de llamar a esta función cuando cargas el perfil en cargarDatosDesdeNube()
-setTimeout(actualizarLabelMetaIA, 2000);
 
 document.getElementById('btn-generar-plan')?.addEventListener('click', () => {
+  if (oracleDB.length === 0) {
+    showToast("⚠️ El Oráculo sigue sincronizando la base de datos JSON. Espera un segundo.");
+    return;
+  }
+  
   currentDietType = document.getElementById('oracle-diet-type').value;
   isCeliac = document.getElementById('oracle-celiac').checked;
-  
   let rawAlergias = document.getElementById('oracle-allergies').value.toLowerCase();
   currentAllergies = rawAlergias.split(',').map(a => a.trim()).filter(a => a !== "");
   
@@ -205,7 +190,7 @@ document.getElementById('btn-generar-plan')?.addEventListener('click', () => {
   
   document.getElementById('oracle-form-card').style.display = 'none';
   document.getElementById('plan-resultado').style.display = 'block';
-  showToast('🤖 IA: Plan optimizado para tu genética generado.');
+  showToast('🤖 IA: Plan optimizado estructurado en 7 días.');
 });
 
 document.getElementById('oracle-day-selector')?.addEventListener('change', (e) => {
@@ -233,16 +218,12 @@ function generarPlanSemanal() {
 }
 
 function obtenerComidaAlgoritmo(tipo, targetCals, excludesId) {
-  // 1. FILTRO CLÍNICO DURO
   let candidatos = oracleDB.filter(m => {
     if(m.tipo !== tipo) return false;
     if(!m.dietas.includes(currentDietType)) return false;
     if(excludesId.includes(m.id)) return false;
-    
-    // Filtro Celíaco inquebrantable
     if(isCeliac && m.glutenFree === false) return false;
     
-    // Filtro de Alergias manuales
     let jsonStr = JSON.stringify(m).toLowerCase();
     for(let a of currentAllergies) {
       if(jsonStr.includes(a)) return false;
@@ -252,30 +233,21 @@ function obtenerComidaAlgoritmo(tipo, targetCals, excludesId) {
 
   if(candidatos.length === 0) candidatos = oracleDB.filter(m => m.tipo === tipo); 
 
-  // 2. FILTRO DE INTELIGENCIA DE METAS (Densidad vs Volumen)
   let bestCandidates = [];
-  if(userProfile.metaObj > 0) {
-    // Está en Volumen: Buscar alimentos densos para que no explote comiendo
-    bestCandidates = candidatos.filter(m => m.isDense === true);
-  } else if (userProfile.metaObj < 0) {
-    // Está en Déficit: Buscar alimentos con mucho volumen de agua/fibra para saciar
-    bestCandidates = candidatos.filter(m => m.isVolume === true);
-  }
+  if(userProfile.metaObj > 0) { bestCandidates = candidatos.filter(m => m.isDense === true); } 
+  else if (userProfile.metaObj < 0) { bestCandidates = candidatos.filter(m => m.isVolume === true); }
   
-  // Si la IA encontró opciones ideales, las usa. Si no, usa el pool general.
   if(bestCandidates.length > 0) candidatos = bestCandidates;
 
+  if(candidatos.length === 0) return { id: 0, tipo: tipo, name: "Ajustar Filtros", cals: targetCals, prot: 0, carb: 0, gras: 0, ingredientes: [] };
+
   const selected = candidatos[Math.floor(Math.random() * candidatos.length)];
-  
-  // 3. CÁLCULO MATEMÁTICO AL GRAMO
   const factor = targetCals / selected.calBase;
   
   let ingredientesAdaptados = selected.ingredientes.map(ing => {
     let qtyCalculada = ing.baseQty * factor;
-    qtyCalculada = ing.unidad === 'unidades' || ing.unidad === 'scoops' || ing.unidad === 'rebanadas' 
-                   ? parseFloat(qtyCalculada.toFixed(1)) 
-                   : Math.round(qtyCalculada);
-                   
+    qtyCalculada = ing.unidad === 'unidades' || ing.unidad === 'scoops' || ing.unidad === 'rebanadas' || ing.unidad === 'porción' 
+                   ? parseFloat(qtyCalculada.toFixed(1)) : Math.round(qtyCalculada);
     return { nombre: ing.nombre, cantidad: qtyCalculada, unidad: ing.unidad };
   });
 
@@ -295,7 +267,9 @@ function renderizarDiaSeleccionado() {
   const dayMeals = weeklyPlan[selectedDayIndex];
   
   dayMeals.forEach((meal, idx) => {
-    let ingredientesHTML = meal.ingredientes.map(i => `• ${i.cantidad} ${i.unidad} de ${i.nombre}`).join('<br>');
+    let ingredientesHTML = meal.ingredientes.length > 0 
+      ? meal.ingredientes.map(i => `• ${i.cantidad} ${i.unidad} de ${i.nombre}`).join('<br>')
+      : `• Intenta cambiar los filtros de dieta`;
 
     let html = `
       <div class="plan-meal-card">
@@ -319,7 +293,7 @@ window.swapMealPlan = function(mealIndex) {
   const newMeal = obtenerComidaAlgoritmo(oldMeal.tipo, oldMeal.cals, [oldMeal.id]);
   weeklyPlan[selectedDayIndex][mealIndex] = newMeal;
   renderizarDiaSeleccionado();
-  showToast(`🔄 Opción modificada por la IA.`);
+  showToast(`🔄 Opción recalculada.`);
 };
 
 window.generarListaCompras = function() {
@@ -351,266 +325,8 @@ window.generarListaCompras = function() {
   
   openSheet('sheet-compras');
 };
-let weeklyPlan = []; // Guarda los 7 días
-let currentDietType = 'normal';
-let currentAllergies = [];
-let selectedDayIndex = 0;
 
-document.getElementById('btn-generar-plan')?.addEventListener('click', () => {
-  currentDietType = document.getElementById('oracle-diet-type').value;
-  let rawAlergias = document.getElementById('oracle-allergies').value.toLowerCase();
-  currentAllergies = rawAlergias.split(',').map(a => a.trim()).filter(a => a !== "");
-  
-  generarPlanSemanal();
-  
-  document.getElementById('oracle-form-card').style.display = 'none';
-  document.getElementById('plan-resultado').style.display = 'block';
-  showToast('🔮 La semana ha sido calculada al milímetro.');
-});
-
-document.getElementById('oracle-day-selector')?.addEventListener('change', (e) => {
-  selectedDayIndex = parseInt(e.target.value);
-  renderizarDiaSeleccionado();
-});
-
-function generarPlanSemanal() {
-  weeklyPlan = [];
-  const distribution = [
-    { tipo: 'desayuno', cals: metaCalorias * 0.25 },
-    { tipo: 'almuerzo', cals: metaCalorias * 0.35 },
-    { tipo: 'cena', cals: metaCalorias * 0.30 },
-    { tipo: 'snack', cals: metaCalorias * 0.10 }
-  ];
-
-  // Generar 7 días distintos
-  for(let i=0; i<7; i++) {
-    let dayMeals = distribution.map(slot => obtenerComidaAleatoria(slot.tipo, slot.cals, []));
-    weeklyPlan.push(dayMeals);
-  }
-  
-  selectedDayIndex = 0;
-  document.getElementById('oracle-day-selector').value = "0";
-  renderizarDiaSeleccionado();
-}
-
-function obtenerComidaAleatoria(tipo, targetCals, excludesId) {
-  // Filtros Clínicos
-  let candidatos = oracleDB.filter(m => {
-    if(m.tipo !== tipo) return false;
-    if(!m.dietas.includes(currentDietType)) return false;
-    if(excludesId.includes(m.id)) return false;
-    
-    // Alergias (Busca en nombre e ingredientes)
-    let jsonStr = JSON.stringify(m).toLowerCase();
-    for(let a of currentAllergies) {
-      if(jsonStr.includes(a)) return false;
-    }
-    return true;
-  });
-
-  if(candidatos.length === 0) candidatos = oracleDB.filter(m => m.tipo === tipo); 
-  const selected = candidatos[Math.floor(Math.random() * candidatos.length)];
-  
-  // Cálculo de Porciones Matemáticas
-  const factor = targetCals / selected.calBase;
-  
-  let ingredientesAdaptados = selected.ingredientes.map(ing => {
-    let qtyCalculada = ing.baseQty * factor;
-    // Redondear lógicamente: si son unidades a 1 decimal, gramos a enteros.
-    qtyCalculada = ing.unidad === 'unidades' || ing.unidad === 'scoops' || ing.unidad === 'rebanadas' 
-                   ? parseFloat(qtyCalculada.toFixed(1)) 
-                   : Math.round(qtyCalculada);
-                   
-    return { nombre: ing.nombre, cantidad: qtyCalculada, unidad: ing.unidad };
-  });
-
-  return {
-    id: selected.id, tipo: selected.tipo, name: selected.name,
-    cals: Math.round(selected.calBase * factor), prot: Math.round(selected.prot * factor),
-    carb: Math.round(selected.carb * factor), gras: Math.round(selected.gras * factor),
-    ingredientes: ingredientesAdaptados
-  };
-}
-
-function renderizarDiaSeleccionado() {
-  const container = document.getElementById('comidas-plan');
-  if(!container) return;
-  container.innerHTML = '';
-  
-  const dayMeals = weeklyPlan[selectedDayIndex];
-  
-  dayMeals.forEach((meal, idx) => {
-    // Convertir ingredientes en una lista visual legible
-    let ingredientesHTML = meal.ingredientes.map(i => `• ${i.cantidad} ${i.unidad} de ${i.nombre}`).join('<br>');
-
-    let html = `
-      <div class="plan-meal-card">
-        <div class="plan-meal-header">
-          <span class="plan-meal-title">${meal.tipo}</span>
-          <button class="btn-swap" onclick="swapMealPlan(${idx})">🔄 Modificar</button>
-        </div>
-        <p class="plan-meal-desc"><b style="color:#fff;">${meal.name}</b><br><span style="color:#a0aec0; font-size:11px;">${ingredientesHTML}</span></p>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-          <span class="plan-meal-cals">🔥 ${meal.cals} kcal</span>
-          <span style="font-size:10px; color:var(--text-muted); font-weight:800;">P: ${meal.prot}g | C: ${meal.carb}g | G: ${meal.gras}g</span>
-        </div>
-      </div>
-    `;
-    container.innerHTML += html;
-  });
-}
-
-window.swapMealPlan = function(mealIndex) {
-  const oldMeal = weeklyPlan[selectedDayIndex][mealIndex];
-  const newMeal = obtenerComidaAleatoria(oldMeal.tipo, oldMeal.cals, [oldMeal.id]);
-  weeklyPlan[selectedDayIndex][mealIndex] = newMeal;
-  renderizarDiaSeleccionado();
-  showToast(`🔄 Opción modificada calculando macros...`);
-};
-
-window.generarListaCompras = function() {
-  const ul = document.getElementById('lista-compras-ui');
-  if(!ul) return;
-  
-  // Consolidar todos los ingredientes de los 7 días
-  let listaConsolidada = {};
-  
-  weeklyPlan.forEach(dia => {
-    dia.forEach(comida => {
-      comida.ingredientes.forEach(ing => {
-        let key = `${ing.nombre} (${ing.unidad})`;
-        listaConsolidada[key] = (listaConsolidada[key] || 0) + ing.cantidad;
-      });
-    });
-  });
-
-  ul.innerHTML = '';
-  for (let key in listaConsolidada) {
-    let rawQty = listaConsolidada[key];
-    let qtyDisplay = key.includes('unidades') || key.includes('scoops') || key.includes('rebanadas') ? rawQty.toFixed(1) : Math.round(rawQty);
-    
-    // Extraer nombre y unidad para mostrar bonito
-    let match = key.match(/(.*) \((.*)\)/);
-    let nombreLimpio = match ? match[1] : key;
-    let unidadLimpia = match ? match[2] : '';
-
-    ul.innerHTML += `<li><input type="checkbox" style="accent-color:var(--primary); width:18px; height:18px;"> <span style="flex:1;">${nombreLimpio}</span> <b style="color:var(--primary); font-size:12px;">${qtyDisplay} ${unidadLimpia}</b></li>`;
-  }
-  
-  openSheet('sheet-compras');
-};
-let currentPlan = []; // Guarda el plan actual en memoria
-let currentDietType = 'normal';
-let currentAllergies = [];
-
-document.getElementById('btn-generar-plan')?.addEventListener('click', () => {
-  currentDietType = document.getElementById('oracle-diet-type').value;
-  let rawAlergias = document.getElementById('oracle-allergies').value.toLowerCase();
-  currentAllergies = rawAlergias.split(',').map(a => a.trim()).filter(a => a !== "");
-  
-  generarYRenderizarPlan();
-  
-  document.getElementById('oracle-form-card').style.display = 'none';
-  document.getElementById('plan-resultado').style.display = 'block';
-  showToast('🔮 El Oráculo ha hablado.');
-});
-
-function generarYRenderizarPlan() {
-  // Distribución matemática: Desayuno 25%, Almuerzo 35%, Cena 30%, Snack 10%
-  const distribution = [
-    { tipo: 'desayuno', cals: metaCalorias * 0.25 },
-    { tipo: 'almuerzo', cals: metaCalorias * 0.35 },
-    { tipo: 'cena', cals: metaCalorias * 0.30 },
-    { tipo: 'snack', cals: metaCalorias * 0.10 }
-  ];
-
-  currentPlan = distribution.map(slot => obtenerComidaAleatoria(slot.tipo, slot.cals, []));
-  renderizarPlanUI();
-}
-
-function obtenerComidaAleatoria(tipo, targetCals, excludesId) {
-  // Filtra por tipo, dieta, y elimina alergias e IDs excluidos (para no repetir al hacer swap)
-  let candidatos = oracleDB.filter(m => {
-    if(m.tipo !== tipo) return false;
-    if(!m.dietas.includes(currentDietType)) return false;
-    if(excludesId.includes(m.id)) return false;
-    
-    // Comprobar alergias
-    let desc = m.desc.toLowerCase();
-    let name = m.name.toLowerCase();
-    for(let a of currentAllergies) {
-      if(desc.includes(a) || name.includes(a)) return false;
-    }
-    return true;
-  });
-
-  // Si el filtro fue tan estricto que no quedó nada, ignorar dieta estricta para esa categoría
-  if(candidatos.length === 0) { candidatos = oracleDB.filter(m => m.tipo === tipo); }
-  
-  const selected = candidatos[Math.floor(Math.random() * candidatos.length)];
-  
-  // Magia Clínica: Escalar porciones exactas
-  const factor = targetCals / selected.calBase;
-  
-  return {
-    id: selected.id, tipo: selected.tipo,
-    name: selected.name,
-    cals: Math.round(selected.calBase * factor),
-    prot: Math.round(selected.prot * factor),
-    carb: Math.round(selected.carb * factor),
-    gras: Math.round(selected.gras * factor),
-    desc: selected.desc,
-    factorEscala: factor // Útil por si en el futuro mostramos gramos exactos
-  };
-}
-
-function renderizarPlanUI() {
-  const container = document.getElementById('comidas-plan');
-  if(!container) return;
-  container.innerHTML = '';
-  
-  currentPlan.forEach((meal, index) => {
-    let html = `
-      <div class="plan-meal-card">
-        <div class="plan-meal-header">
-          <span class="plan-meal-title">${meal.tipo}</span>
-          <button class="btn-swap" onclick="swapMealPlan(${index})">🔄 Reemplazar</button>
-        </div>
-        <p class="plan-meal-desc"><b style="color:#fff;">${meal.name}</b><br>${meal.desc}</p>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span class="plan-meal-cals">🔥 ${meal.cals} kcal</span>
-          <span style="font-size:10px; color:var(--text-muted);">P: ${meal.prot}g | C: ${meal.carb}g | G: ${meal.gras}g</span>
-        </div>
-      </div>
-    `;
-    container.innerHTML += html;
-  });
-}
-
-window.swapMealPlan = function(index) {
-  const oldMeal = currentPlan[index];
-  const targetCals = oldMeal.cals; // Mantenemos las calorías asignadas a ese slot
-  const newMeal = obtenerComidaAleatoria(oldMeal.tipo, targetCals, [oldMeal.id]);
-  currentPlan[index] = newMeal;
-  renderizarPlanUI();
-  showToast(`🔄 Opción modificada.`);
-};
-
-window.generarListaCompras = function() {
-  const ul = document.getElementById('lista-compras-ui');
-  if(!ul) return;
-  ul.innerHTML = '';
-  
-  // Aquí se podrían sumar ingredientes. Por simplicidad de lectura para el usuario, 
-  // volcamos los nombres de los platos escalados por 7 días.
-  currentPlan.forEach(meal => {
-    ul.innerHTML += `<li><input type="checkbox" style="accent-color:var(--primary);"> <b>${meal.name}</b><br><small style="color:var(--text-muted); font-size:9px; margin-left:5px;">(Base para 7 días)</small></li>`;
-  });
-  
-  openSheet('sheet-compras');
-};
-
-// --- PERSISTENCIA DE LISTAS (COMIDAS Y ENTRENOS) ---
+// --- PERSISTENCIA DE LISTAS DIARIAS (COMIDAS Y ENTRENOS) ---
 async function cargarRegistrosDelDia(uid) {
   const hoyKey = getTodayKey();
   const listaComidas = document.getElementById('lista-comidas');
@@ -637,6 +353,7 @@ function renderizarEntrenoEnUI(nombre, sets, weight, rpe, docId = null) {
   const li = document.createElement('li'); if(docId) li.setAttribute('data-id', docId);
   li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre.toUpperCase()}</span><button class="btn-delete-item" onclick="eliminarEntrenoNube('${docId}', this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🏋️ Sets: ${sets} &nbsp;|&nbsp; <span style="color:#00e5ff;">Peso: ${weight} kg</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">RPE: ${rpe}</span></span>`; l.appendChild(li);
 }
+
 window.eliminarComidaNube = async function(docId, cal, prot, carb, gras, btnElement) {
   if(!confirm("¿Eliminar este alimento del registro?")) return;
   totalCalorias = Math.max(0, totalCalorias - cal); totalProt = Math.max(0, totalProt - prot); totalCarb = Math.max(0, totalCarb - carb); totalGrasa = Math.max(0, totalGrasa - gras);
