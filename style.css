@@ -153,3 +153,26 @@ label { display: flex; justify-content: space-between; margin-top: 15px; color: 
 .nav-item .text { font-size: 7px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 800; }
 .nav-item.active { color: var(--primary); }
 .nav-item.active .icon { filter: grayscale(0%); opacity: 1; filter: drop-shadow(0 0 5px var(--primary-glow)); transform: translateY(-2px); }
+
+/* ETIQUETAS DE ALERGIAS (CHIPS) */
+.allergy-chip {
+  background: rgba(255, 51, 102, 0.15);
+  border: 1px solid #ff3366;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.allergy-chip-close {
+  cursor: pointer;
+  color: #ff3366;
+  font-weight: 900;
+  font-size: 14px;
+}
+.allergy-chip-close:hover {
+  color: #fff;
+}
