@@ -1037,70 +1037,83 @@ window.abrirBuscadorManual = function() {
 };
 document.getElementById('btn-registrar-serie')?.addEventListener('click', window.abrirBuscadorManual);
 
-// HISTORIAL Y DÍAS
-window.cargarRegistrosDelDia = async function(uid) {
-  const hoyKey = window.getTodayKey(); const listaComidas = document.getElementById('lista-comidas');
-  if(listaComidas) { listaComidas.innerHTML = ''; const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "meals")); snapshot.forEach(docSnap => { const i = docSnap.data(); window.renderizarComidaEnUI(i.nombre, i.cal, i.prot, i.carb, i.gras, docSnap.id); }); }
-  const listaEntrenos = document.getElementById('lista-entrenos');
-  if(listaEntrenos) { listaEntrenos.innerHTML = ''; const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "workouts")); snapshot.forEach(docSnap => { const i = docSnap.data(); window.renderizarEntrenoEnUI(i.nombre, i.sets, i.weight, i.rpe, i.cals || 0, docSnap.id); }); }
-};
-
+// --- BITÁCORA E HISTORIAL SINCRONIZADO CON EL DÍA EN CURSO ---
 window.cargarHistorialYCheckins = async function(uid) {
-  const histContainer = document.getElementById('historial-container'); const chkContainer = document.getElementById('checkin-history-container');
+  const histContainer = document.getElementById('historial-container'); 
+  const chkContainer = document.getElementById('checkin-history-container');
+  const hoyKey = window.getTodayKey();
+
   if(chkContainer && db) {
     chkContainer.innerHTML = '<p style="text-align:center; font-size:12px; color:#9ca3af;">Cargando check-ins...</p>'; 
     const q = query(collection(db, "users", uid, "checkins"), orderBy("timestamp", "desc"), limit(15)); 
     const snaps = await getDocs(q); 
     let html = ''; let historialPesos = []; 
-    snaps.forEach(d => { let data = d.data(); historialPesos.push(data); html += `<div style="background:#111827; padding:12px; margin-bottom:10px; border-radius:8px; border-left:3px solid #ffaa00; display:flex; justify-content:space-between; align-items:center;"><span style="color:#00e5ff; font-weight:800; font-size:12px;">📅 ${data.fecha}</span><span style="color:#fff; font-weight:900; font-size:14px;">⚖️ ${data.peso} kg</span></div>`; }); 
+    snaps.forEach(d => { 
+      let data = d.data(); historialPesos.push(data); 
+      html += `<div style="background:#111827; padding:12px; margin-bottom:10px; border-radius:8px; border-left:3px solid #ffaa00; display:flex; justify-content:space-between; align-items:center;"><span style="color:#00e5ff; font-weight:800; font-size:12px;">📅 ${data.fecha}</span><span style="color:#fff; font-weight:900; font-size:14px;">⚖️ ${data.peso} kg</span></div>`; 
+    }); 
     chkContainer.innerHTML = html || '<p style="text-align:center; font-size:12px; color:#9ca3af;">No hay check-ins registrados.</p>'; 
     if(historialPesos.length > 0) window.dibujarGraficoPerfil(historialPesos);
   }
+
   if(histContainer && db) {
-    histContainer.innerHTML = '<p style="text-align:center; font-size:12px; color:#9ca3af;">Cargando historial...</p>'; 
-    const q2 = query(collection(db, "users", uid, "history"), orderBy("timestamp", "desc"), limit(60)); 
-    const snaps2 = await getDocs(q2); 
-    let agrupado = {}; snaps2.forEach(d => { let data = d.data(); if(!agrupado[data.date]) agrupado[data.date] = []; agrupado[data.date].push(data); }); 
-    let html2 = ''; 
-    for(const [fecha, items] of Object.entries(agrupado)) {
-      let itemsHtml = items.map(i => `<div style="margin-top:10px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);"><b style="color:${i.tipo === 'entreno' ? '#00e5ff' : '#ff3366'}; font-size:13px;">${i.tipo === 'entreno' ? '🏋️' : '🍏'} ${i.nombre}</b><br><span style="font-size:11px; color:#9ca3af; display:block; margin-top:4px;">${i.detalle}</span></div>`).join('');
-      html2 += `<div class="history-day"><div class="history-day-header" onclick="const content = this.nextElementSibling; content.style.display = content.style.display === 'block' ? 'none' : 'block';"><span>📅 Jornada: ${fecha}</span> <span style="color:#fff;">▼</span></div><div class="history-day-content">${itemsHtml}</div></div>`;
-    } 
-    histContainer.innerHTML = html2 || '<p style="text-align:center; font-size:12px; color:#9ca3af;">Aún no hay historial.</p>';
+    histContainer.innerHTML = '<p style="text-align:center; font-size:12px; color:#9ca3af;">Sincronizando jornada táctica...</p>';
+    
+    try {
+      // Consultamos de forma directa las colecciones del día actual para que converse con Dieta y Combate
+      const mealsSnap = await getDocs(collection(db, "users", uid, "days", hoyKey, "meals"));
+      const workoutsSnap = await getDocs(collection(db, "users", uid, "days", hoyKey, "workouts"));
+      
+      let itemsHoy = [];
+      mealsSnap.forEach(m => {
+        let data = m.data();
+        itemsHoy.push({ tipo: 'comida', nombre: data.nombre, detalle: `🔥 ${data.cal} kcal | P:${data.prot}g C:${data.carb}g G:${data.gras}g` });
+      });
+      workoutsSnap.forEach(w => {
+        let data = w.data();
+        itemsHoy.push({ tipo: 'entreno', nombre: data.nombre.toUpperCase(), detalle: `${data.sets} | 🔥 ${data.cals || 0} kcal` });
+      });
+
+      let htmlJornada = `<div class="history-day">
+        <div class="history-day-header" style="cursor:default;"><span>📅 Jornada Actual: ${hoyKey}</span> <span style="color:var(--primary); font-size:11px;">Sincronizado 🟢</span></div>
+        <div class="history-day-content" style="display:block; background:rgba(0,0,0,0.2); padding:15px;">`;
+
+      if(itemsHoy.length === 0) {
+        htmlJornada += `<p style="font-size:12px; color:#9ca3af; text-align:center; margin:0;">No hay registros de nutrición ni combate para el día de hoy.</p>`;
+      } else {
+        itemsHoy.forEach(i => {
+          htmlJornada += `<div style="margin-top:10px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+            <b style="color:${i.tipo === 'entreno' ? '#00e5ff' : '#ff3366'}; font-size:13px;">${i.tipo === 'entreno' ? '🏋️' : '🍏'} ${i.nombre}</b><br>
+            <span style="font-size:11px; color:#9ca3af; display:block; margin-top:4px;">${i.detalle}</span>
+          </div>`;
+        });
+      }
+
+      htmlJornada += `</div></div>`;
+
+      // Añadimos también el histórico de días pasados si existiera
+      const qOld = query(collection(db, "users", uid, "history"), orderBy("timestamp", "desc"), limit(30));
+      const snapsOld = await getDocs(qOld);
+      let agrupadoOld = {};
+      snapsOld.forEach(d => { 
+        let data = d.data(); 
+        if(data.date !== hoyKey) {
+          if(!agrupadoOld[data.date]) agrupadoOld[data.date] = []; 
+          agrupadoOld[data.date].push(data); 
+        }
+      });
+
+      let htmlOld = '';
+      for(const [fecha, items] of Object.entries(agrupadoOld)) {
+        let itemsHtml = items.map(i => `<div style="margin-top:10px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);"><b style="color:${i.tipo === 'entreno' ? '#00e5ff' : '#ff3366'}; font-size:13px;">${i.tipo === 'entreno' ? '🏋️' : '🍏'} ${i.nombre}</b><br><span style="font-size:11px; color:#9ca3af; display:block; margin-top:4px;">${i.detalle}</span></div>`).join('');
+        htmlOld += `<div class="history-day"><div class="history-day-header" onclick="const content = this.nextElementSibling; content.style.display = content.style.display === 'block' ? 'none' : 'block';"><span>📅 Jornada: ${fecha}</span> <span style="color:#fff;">▼</span></div><div class="history-day-content">${itemsHtml}</div></div>`;
+      }
+
+      histContainer.innerHTML = htmlJornada + htmlOld;
+    } catch(e) {
+      histContainer.innerHTML = '<p style="font-size:12px; color:#ff3366; text-align:center;">Error al sincronizar la bitácora.</p>';
+    }
   }
-};
-
-window.verificarCambioDeDia = function() { 
-  const hoy = new Date().toDateString(); const ult = localStorage.getItem('ic_ultima_fecha'); 
-  if (!ult) localStorage.setItem('ic_ultima_fecha', hoy); 
-  else if (ult !== hoy) { 
-    totalCalorias = 0; totalProt = 0; totalCarb = 0; totalGrasa = 0; totalAgua = 0; totalQuemadas = 0; 
-    userStreak++; 
-    localStorage.setItem('ic_ultima_fecha', hoy); 
-    window.guardarEstadoNube(); 
-    window.showToast('🌙 Nuevo día. ¡Racha incrementada!'); 
-  } 
-  const st = document.getElementById('header-streak'); if(st) st.innerText = `🔥 Racha: ${userStreak} días`; 
-};
-
-window.reiniciarDiaActual = function() { 
-  if(confirm("¿Reiniciar balance?")) { 
-    totalCalorias = 0; totalProt = 0; totalCarb = 0; totalGrasa = 0; totalAgua = 0; totalQuemadas = 0; 
-    window.guardarEstadoNube(); 
-    window.actualizarDashboard(); 
-    window.actualizarAguaUI(); 
-    const lc = document.getElementById('lista-comidas'); if(lc) lc.innerHTML = ''; 
-    window.showToast('🔄 Restablecido.'); 
-  } 
-};
-
-window.borrarTodoHistorial = function() { 
-  if(confirm("¿Restablecer historial archivado?")) { 
-    localStorage.removeItem('ic_historial_pasado'); localStorage.removeItem('ic_checkins'); 
-    const hc = document.getElementById('historial-container'); if(hc) hc.innerHTML = ''; 
-    const chc = document.getElementById('checkin-history-container'); if(chc) chc.innerHTML = ''; 
-    window.showToast('🧹 Borrado.'); 
-  } 
 };
 
 // CHECKIN DE PESO
