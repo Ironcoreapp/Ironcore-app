@@ -141,7 +141,7 @@ label { display: flex; justify-content: space-between; margin-top: 15px; color: 
 .nav-item.active { color: var(--primary); }
 .nav-item.active .icon { filter: grayscale(0%); opacity: 1; filter: drop-shadow(0 0 5px var(--primary-glow)); transform: translateY(-2px); }
 
-/* --- ACTUALIZACIONES DEL ORÁCULO PREMIUM Y ALERGIAS --- */
+/* ALERGIAS Y CLINICO */
 .allergy-chip { background: rgba(255, 51, 102, 0.15); border: 1px solid #ff3366; color: #fff; padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 8px;}
 .allergy-chip-close { cursor: pointer; color: #ff3366; font-weight: 900; font-size: 14px; }
 .allergy-chip-close:hover { color: #fff; }
@@ -163,8 +163,11 @@ label { display: flex; justify-content: space-between; margin-top: 15px; color: 
 .btn-swap { background: transparent; border: 1px solid #ffaa00; color: #ffaa00; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; float: right; margin-top: -5px;}
 .btn-swap:active { background: rgba(255,170,0,0.1); }
 
-/* TARJETAS DEL MODAL DE REEMPLAZO Y PLAN DIARIO */
 .swap-option-card { background: #1a2130; border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; cursor: pointer; transition: 0.2s; text-align: left;}
 .swap-option-card:hover { border-color: var(--primary); background: rgba(0,229,255,0.1); }
 .swap-option-card b { color: #fff; font-size: 13px; display: block; margin-bottom: 4px;}
 .swap-option-card span { font-size: 11px; color: var(--text-muted); }
+
+/* --- MODO ENTRENAMIENTO (NUEVO) --- */
+.workout-card { padding: 15px; }
+.workout-inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; }
