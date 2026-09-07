@@ -2,6 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>IronCore Tracker Cloud</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
@@ -438,7 +441,11 @@
     <button class="nav-item" data-target="page-ai"><span class="icon">👹</span><span class="text">Shōgun AI</span></button>
     <button class="nav-item" data-target="page-profile"><span class="icon">⚙️</span><span class="text">Perfil</span></button>
   </nav>
-
-  <script type="module" src="script.js?v=1.0"></script>
+  <!-- Importación dinámica Anti-Caché del motor principal -->
+  <script type="module">
+    // Esto obliga al navegador a descargar siempre el script fresco añadiéndole los milisegundos actuales
+    import(`./script.js?v=${Date.now()}`);
+  </script>
+</body>
 </body>
 </html>
