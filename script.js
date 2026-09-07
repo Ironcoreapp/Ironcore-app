@@ -35,8 +35,14 @@ getRedirectResult(auth).then((result) => { if (result && result.user) showToast(
 document.getElementById('btn-google-login')?.addEventListener('click', async () => {
   showToast('🔄 Conectando con Google...');
   const provider = new GoogleAuthProvider(); provider.setCustomParameters({ prompt: 'select_account' });
-  try { await signInWithPopup(auth, provider); showToast('⚔️ ¡Acceso autorizado al Dojo!'); } 
-  catch(error) { if (error.code === 'auth/popup-blocked') await signInWithRedirect(auth, provider); }
+  try { 
+    await signInWithPopup(auth, provider); 
+    showToast('⚔️ ¡Acceso autorizado al Dojo!'); 
+  } catch(error) { 
+    console.warn("Fallo el Popup de PC, forzando redirección directa:", error);
+    showToast('🔄 Abriendo portal seguro...');
+    await signInWithRedirect(auth, provider); 
+  }
 });
 
 document.getElementById('btn-logout')?.addEventListener('click', () => signOut(auth));
@@ -67,7 +73,7 @@ window.abrirOnboarding = function(isEdit = false) {
   if(isEdit) {
     document.getElementById('ob-title').innerText = "Editar Credencial";
     document.getElementById('ob-nickname').value = userProfile.nickname;
-    seleccionarGenero(userProfile.genero); document.getElementById('ob-edad').value = userProfile.edad;
+    window.seleccionarGenero(userProfile.genero); document.getElementById('ob-edad').value = userProfile.edad;
     document.getElementById('ob-peso').value = userProfile.peso; document.getElementById('ob-altura').value = userProfile.altura;
     document.querySelectorAll('.ob-goal-card').forEach(c => {
       c.classList.remove('active'); if(parseInt(c.getAttribute('data-val')) === userProfile.metaObj) c.classList.add('active');
@@ -97,8 +103,12 @@ window.finalizarOnboarding = async function() {
   metaProt = userProfile.metaObj > 0 ? Math.round(userProfile.peso * 2.0) : Math.round(userProfile.peso * 2.2);
   metaGrasa = Math.round((metaCalorias * 0.25) / 9); metaCarb = Math.round((metaCalorias - ((metaProt * 4) + (metaGrasa * 9))) / 4);
 
-  await guardarEstadoNube(); actualizarUIHeader(); actualizarUIPerfil(); actualizarDashboard(); actualizarGraficoProyeccion(userProfile.peso, userProfile.metaObj);
-  actualizarLabelMetaIA(); // Act Oraculo
+  await guardarEstadoNube(); 
+  actualizarUIHeader(); 
+  actualizarUIPerfil(); 
+  actualizarDashboard(); 
+  actualizarGraficoProyeccion(userProfile.peso, userProfile.metaObj);
+  actualizarLabelMetaIA(); 
   
   obScreen.style.display = 'none'; showToast(`✅ Credencial Sincronizada`);
   document.querySelector('[data-target="page-dashboard"]').click();
@@ -138,14 +148,12 @@ function actualizarUIPerfil() {
   if(currentUser && currentUser.photoURL) document.getElementById('profile-card-avatar').src = currentUser.photoURL;
 }
 
-// --- EL ORÁCULO NUTRICIONAL (MOTOR CON JSON EXTERNO) ---
+// --- EL ORÁCULO NUTRICIONAL (IA CLÍNICA JSON) ---
 
-let oracleDB = []; // Inicia vacío, se llenará desde alimentos.json
+let oracleDB = []; 
 
-// Descargar la base de datos externa al iniciar
 async function inicializarOraculo() {
   try {
-    // Busca el archivo alimentos.json en el mismo directorio de GitHub
     const respuesta = await fetch('alimentos.json');
     if (!respuesta.ok) throw new Error('No se pudo cargar la base de datos nutricional.');
     oracleDB = await respuesta.json();
@@ -156,7 +164,6 @@ async function inicializarOraculo() {
   }
 }
 
-// Llamar a la inicialización al cargar la app
 window.addEventListener('DOMContentLoaded', inicializarOraculo);
 
 let weeklyPlan = [];
@@ -176,10 +183,7 @@ function actualizarLabelMetaIA() {
 }
 
 document.getElementById('btn-generar-plan')?.addEventListener('click', () => {
-  if (oracleDB.length === 0) {
-    showToast("⚠️ El Oráculo sigue sincronizando la base de datos JSON. Espera un segundo.");
-    return;
-  }
+  if (oracleDB.length === 0) { showToast("⚠️ El Oráculo sigue sincronizando la base de datos JSON. Espera un segundo."); return; }
   
   currentDietType = document.getElementById('oracle-diet-type').value;
   isCeliac = document.getElementById('oracle-celiac').checked;
@@ -275,7 +279,7 @@ function renderizarDiaSeleccionado() {
       <div class="plan-meal-card">
         <div class="plan-meal-header">
           <span class="plan-meal-title">${meal.tipo}</span>
-          <button class="btn-swap" onclick="swapMealPlan(${idx})">🔄 Reemplazar</button>
+          <button class="btn-swap" onclick="window.swapMealPlan(${idx})">🔄 Reemplazar</button>
         </div>
         <p class="plan-meal-desc"><b style="color:#fff;">${meal.name}</b><br><span style="color:#a0aec0; font-size:11px;">${ingredientesHTML}</span></p>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
@@ -323,7 +327,7 @@ window.generarListaCompras = function() {
     ul.innerHTML += `<li><input type="checkbox" style="accent-color:var(--primary); width:18px; height:18px;"> <span style="flex:1;">${nombreLimpio}</span> <b style="color:var(--primary); font-size:12px;">${qtyDisplay} ${unidadLimpia}</b></li>`;
   }
   
-  openSheet('sheet-compras');
+  window.openSheet('sheet-compras');
 };
 
 // --- PERSISTENCIA DE LISTAS DIARIAS (COMIDAS Y ENTRENOS) ---
@@ -346,12 +350,12 @@ async function cargarRegistrosDelDia(uid) {
 function renderizarComidaEnUI(nombre, cal, prot, carb, gras, docId = null) {
   const l = document.getElementById('lista-comidas'); if(!l) return;
   const li = document.createElement('li'); if(docId) li.setAttribute('data-id', docId);
-  li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre}</span><button class="btn-delete-item" onclick="eliminarComidaNube('${docId}', ${cal}, ${prot}, ${carb}, ${gras}, this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🔥 ${cal} kcal &nbsp;|&nbsp; <span style="color:#ff3366;">P: ${prot}g</span> &nbsp;|&nbsp; <span style="color:#00e5ff;">C: ${carb}g</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">G: ${gras}g</span></span>`; l.appendChild(li);
+  li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre}</span><button class="btn-delete-item" onclick="window.eliminarComidaNube('${docId}', ${cal}, ${prot}, ${carb}, ${gras}, this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🔥 ${cal} kcal &nbsp;|&nbsp; <span style="color:#ff3366;">P: ${prot}g</span> &nbsp;|&nbsp; <span style="color:#00e5ff;">C: ${carb}g</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">G: ${gras}g</span></span>`; l.appendChild(li);
 }
 function renderizarEntrenoEnUI(nombre, sets, weight, rpe, docId = null) {
   const l = document.getElementById('lista-entrenos'); if(!l) return;
   const li = document.createElement('li'); if(docId) li.setAttribute('data-id', docId);
-  li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre.toUpperCase()}</span><button class="btn-delete-item" onclick="eliminarEntrenoNube('${docId}', this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🏋️ Sets: ${sets} &nbsp;|&nbsp; <span style="color:#00e5ff;">Peso: ${weight} kg</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">RPE: ${rpe}</span></span>`; l.appendChild(li);
+  li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre.toUpperCase()}</span><button class="btn-delete-item" onclick="window.eliminarEntrenoNube('${docId}', this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🏋️ Sets: ${sets} &nbsp;|&nbsp; <span style="color:#00e5ff;">Peso: ${weight} kg</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">RPE: ${rpe}</span></span>`; l.appendChild(li);
 }
 
 window.eliminarComidaNube = async function(docId, cal, prot, carb, gras, btnElement) {
@@ -390,6 +394,9 @@ function verificarCambioDeDia() {
 window.reiniciarDiaActual = function() {
   if(confirm("¿Reiniciar contadores de hoy a 0?")) { totalCalorias = 0; totalProt = 0; totalCarb = 0; totalGrasa = 0; totalAgua = 0; guardarEstadoNube(); actualizarDashboard(); actualizarAguaUI(); document.getElementById('lista-comidas').innerHTML = ''; showToast('🔄 Balance restablecido.'); }
 };
+window.borrarTodoHistorial = function() {
+  if(confirm("¿Restablecer todo el historial archivado?")) { localStorage.removeItem('ic_historial_pasado'); localStorage.removeItem('ic_checkins'); document.getElementById('historial-container').innerHTML = ''; document.getElementById('checkin-history-container').innerHTML = ''; showToast('🧹 Historial borrado.'); }
+};
 
 // --- NAVEGACIÓN Y TABS ---
 const navItems = document.querySelectorAll('.nav-item'); const pages = document.querySelectorAll('.page');
@@ -410,17 +417,17 @@ function enviarMensajeShogun() { const inp = document.getElementById('chat-input
 const overlay = document.getElementById('sheet-overlay'); let activeSheet = null;
 window.openSheet = function(sheetId) { activeSheet = document.getElementById(sheetId); if(overlay) overlay.style.display = 'block'; if(activeSheet) { activeSheet.classList.add('open'); setTimeout(() => activeSheet.style.bottom = '0', 10); } }
 window.closeSheet = function() { if(activeSheet) { activeSheet.style.bottom = '-100%'; setTimeout(() => { activeSheet.classList.remove('open'); if(overlay) overlay.style.display = 'none'; }, 300); } }
-document.querySelectorAll('.custom-select').forEach(sel => { sel.addEventListener('click', () => { window.activeSelect = sel; openSheet(sel.id.replace('select-', 'sheet-')); }); });
-document.querySelectorAll('.sheet-option').forEach(opt => { opt.addEventListener('click', function() { if(this.parentElement.id !== 'sheet-actividad') { this.parentElement.querySelectorAll('.sheet-option').forEach(o => o.classList.remove('active')); this.classList.add('active'); window.activeSelect.innerText = this.innerText; window.activeSelect.setAttribute('data-val', this.getAttribute('data-val')); closeSheet(); } else { closeSheet(); }}); });
-if(overlay) overlay.addEventListener('click', closeSheet);
+document.querySelectorAll('.custom-select').forEach(sel => { sel.addEventListener('click', () => { window.activeSelect = sel; window.openSheet(sel.id.replace('select-', 'sheet-')); }); });
+document.querySelectorAll('.sheet-option').forEach(opt => { opt.addEventListener('click', function() { if(this.parentElement.id !== 'sheet-actividad') { this.parentElement.querySelectorAll('.sheet-option').forEach(o => o.classList.remove('active')); this.classList.add('active'); window.activeSelect.innerText = this.innerText; window.activeSelect.setAttribute('data-val', this.getAttribute('data-val')); window.closeSheet(); } else { window.closeSheet(); }}); });
+if(overlay) overlay.addEventListener('click', window.closeSheet);
 
 // --- COACH TÉCNICO ---
 const focusCards = document.querySelectorAll('.focus-card');
-focusCards.forEach(card => { card.addEventListener('click', () => { focusCards.forEach(c => c.classList.remove('active')); card.classList.add('active'); document.getElementById('coach-recommendation').innerHTML = `<h4>Foco: ${card.innerText}</h4><p>Prioriza la tensión mecánica y aplica sobrecarga progresiva en los levantamientos base de este grupo.</p>`; document.getElementById('coach-recommendation').style.display='block'; }); });
+focusCards.forEach(card => { card.addEventListener('click', () => { focusCards.forEach(c => c.classList.remove('active')); card.classList.add('active'); document.getElementById('coach-recommendation').innerHTML = `<h4>Foco: ${card.innerText}</h4><p>Prioriza la tensión mecánica y aplica sobrecarga progresiva en los levantamientos base.</p>`; document.getElementById('coach-recommendation').style.display='block'; }); });
 
 // --- BITÁCORA ---
-document.getElementById('btn-registrar-serie')?.addEventListener('click', () => { document.getElementById('work-name').value = ''; document.getElementById('work-sets').value = ''; document.getElementById('work-weight').value = ''; openSheet('sheet-workout'); });
-document.getElementById('btn-confirm-workout')?.addEventListener('click', async () => { const n = document.getElementById('work-name').value; const s = document.getElementById('work-sets').value; const w = document.getElementById('work-weight').value; const r = document.getElementById('work-rpe').value || '8'; if(!n || !s || !w) { showToast('⚠️ Completa los campos.'); return; } await registrarEntrenoNube(n, s, w, r); closeSheet(); showToast('💪 Serie sincronizada.'); });
+document.getElementById('btn-registrar-serie')?.addEventListener('click', () => { document.getElementById('work-name').value = ''; document.getElementById('work-sets').value = ''; document.getElementById('work-weight').value = ''; window.openSheet('sheet-workout'); });
+document.getElementById('btn-confirm-workout')?.addEventListener('click', async () => { const n = document.getElementById('work-name').value; const s = document.getElementById('work-sets').value; const w = document.getElementById('work-weight').value; const r = document.getElementById('work-rpe').value || '8'; if(!n || !s || !w) { showToast('⚠️ Completa los campos.'); return; } await registrarEntrenoNube(n, s, w, r); window.closeSheet(); showToast('💪 Serie sincronizada.'); });
 
 // --- RANGOS SAMURAI Y RANKING GLOBAL ---
 const rangos = [ { nombre: "Ashigaru", minRatio: 0, color: "#6b7c93", msg: "Primer paso." }, { nombre: "Rōnin", minRatio: 1.5, color: "#ffaa00", msg: "Camino propio." }, { nombre: "Samurái", minRatio: 2.5, color: "#ff3366", msg: "Honor y disciplina." }, { nombre: "Daimyō", minRatio: 3.5, color: "#9933ff", msg: "Élite del hierro." }, { nombre: "IRON SHŌGUN", minRatio: 4.5, color: "#00e5ff", msg: "Comandante Supremo." } ];
@@ -463,7 +470,7 @@ function actualizarDashboard() {
 // --- BASE DE ALIMENTOS MANUAL ---
 const fatSecretDB = [ { nombre: "Pechuga de Pollo (100g)", cal: 165, prot: 31, carb: 0, gras: 3.6 }, { nombre: "Arroz Blanco Cocido (100g)", cal: 130, prot: 2.7, carb: 28, gras: 0.3 }, { nombre: "Avena (100g)", cal: 389, prot: 17, carb: 66, gras: 7 }, { nombre: "Huevo Entero (1)", cal: 72, prot: 6.3, carb: 0.4, gras: 4.8 }, { nombre: "Proteína IronCore (30g)", cal: 120, prot: 25, carb: 3, gras: 1 } ];
 let selFood = null;
-document.getElementById('btn-abrir-manual')?.addEventListener('click', () => { document.getElementById('food-search').value = ''; document.getElementById('food-results-list').innerHTML = ''; openSheet('sheet-add-food'); });
+document.getElementById('btn-abrir-manual')?.addEventListener('click', () => { document.getElementById('food-search').value = ''; document.getElementById('food-results-list').innerHTML = ''; window.openSheet('sheet-add-food'); });
 document.getElementById('food-search')?.addEventListener('input', (e) => {
   const q = e.target.value.trim().toLowerCase(); const c = document.getElementById('food-results-list'); c.innerHTML = ''; if(!q) return; const m = fatSecretDB.filter(f => f.nombre.toLowerCase().includes(q)); if(!m.length) return;
   m.forEach(i => { const d = document.createElement('div'); d.className = 'food-search-item'; d.innerHTML = `<span>${i.nombre}</span> <span style="color:var(--primary);">${i.cal} kcal</span>`; d.addEventListener('click', () => { selFood = i; document.getElementById('food-search').value = i.nombre; document.getElementById('edit-cal').value = i.cal; document.getElementById('edit-prot').value = i.prot; document.getElementById('edit-carb').value = i.carb; document.getElementById('edit-gras').value = i.gras; c.innerHTML = ''; }); c.appendChild(d); });
@@ -471,12 +478,12 @@ document.getElementById('food-search')?.addEventListener('input', (e) => {
 document.getElementById('edit-qty')?.addEventListener('input', (e) => { let q = parseFloat(e.target.value)||100; if(selFood) { let f = q/100; document.getElementById('edit-cal').value = Math.round(selFood.cal*f); document.getElementById('edit-prot').value = Math.round(selFood.prot*f); document.getElementById('edit-carb').value = Math.round(selFood.carb*f); document.getElementById('edit-gras').value = Math.round(selFood.gras*f); } });
 document.getElementById('btn-confirm-food-final')?.addEventListener('click', async () => {
   let mt = document.getElementById('food-meal-time').value; let n = document.getElementById('food-search').value || "Alimento"; let c = parseInt(document.getElementById('edit-cal').value)||0; let p = parseInt(document.getElementById('edit-prot').value)||0; let cb = parseInt(document.getElementById('edit-carb').value)||0; let g = parseInt(document.getElementById('edit-gras').value)||0;
-  if(!c && !p) { showToast('⚠️ Ingresa calorías o proteína.'); return; } await registrarComidaNube(c, p, cb, g, `[${mt}] ${n}`); closeSheet(); showToast(`✅ ${n.toUpperCase()} registrado.`);
+  if(!c && !p) { showToast('⚠️ Ingresa calorías o proteína.'); return; } await registrarComidaNube(c, p, cb, g, `[${mt}] ${n}`); window.closeSheet(); showToast(`✅ ${n.toUpperCase()} registrado.`);
 });
 
 // CHECKIN
-document.getElementById('btn-checkin')?.addEventListener('click', () => openSheet('sheet-checkin'));
-document.getElementById('btn-confirm-checkin')?.addEventListener('click', () => { closeSheet(); showToast('📈 Check-in guardado.'); });
+document.getElementById('btn-checkin')?.addEventListener('click', () => window.openSheet('sheet-checkin'));
+document.getElementById('btn-confirm-checkin')?.addEventListener('click', () => { window.closeSheet(); showToast('📈 Check-in guardado.'); });
 
 // PWA
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').then(() => console.log('SW activo')).catch(console.log); }); }
