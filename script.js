@@ -39,7 +39,7 @@ document.getElementById('btn-google-login')?.addEventListener('click', async () 
     await signInWithPopup(auth, provider); 
     showToast('⚔️ ¡Acceso autorizado al Dojo!'); 
   } catch(error) { 
-    console.warn("Fallo el Popup de PC, forzando redirección directa:", error);
+    console.warn("Fallo el Popup, forzando redirección directa:", error);
     showToast('🔄 Abriendo portal seguro...');
     await signInWithRedirect(auth, provider); 
   }
@@ -263,8 +263,23 @@ window.generarListaCompras = function() {
   window.openSheet('sheet-compras');
 };
 
-// --- BASE DE DATOS GLOBAL (OPEN FOOD FACTS API CON PROXY ANTI-ADBLOCK) ---
+
+// --- BUSCADOR GLOBAL Y BASE DE RESPALDO (ANTI-CAÍDAS) ---
 let currentSearchFoodBase = null;
+
+// Base de datos de emergencia por si el usuario no tiene internet o su navegador bloquea APIs
+const fallbackDB = [
+  { product_name: "Yogurt Protein Natural", brands: "Soprole", nutriments: { 'energy-kcal_100g': 55, 'proteins_100g': 8, 'carbohydrates_100g': 5, 'fat_100g': 0 } },
+  { product_name: "Yogurt con Proteína", brands: "Colun", nutriments: { 'energy-kcal_100g': 60, 'proteins_100g': 9, 'carbohydrates_100g': 4, 'fat_100g': 0.5 } },
+  { product_name: "Avena Tradicional", brands: "Quaker", nutriments: { 'energy-kcal_100g': 370, 'proteins_100g': 13, 'carbohydrates_100g': 60, 'fat_100g': 7 } },
+  { product_name: "Avena Instantánea", brands: "Selecta", nutriments: { 'energy-kcal_100g': 365, 'proteins_100g': 12, 'carbohydrates_100g': 62, 'fat_100g': 6 } },
+  { product_name: "Leche Descremada", brands: "Colun", nutriments: { 'energy-kcal_100g': 34, 'proteins_100g': 3.3, 'carbohydrates_100g': 5, 'fat_100g': 0 } },
+  { product_name: "Pechuga de Pollo", brands: "SuperPollo", nutriments: { 'energy-kcal_100g': 110, 'proteins_100g': 23, 'carbohydrates_100g': 0, 'fat_100g': 1.5 } },
+  { product_name: "Arroz Grano Largo", brands: "Tucapel", nutriments: { 'energy-kcal_100g': 350, 'proteins_100g': 7, 'carbohydrates_100g': 78, 'fat_100g': 1 } },
+  { product_name: "Pan Integral de Molde", brands: "Castaño", nutriments: { 'energy-kcal_100g': 240, 'proteins_100g': 10, 'carbohydrates_100g': 45, 'fat_100g': 3 } },
+  { product_name: "Huevo Grande", brands: "Champion", nutriments: { 'energy-kcal_100g': 143, 'proteins_100g': 12.5, 'carbohydrates_100g': 0.7, 'fat_100g': 9.5 } },
+  { product_name: "Whey Protein Isolate", brands: "Genérico", nutriments: { 'energy-kcal_100g': 380, 'proteins_100g': 85, 'carbohydrates_100g': 3, 'fat_100g': 1 } }
+];
 
 document.getElementById('btn-abrir-manual')?.addEventListener('click', () => { 
   document.getElementById('food-search').value = ''; 
@@ -274,7 +289,7 @@ document.getElementById('btn-abrir-manual')?.addEventListener('click', () => {
 });
 
 document.getElementById('btn-trigger-search')?.addEventListener('click', async () => {
-  const query = document.getElementById('food-search').value.trim();
+  const query = document.getElementById('food-search').value.trim().toLowerCase();
   const c = document.getElementById('food-results-list');
   const loader = document.getElementById('food-loading');
   
@@ -283,61 +298,65 @@ document.getElementById('btn-trigger-search')?.addEventListener('click', async (
   loader.style.display = 'block';
 
   try {
-    // SOLUCIÓN ANTI-ADBLOCK: Usamos AllOrigins Proxy para enmascarar la petición
-    const targetUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15`;
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-    
-    const res = await fetch(proxyUrl);
-    if (!res.ok) throw new Error('Error en el proxy');
-    
-    const proxyData = await res.json();
-    const data = JSON.parse(proxyData.contents); // Extraemos los datos reales
-    
+    // Intento directo, limpio y oficial a la API de OpenFoodFacts
+    const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15`);
+    const data = await res.json();
     loader.style.display = 'none';
 
     if(!data.products || data.products.length === 0) {
-      c.innerHTML = `<div style="font-size:11px; color:#ff3366; text-align:center;">No se encontró en la base global.</div>`;
-      return;
+      throw new Error("Sin resultados en API"); // Forzamos ir a la base de datos de respaldo
     }
+    renderizarResultadosBusqueda(data.products, c);
 
-    data.products.forEach(p => {
-      // Filtrar productos que no tienen info nutricional clara
-      if(!p.nutriments || !p.nutriments['energy-kcal_100g']) return;
-
-      const d = document.createElement('div'); 
-      d.className = 'food-search-item'; 
-      let brand = p.brands ? ` (${p.brands.split(',')[0]})` : '';
-      let nombre = `${p.product_name || 'Producto Desconocido'}${brand}`;
-      
-      let cal100 = Math.round(p.nutriments['energy-kcal_100g']);
-      let prot100 = Math.round(p.nutriments['proteins_100g'] || 0);
-      let carb100 = Math.round(p.nutriments['carbohydrates_100g'] || 0);
-      let gras100 = Math.round(p.nutriments['fat_100g'] || 0);
-
-      d.innerHTML = `
-        <div style="display:flex; flex-direction:column;">
-          <span>${nombre}</span>
-          <span style="font-size:9px; color:var(--text-muted);">Por 100g: P:${prot100}g C:${carb100}g G:${gras100}g</span>
-        </div>
-        <span style="color:var(--primary); font-weight:800; display:flex; align-items:center;">${cal100} kcal</span>
-      `;
-      
-      d.addEventListener('click', () => { 
-        currentSearchFoodBase = { cal: cal100, prot: prot100, carb: carb100, gras: gras100 };
-        document.getElementById('food-selected-name').innerText = nombre;
-        document.getElementById('food-results-list').innerHTML = ''; 
-        document.getElementById('edit-qty').value = '100';
-        actualizarMacrosManual(100);
-        document.getElementById('food-custom-section').style.display = 'block';
-      }); 
-      c.appendChild(d); 
-    });
   } catch (error) {
+    console.warn("Fallo la API externa (Red/CORS), activando Base de Datos de Respaldo Offline.", error);
     loader.style.display = 'none';
-    console.error("OpenFoodFacts Error:", error);
-    c.innerHTML = `<div style="font-size:11px; color:#ff3366; text-align:center;">Error de red temporal. Inténtalo de nuevo en unos segundos.</div>`;
+    
+    // Filtrar la base de datos local de emergencia
+    const resultadosLocales = fallbackDB.filter(p => p.product_name.toLowerCase().includes(query) || p.brands.toLowerCase().includes(query));
+    
+    if(resultadosLocales.length > 0) {
+      renderizarResultadosBusqueda(resultadosLocales, c);
+      showToast('⚠️ Red inestable: Mostrando productos locales.');
+    } else {
+      c.innerHTML = `<div style="font-size:12px; color:#ff3366; text-align:center; margin-top:10px;">❌ No se encontró en la red ni en el respaldo offline.</div>`;
+    }
   }
 });
+
+function renderizarResultadosBusqueda(productos, contenedor) {
+  productos.forEach(p => {
+    if(!p.nutriments || p.nutriments['energy-kcal_100g'] == null) return;
+
+    const d = document.createElement('div'); 
+    d.className = 'food-search-item'; 
+    let brand = p.brands ? ` (${p.brands.split(',')[0]})` : '';
+    let nombre = `${p.product_name || 'Producto Desconocido'}${brand}`;
+    
+    let cal100 = Math.round(p.nutriments['energy-kcal_100g']);
+    let prot100 = Math.round(p.nutriments['proteins_100g'] || 0);
+    let carb100 = Math.round(p.nutriments['carbohydrates_100g'] || 0);
+    let gras100 = Math.round(p.nutriments['fat_100g'] || 0);
+
+    d.innerHTML = `
+      <div style="display:flex; flex-direction:column;">
+        <span>${nombre}</span>
+        <span style="font-size:9px; color:var(--text-muted);">Por 100g: P:${prot100}g C:${carb100}g G:${gras100}g</span>
+      </div>
+      <span style="color:var(--primary); font-weight:800; display:flex; align-items:center;">${cal100} kcal</span>
+    `;
+    
+    d.addEventListener('click', () => { 
+      currentSearchFoodBase = { cal: cal100, prot: prot100, carb: carb100, gras: gras100 };
+      document.getElementById('food-selected-name').innerText = nombre;
+      document.getElementById('food-results-list').innerHTML = ''; 
+      document.getElementById('edit-qty').value = '100';
+      actualizarMacrosManual(100);
+      document.getElementById('food-custom-section').style.display = 'block';
+    }); 
+    contenedor.appendChild(d); 
+  });
+}
 
 document.getElementById('edit-qty')?.addEventListener('input', (e) => { 
   let q = parseFloat(e.target.value)||100; 
