@@ -246,22 +246,22 @@ async function inicializarBases() {
 }
 inicializarBases();
 
-// --- INYECCIÓN Y CREACIÓN DEL GRÁFICO DE PERFIL ---
+// --- INYECCIÓN Y CREACIÓN DEL GRÁFICO DE PERFIL (CORREGIDO) ---
 let profileChartInstance = null;
 function dibujarGraficoPerfil(historialPesos) {
   const canvasContainer = document.getElementById('profile-chart-container');
   if(!canvasContainer) {
-    // Si no existe el contenedor en el HTML, lo inyectamos dinámicamente en la pestaña de perfil
     const tabProfile = document.getElementById('page-profile');
     if(tabProfile) {
       const wrapper = document.createElement('div');
       wrapper.innerHTML = `
-        <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-top: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
           <h4 style="font-size: 12px; color: #9ca3af; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px;">📊 Evolución de Masa Corporal</h4>
           <div style="height: 200px; width: 100%;"><canvas id="profile-chart-container"></canvas></div>
         </div>
       `;
-      tabProfile.insertBefore(wrapper, document.getElementById('btn-logout-profile'));
+      // Lo añadimos al final de la pestaña de forma segura
+      tabProfile.appendChild(wrapper); 
     }
   }
 
