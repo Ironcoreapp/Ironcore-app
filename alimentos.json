@@ -1,0 +1,964 @@
+[
+  {
+    "id": 1,
+    "tipo": "desayuno",
+    "dietas": [
+      "normal",
+      "vegetariano"
+    ],
+    "name": "Marraqueta con Huevo y Palta",
+    "calBase": 450,
+    "prot": 20,
+    "carb": 50,
+    "gras": 18,
+    "glutenFree": false,
+    "isVolume": false,
+    "isDense": true,
+    "ingredientes": [
+      {
+        "nombre": "Marraqueta (Pan batido)",
+        "baseQty": 1,
+        "unidad": "unidades"
+      },
+      {
+        "nombre": "Huevos enteros",
+        "baseQty": 2,
+        "unidad": "unidades"
+      },
+      {
+        "nombre": "Palta Hass",
+        "baseQty": 60,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "tipo": "desayuno",
+    "dietas": [
+      "normal",
+      "lowcarb",
+      "vegetariano"
+    ],
+    "name": "Paila de Huevos a la Chilena",
+    "calBase": 350,
+    "prot": 24,
+    "carb": 5,
+    "gras": 25,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Huevos enteros",
+        "baseQty": 3,
+        "unidad": "unidades"
+      },
+      {
+        "nombre": "Tomate picado",
+        "baseQty": 80,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Cebolla picada",
+        "baseQty": 30,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Aceite de maravilla",
+        "baseQty": 5,
+        "unidad": "ml"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "tipo": "desayuno",
+    "dietas": [
+      "normal",
+      "vegetariano"
+    ],
+    "name": "Avena Clásica con Manzana y Nueces",
+    "calBase": 400,
+    "prot": 12,
+    "carb": 60,
+    "gras": 12,
+    "glutenFree": false,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Avena tradicional",
+        "baseQty": 60,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Leche descremada (ej. Soprole/Colun)",
+        "baseQty": 200,
+        "unidad": "ml"
+      },
+      {
+        "nombre": "Manzana verde picada",
+        "baseQty": 100,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Nueces mariposa",
+        "baseQty": 15,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "tipo": "desayuno",
+    "dietas": [
+      "keto",
+      "lowcarb"
+    ],
+    "name": "Queso Fresco con Jamón de Pavo",
+    "calBase": 300,
+    "prot": 28,
+    "carb": 3,
+    "gras": 18,
+    "glutenFree": true,
+    "isVolume": false,
+    "isDense": true,
+    "ingredientes": [
+      {
+        "nombre": "Queso fresco tipo Colun",
+        "baseQty": 120,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Jamón de pavo cocido",
+        "baseQty": 80,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Aceite de oliva (toque)",
+        "baseQty": 5,
+        "unidad": "ml"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "tipo": "desayuno",
+    "dietas": [
+      "vegano"
+    ],
+    "name": "Pan Hallulla Integral con Hummus",
+    "calBase": 380,
+    "prot": 14,
+    "carb": 55,
+    "gras": 12,
+    "glutenFree": false,
+    "isVolume": false,
+    "isDense": true,
+    "ingredientes": [
+      {
+        "nombre": "Hallulla integral",
+        "baseQty": 1,
+        "unidad": "unidades"
+      },
+      {
+        "nombre": "Hummus casero de garbanzos",
+        "baseQty": 60,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Semillas de sésamo/linaza",
+        "baseQty": 10,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "tipo": "desayuno",
+    "dietas": [
+      "normal",
+      "vegetariano",
+      "lowcarb"
+    ],
+    "name": "Yogur Proteico con Almendras",
+    "calBase": 320,
+    "prot": 25,
+    "carb": 15,
+    "gras": 16,
+    "glutenFree": true,
+    "isVolume": false,
+    "isDense": true,
+    "ingredientes": [
+      {
+        "nombre": "Yogur Protein (ej. Soprole/Quillayes)",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Almendras naturales",
+        "baseQty": 30,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "tipo": "desayuno",
+    "dietas": [
+      "vegano",
+      "lowcarb"
+    ],
+    "name": "Tofu Revuelto tipo Huevo",
+    "calBase": 350,
+    "prot": 22,
+    "carb": 10,
+    "gras": 22,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Tofu firme",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Cúrcuma y especias",
+        "baseQty": 5,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Champiñones",
+        "baseQty": 80,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Aceite de oliva",
+        "baseQty": 10,
+        "unidad": "ml"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "tipo": "almuerzo",
+    "dietas": [
+      "normal"
+    ],
+    "name": "Charquicán de Vacuno Magro",
+    "calBase": 550,
+    "prot": 35,
+    "carb": 65,
+    "gras": 15,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Posta rosada picada",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Papa cocida molida",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Zapallo camote molido",
+        "baseQty": 100,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Choclo, porotos verdes, zanahoria",
+        "baseQty": 80,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "tipo": "almuerzo",
+    "dietas": [
+      "normal",
+      "lowcarb"
+    ],
+    "name": "Reineta a la Plancha con Ensalada Chilena",
+    "calBase": 450,
+    "prot": 45,
+    "carb": 12,
+    "gras": 22,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Filete de Reineta",
+        "baseQty": 200,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Tomate",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Cebolla en pluma",
+        "baseQty": 50,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Aceite de maravilla/oliva",
+        "baseQty": 15,
+        "unidad": "ml"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "tipo": "almuerzo",
+    "dietas": [
+      "normal"
+    ],
+    "name": "Porotos con Riendas (Versión Fit)",
+    "calBase": 650,
+    "prot": 30,
+    "carb": 95,
+    "gras": 10,
+    "glutenFree": false,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Porotos hallados crudos",
+        "baseQty": 80,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Fideos tallarines crudos",
+        "baseQty": 40,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Zapallo camote",
+        "baseQty": 100,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Sofrito (cebolla, ajo, pimentón)",
+        "baseQty": 50,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "tipo": "almuerzo",
+    "dietas": [
+      "normal",
+      "lowcarb"
+    ],
+    "name": "Pollo Arvejado con Coliflor",
+    "calBase": 480,
+    "prot": 55,
+    "carb": 25,
+    "gras": 15,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Pechuga o trutro de pollo magro",
+        "baseQty": 200,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Arvejas cocidas",
+        "baseQty": 80,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Zanahoria",
+        "baseQty": 50,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Arroz de Coliflor",
+        "baseQty": 150,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "tipo": "almuerzo",
+    "dietas": [
+      "normal"
+    ],
+    "name": "Lentejas Guisadas con Arroz",
+    "calBase": 600,
+    "prot": 32,
+    "carb": 90,
+    "gras": 8,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Lentejas crudas",
+        "baseQty": 80,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Arroz blanco crudo",
+        "baseQty": 40,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Zanahoria y cebolla sofrito",
+        "baseQty": 50,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "tipo": "almuerzo",
+    "dietas": [
+      "keto"
+    ],
+    "name": "Lomo Liso con Mantequilla y Espárragos",
+    "calBase": 650,
+    "prot": 50,
+    "carb": 5,
+    "gras": 45,
+    "glutenFree": true,
+    "isVolume": false,
+    "isDense": true,
+    "ingredientes": [
+      {
+        "nombre": "Lomo liso de vacuno",
+        "baseQty": 200,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Espárragos o Brócoli",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Mantequilla (para dorar)",
+        "baseQty": 15,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "tipo": "almuerzo",
+    "dietas": [
+      "normal"
+    ],
+    "name": "Fideos con Salsa de Carne (Boloñesa)",
+    "calBase": 700,
+    "prot": 45,
+    "carb": 90,
+    "gras": 18,
+    "glutenFree": false,
+    "isVolume": false,
+    "isDense": true,
+    "ingredientes": [
+      {
+        "nombre": "Fideos o espaguetis crudos",
+        "baseQty": 100,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Carne molida magra (ej. 4% grasa)",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Salsa de tomate casera",
+        "baseQty": 150,
+        "unidad": "ml"
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "tipo": "almuerzo",
+    "dietas": [
+      "vegano"
+    ],
+    "name": "Salteado de Tofu con Fideos de Arroz",
+    "calBase": 550,
+    "prot": 28,
+    "carb": 75,
+    "gras": 15,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Tofu firme",
+        "baseQty": 200,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Fideos de arroz crudos",
+        "baseQty": 80,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Salsa de soya y verduras",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Aceite de sésamo",
+        "baseQty": 5,
+        "unidad": "ml"
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "tipo": "cena",
+    "dietas": [
+      "normal",
+      "lowcarb"
+    ],
+    "name": "Salpicón de Jurel",
+    "calBase": 400,
+    "prot": 35,
+    "carb": 25,
+    "gras": 15,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Jurel al natural (lata, drenado)",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Papas cocidas en cubos",
+        "baseQty": 100,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Lechuga picada",
+        "baseQty": 100,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Aceite y limón",
+        "baseQty": 10,
+        "unidad": "ml"
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "tipo": "cena",
+    "dietas": [
+      "normal",
+      "lowcarb"
+    ],
+    "name": "Ensalada con Pollo Asado",
+    "calBase": 450,
+    "prot": 45,
+    "carb": 15,
+    "gras": 20,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Pechuga de pollo asada",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Lechuga costina",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Semillas surtidas",
+        "baseQty": 20,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Yogurt natural (aderezo)",
+        "baseQty": 30,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "tipo": "cena",
+    "dietas": [
+      "keto",
+      "lowcarb"
+    ],
+    "name": "Atún con Mayonesa y Palta",
+    "calBase": 500,
+    "prot": 35,
+    "carb": 8,
+    "gras": 35,
+    "glutenFree": true,
+    "isVolume": false,
+    "isDense": true,
+    "ingredientes": [
+      {
+        "nombre": "Lomitos de atún al agua",
+        "baseQty": 160,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Palta Hass",
+        "baseQty": 80,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Mayonesa",
+        "baseQty": 15,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Apio picado",
+        "baseQty": 50,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "tipo": "cena",
+    "dietas": [
+      "normal",
+      "vegetariano"
+    ],
+    "name": "Tortilla de Zapallo Italiano",
+    "calBase": 400,
+    "prot": 22,
+    "carb": 15,
+    "gras": 25,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Zapallo italiano rallado",
+        "baseQty": 200,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Huevos enteros",
+        "baseQty": 3,
+        "unidad": "unidades"
+      },
+      {
+        "nombre": "Cebolla",
+        "baseQty": 30,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Aceite",
+        "baseQty": 5,
+        "unidad": "ml"
+      }
+    ]
+  },
+  {
+    "id": 20,
+    "tipo": "cena",
+    "dietas": [
+      "vegano"
+    ],
+    "name": "Ceviche de Champiñones",
+    "calBase": 380,
+    "prot": 12,
+    "carb": 60,
+    "gras": 10,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Champiñones frescos",
+        "baseQty": 200,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Quinoa cocida",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Cilantro, limón, cebolla",
+        "baseQty": 50,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Aceite de oliva",
+        "baseQty": 5,
+        "unidad": "ml"
+      }
+    ]
+  },
+  {
+    "id": 21,
+    "tipo": "cena",
+    "dietas": [
+      "normal"
+    ],
+    "name": "Fajitas de Posta",
+    "calBase": 550,
+    "prot": 40,
+    "carb": 50,
+    "gras": 18,
+    "glutenFree": false,
+    "isVolume": false,
+    "isDense": true,
+    "ingredientes": [
+      {
+        "nombre": "Posta picada en tiras",
+        "baseQty": 150,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Tortillas tipo Rapiditas",
+        "baseQty": 2,
+        "unidad": "unidades"
+      },
+      {
+        "nombre": "Pimentón y cebolla",
+        "baseQty": 80,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Palta molida",
+        "baseQty": 40,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "tipo": "snack",
+    "dietas": [
+      "normal",
+      "vegetariano",
+      "lowcarb"
+    ],
+    "name": "Batido de Whey Protein",
+    "calBase": 200,
+    "prot": 30,
+    "carb": 5,
+    "gras": 3,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Proteína Whey",
+        "baseQty": 1.5,
+        "unidad": "scoops"
+      },
+      {
+        "nombre": "Agua",
+        "baseQty": 300,
+        "unidad": "ml"
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "tipo": "snack",
+    "dietas": [
+      "normal",
+      "vegetariano"
+    ],
+    "name": "Pan con Quesillo",
+    "calBase": 250,
+    "prot": 15,
+    "carb": 35,
+    "gras": 5,
+    "glutenFree": false,
+    "isVolume": false,
+    "isDense": true,
+    "ingredientes": [
+      {
+        "nombre": "Pan de molde integral",
+        "baseQty": 2,
+        "unidad": "rebanadas"
+      },
+      {
+        "nombre": "Quesillo",
+        "baseQty": 60,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Mermelada light",
+        "baseQty": 20,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 24,
+    "tipo": "snack",
+    "dietas": [
+      "vegano"
+    ],
+    "name": "Galletas de Arroz y Maní",
+    "calBase": 300,
+    "prot": 8,
+    "carb": 35,
+    "gras": 14,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Galletas de arroz inflado",
+        "baseQty": 3,
+        "unidad": "unidades"
+      },
+      {
+        "nombre": "Mantequilla de maní natural",
+        "baseQty": 25,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 25,
+    "tipo": "snack",
+    "dietas": [
+      "keto",
+      "lowcarb",
+      "vegetariano"
+    ],
+    "name": "Mix de Frutos Secos",
+    "calBase": 350,
+    "prot": 12,
+    "carb": 8,
+    "gras": 32,
+    "glutenFree": true,
+    "isVolume": false,
+    "isDense": true,
+    "ingredientes": [
+      {
+        "nombre": "Maní tostado sin sal",
+        "baseQty": 30,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Nueces/Almendras",
+        "baseQty": 30,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 26,
+    "tipo": "snack",
+    "dietas": [
+      "normal",
+      "vegetariano"
+    ],
+    "name": "Yogur con Plátano",
+    "calBase": 250,
+    "prot": 12,
+    "carb": 45,
+    "gras": 2,
+    "glutenFree": true,
+    "isVolume": true,
+    "isDense": false,
+    "ingredientes": [
+      {
+        "nombre": "Yogur descremado",
+        "baseQty": 1,
+        "unidad": "unidades"
+      },
+      {
+        "nombre": "Plátano chileno",
+        "baseQty": 1,
+        "unidad": "unidades"
+      }
+    ]
+  },
+  {
+    "id": 27,
+    "tipo": "snack",
+    "dietas": [
+      "keto",
+      "lowcarb"
+    ],
+    "name": "Rollitos Jamón Queso",
+    "calBase": 280,
+    "prot": 22,
+    "carb": 3,
+    "gras": 20,
+    "glutenFree": true,
+    "isVolume": false,
+    "isDense": true,
+    "ingredientes": [
+      {
+        "nombre": "Queso Gauda/Mantecoso",
+        "baseQty": 50,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Jamón de Pavo",
+        "baseQty": 80,
+        "unidad": "g"
+      }
+    ]
+  },
+  {
+    "id": 28,
+    "tipo": "snack",
+    "dietas": [
+      "normal"
+    ],
+    "name": "Batido de Avena Gainer",
+    "calBase": 450,
+    "prot": 20,
+    "carb": 75,
+    "gras": 8,
+    "glutenFree": false,
+    "isVolume": false,
+    "isDense": true,
+    "ingredientes": [
+      {
+        "nombre": "Avena tradicional",
+        "baseQty": 50,
+        "unidad": "g"
+      },
+      {
+        "nombre": "Plátano",
+        "baseQty": 1,
+        "unidad": "unidades"
+      },
+      {
+        "nombre": "Leche",
+        "baseQty": 300,
+        "unidad": "ml"
+      },
+      {
+        "nombre": "Miel",
+        "baseQty": 15,
+        "unidad": "g"
+      }
+    ]
+  }
+]
