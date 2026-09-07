@@ -82,7 +82,7 @@
 
   <header>
     <img src="logo.png" alt="IronCore Nutrition" class="logo-img">
-    <p>Elite Performance System (Cloud)</p>
+    <p>⚡ IRONCORE // PRE-ALFA TESTNET (ENV)</p>
     <div id="user-welcome-box" style="display: none; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;">
       <img id="user-avatar" src="" alt="Avatar" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--primary); display: none; object-fit: cover; background: #1a2130;">
       <span style="font-size: 11px; font-weight: 700; color: #fff;">Bienvenido, <b id="user-display-name" style="color: var(--primary);">Guerrero</b></span>
@@ -192,8 +192,6 @@
       </div>
 
       <div id="tab-rutina" class="sub-tab-train active">
-        
-        <!-- FORMULARIO GENERADOR DE RUTINAS -->
         <div class="card" id="workout-generator-card" style="text-align: left; background: linear-gradient(145deg, #141a26 0%, #0b0f17 100%); border: 1px solid rgba(0,229,255,0.2);">
           <h3 style="color: #00e5ff; margin-top:0;">Planificación Táctica</h3>
           <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">La IA adaptará los ejercicios según tu equipamiento.</p>
@@ -214,24 +212,19 @@
           
           <button id="btn-generar-rutina" class="btn btn-primary" style="width: 100%; margin-top: 25px; box-shadow: 0 10px 20px rgba(0,229,255,0.3); font-size: 14px;">Generar Rutina ⚔️</button>
           
-          <!-- HISTORIAL DE HOY (Accesible desde aquí si no generas plan) -->
           <div class="log" style="margin-top: 25px;"><h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;">Bitácora de Hoy</h3><ul id="lista-entrenos"></ul></div>
           <button id="btn-registrar-serie" class="btn btn-secondary" style="width: 100%; margin-top: 15px; font-size:11px;">+ Agregar Serie Manual</button>
         </div>
 
-        <!-- MODO ENTRENAMIENTO EN VIVO -->
         <div id="workout-live-container" style="display: none;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 15px;">
             <h3 style="color: #fff; margin: 0; font-size: 16px;">Modo Foco Activado</h3>
             <button id="btn-cancel-workout" class="btn-clear-history">Descartar</button>
           </div>
-          
           <div id="rutina-generada-lista"></div>
-          
           <button id="btn-start-workout" class="btn btn-primary" style="width:100%; margin-top:20px; font-size:16px;">🔥 COMENZAR ENTRENAMIENTO</button>
           <button id="btn-finish-workout" class="btn btn-primary" style="width:100%; margin-top:20px; font-size:16px; background: linear-gradient(90deg, #ff3366 0%, #ff0044 100%); display:none; box-shadow: 0 5px 15px rgba(255,51,102,0.4);">Terminar y Guardar 💾</button>
         </div>
-
       </div>
 
       <div id="tab-rango" class="sub-tab-train" style="display: none;">
@@ -277,6 +270,14 @@
       <div class="card" style="text-align: left; margin-top: 20px;">
         <h3 style="color: #00e5ff; margin-top:0;">Historial de Check-ins</h3>
         <div id="checkin-history-container"><p style="font-size: 13px; color: var(--text-muted);">No hay check-ins registrados todavía.</p></div>
+      </div>
+    </section>
+
+    <!-- 👥 COFRADÍA (SOCIAL) -->
+    <section id="page-social" class="page" style="display: none;">
+      <div style="max-width: 600px; margin: 0 auto; padding-bottom: 80px;">
+        <h2 class="page-title">Cofradía & Muro Social</h2>
+        <div id="social-tab-content-root"></div>
       </div>
     </section>
 
@@ -332,7 +333,6 @@
     <button class="btn btn-secondary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cancelar</button>
   </div>
 
-  <!-- NUEVO MODAL: REEMPLAZO DE EJERCICIO -->
   <div id="sheet-swap-exercise" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
     <h3>🔄 Alternativas</h3>
     <p style="font-size: 11px; color: var(--text-muted); text-align:center; margin-bottom:15px;">Opciones para el mismo grupo muscular y equipamiento.</p>
@@ -438,14 +438,14 @@
     <button class="nav-item" data-target="page-diet"><span class="icon">🍎</span><span class="text">Dieta</span></button>
     <button class="nav-item" data-target="page-training"><span class="icon">⚔️</span><span class="text">Combate</span></button>
     <button class="nav-item" data-target="page-history"><span class="icon">📜</span><span class="text">Historial</span></button>
+    <button class="nav-item" data-target="page-social"><span class="icon">👥</span><span class="text">Cofradía</span></button>
     <button class="nav-item" data-target="page-ai"><span class="icon">👹</span><span class="text">Shōgun AI</span></button>
     <button class="nav-item" data-target="page-profile"><span class="icon">⚙️</span><span class="text">Perfil</span></button>
   </nav>
+
   <!-- Importación dinámica Anti-Caché del motor principal -->
   <script type="module">
-    // Esto obliga al navegador a descargar siempre el script fresco añadiéndole los milisegundos actuales
     import(`./script.js?v=${Date.now()}`);
   </script>
-</body>
 </body>
 </html>
