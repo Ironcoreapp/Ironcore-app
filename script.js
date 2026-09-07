@@ -121,7 +121,6 @@ window.seleccionarMetaOb = function(elem) {
   userProfile.metaObj = parseInt(elem.getAttribute('data-val')); 
 };
 
-// FINALIZAR ONBOARDING CON LECTURA PROTEGIDA (CORRIGE EL ERROR DE "SELLAR RITUAL")
 window.finalizarOnboarding = async function() {
   const nickInput = document.getElementById('ob-nickname');
   const edadInput = document.getElementById('ob-edad');
@@ -234,18 +233,16 @@ function actualizarUIPerfil() {
   const ca = document.getElementById('profile-card-avatar'); if(ca) ca.src = generarAvatarPorRango(userProfile.nickname, currentRankName); 
 }
 
-// --- BASES DE DATOS EXTERNAS (ALIMENTOS JSON Y EJERCICIOS JSON DIRECTO EN ESPAÑOL) ---
+// --- BASES DE DATOS EXTERNAS ---
 let oracleDB = []; 
 let exercisesDB = [];
 
 async function inicializarBases() {
-  // 1. Cargar Alimentos JSON
   try {
     const resFood = await fetch('alimentos.json?v=' + Date.now());
     if (resFood.ok) oracleDB = await resFood.json();
   } catch (error) { console.error("Error Alimentos JSON:", error); }
   
-  // 2. Cargar Ejercicios JSON (Apuntando a ejercicios.json con bypass de caché)
   try {
     const resEx = await fetch('ejercicios.json?v=' + Date.now());
     if (!resEx.ok) throw new Error('No se pudo cargar ejercicios.json (HTTP ' + resEx.status + ')');
@@ -481,25 +478,40 @@ window.registrarComidaPlaneada = async function(encodedData) {
   showToast(`✅ Registrado al instante.`); 
 };
 
-// --- LECTOR BARRAS Y BUSCADOR OPENFOODFACTS ---
-let html5QrcodeScanner = null;
+// --- SCANNER DIRECTO CON CAMARA TRASERA (NUEVA LÓGICA) ---
+let html5QrCode = null;
 document.getElementById('btn-foto')?.addEventListener('click', () => { 
   window.openSheet('sheet-scanner'); 
-  if (!html5QrcodeScanner) { 
-    html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false); 
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure); 
+  if (!html5QrCode) { 
+    html5QrCode = new Html5Qrcode("qr-reader"); 
   } 
+  
+  const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+  
+  html5QrCode.start(
+    { facingMode: "environment" }, 
+    config, 
+    onScanSuccess, 
+    onScanFailure
+  ).catch(err => {
+    console.error("Error iniciando cámara trasera:", err);
+    showToast("⚠️ No se pudo iniciar la cámara trasera.");
+  });
 });
 
 window.closeScanner = function() { 
-  if(html5QrcodeScanner) { 
-    html5QrcodeScanner.clear().catch(e => console.error(e)); 
-    html5QrcodeScanner = null; 
+  if (html5QrCode && html5QrCode.isScanning) { 
+    html5QrCode.stop().then(() => {
+      html5QrCode.clear(); 
+    }).catch(e => console.error(e));
   } 
   window.closeSheet(); 
 };
 
-async function onScanSuccess(decodedText, decodedResult) { 
+async function onScanSuccess(decodedText) { 
+  if (html5QrCode && html5QrCode.isScanning) { 
+    await html5QrCode.stop();
+  }
   window.closeScanner(); 
   showToast(`🔍 Buscando ${decodedText}...`); 
   try { 
@@ -527,7 +539,7 @@ async function onScanSuccess(decodedText, decodedResult) {
     } 
   } catch (err) { showToast('⚠️ Error de conexión.'); } 
 }
-function onScanFailure(error) { }
+function onScanFailure(error) { /* Ignorar errores cuadro por cuadro */ }
 
 let currentSearchFoodBase = null;
 const fallbackDB = [ 
@@ -633,6 +645,7 @@ document.getElementById('btn-confirm-food-final')?.addEventListener('click', asy
 // ============================================================================
 let currentWorkoutRoutine = [];
 let workoutSwapTargetIndex = -1;
+let activeTimers = {}; // Guarda los cronómetros activos
 
 document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
   if(exercisesDB.length === 0) { showToast('⚠️ Espera, sincronizando ejercicios...'); return; }
@@ -650,7 +663,6 @@ document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
       return matchGrupo && matchEquip;
     });
     if(valid.length === 0) {
-      // Si no encuentra por equipamiento estricto, busca solo por grupo para evitar vacíos
       const fallbackGrupo = exercisesDB.filter(ex => ex.grupo?.toLowerCase() === grupoReq.toLowerCase());
       return fallbackGrupo.length > 0 ? fallbackGrupo[Math.floor(Math.random() * fallbackGrupo.length)] : null;
     }
@@ -665,6 +677,7 @@ document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
   structure.forEach(g => {
     let ex = getRandomEx(g);
     if(ex && !currentWorkoutRoutine.find(e => e.id === ex.id)) {
+      ex.loggedSets = []; // Reseteamos series limpias
       currentWorkoutRoutine.push(ex);
     }
   });
@@ -686,34 +699,116 @@ function renderizarRutina(isLiveMode) {
   
   currentWorkoutRoutine.forEach((ex, idx) => {
     const displaySwap = isLiveMode ? 'none' : 'block';
-    const displayInputs = isLiveMode ? 'grid' : 'none';
+    const displayInputs = isLiveMode ? 'block' : 'none';
     
-    // Si la imagen falla o está vacía, genera una tarjeta con el nombre del ejercicio
     const fallbackNeon = `https://dummyimage.com/400x400/141a26/00e5ff&text=${encodeURIComponent(ex.nombre)}`;
     const imgSource = ex.imagen && ex.imagen.trim() !== "" ? ex.imagen : fallbackNeon;
 
-    container.innerHTML += `
+    ex.loggedSets = ex.loggedSets || []; 
+
+    let html = `
       <div class="plan-meal-card workout-card" data-index="${idx}" data-name="${ex.nombre}">
         <div class="plan-meal-header">
           <span class="plan-meal-title">${ex.nombre}</span>
           <button class="btn-swap" style="display:${displaySwap};" onclick="window.abrirMenuReemplazoEj(${idx})">🔄 Cambiar</button>
         </div>
-        <div style="display:flex; gap:12px; align-items:center;">
+        <div style="display:flex; gap:12px; align-items:center; margin-bottom: 10px;">
           <img src="${imgSource}" onerror="this.onerror=null; this.src='${fallbackNeon}';" style="width:70px; height:70px; border-radius:10px; object-fit:cover; border:1px solid rgba(0,229,255,0.3);">
           <div>
             <p style="font-size:11px; color:var(--primary); margin:0 0 5px 0; font-weight:800; text-transform:uppercase;">🎯 ${ex.musculoPrincipal || 'General'}</p>
             <p style="font-size:11px; color:#a0aec0; margin:0; line-height:1.4;">💡 ${ex.tips || 'Mantén la técnica estricta.'}</p>
           </div>
         </div>
-        <div class="workout-inputs" style="display:${displayInputs};">
-          <div><label style="font-size:9px;">Series (Sets)</label><input type="number" class="neon-input ex-sets" placeholder="Ej: 4"></div>
-          <div><label style="font-size:9px;">Repes</label><input type="number" class="neon-input ex-reps" placeholder="Ej: 10"></div>
-          <div><label style="font-size:9px;">Peso (Kg)</label><input type="number" class="neon-input ex-weight" placeholder="Ej: 80"></div>
-        </div>
-      </div>
     `;
+
+    // Interfaz del Modo En Vivo (Cargas Progresivas + Cronómetro)
+    if (isLiveMode) {
+      let seriesHTML = ex.loggedSets.map((s, i) => `<li style="margin-bottom:4px; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.05);">Serie ${i+1}: <span style="color:var(--primary); font-weight:800;">${s.reps} reps x ${s.peso} kg</span></li>`).join('');
+
+      html += `
+        <div class="workout-inputs" style="display:${displayInputs}; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px;">
+          <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <div style="flex:1;"><label style="font-size:9px; color:#a0aec0;">Repes</label><input type="number" id="reps-${idx}" class="neon-input" placeholder="Ej: 10"></div>
+            <div style="flex:1;"><label style="font-size:9px; color:#a0aec0;">Peso (Kg)</label><input type="number" id="peso-${idx}" class="neon-input" placeholder="Ej: 50"></div>
+            <div style="flex:1;"><label style="font-size:9px; color:#a0aec0;">Descanso (seg)</label><input type="number" id="descanso-${idx}" class="neon-input" value="90"></div>
+          </div>
+          
+          <button class="btn-primary" style="width:100%; padding: 8px; font-size:12px; margin-bottom:10px;" onclick="window.registrarSerieIndividual(${idx})">✅ Registrar Serie</button>
+          
+          <ul id="lista-series-${idx}" style="list-style:none; padding:0; margin:0 0 10px 0; font-size:11px; color:#fff;">
+            ${seriesHTML}
+          </ul>
+
+          <div id="timer-container-${idx}" style="display:none; text-align:center; background: #1a2130; padding:10px; border-radius:8px; border: 1px dashed var(--primary);">
+            <span style="font-size:16px; font-weight:800; color:var(--primary); display:block; margin-bottom:8px;">⏱️ Descanso: <span id="time-left-${idx}">0</span>s</span>
+            <button class="btn-swap" style="width:100%; border-color:#ff3366; color:#ff3366;" onclick="window.terminarDescanso(${idx})">Terminar Descanso ⏹️</button>
+          </div>
+        </div>
+      `;
+    }
+
+    html += `</div>`;
+    container.innerHTML += html;
   });
 }
+
+// --- LÓGICA DE REGISTRO DE SERIES Y CRONÓMETRO ---
+window.registrarSerieIndividual = function(idx) {
+  const repsInput = document.getElementById(`reps-${idx}`);
+  const pesoInput = document.getElementById(`peso-${idx}`);
+  const descansoInput = document.getElementById(`descanso-${idx}`);
+
+  const reps = parseInt(repsInput.value);
+  const peso = parseFloat(pesoInput.value) || 0;
+  const descanso = parseInt(descansoInput.value) || 90;
+
+  if(!reps || reps <= 0) {
+    showToast('⚠️ Ingresa las repeticiones logradas.');
+    return;
+  }
+
+  if(!currentWorkoutRoutine[idx].loggedSets) currentWorkoutRoutine[idx].loggedSets = [];
+  currentWorkoutRoutine[idx].loggedSets.push({ reps, peso });
+
+  const lista = document.getElementById(`lista-series-${idx}`);
+  const numSerie = currentWorkoutRoutine[idx].loggedSets.length;
+  lista.innerHTML += `<li style="margin-bottom:4px; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.05);">Serie ${numSerie}: <span style="color:var(--primary); font-weight:800;">${reps} reps x ${peso} kg</span></li>`;
+
+  repsInput.value = ''; // Limpiar campo
+  window.iniciarDescanso(idx, descanso);
+};
+
+window.iniciarDescanso = function(idx, segundos) {
+  if(activeTimers[idx]) clearInterval(activeTimers[idx].interval);
+
+  const container = document.getElementById(`timer-container-${idx}`);
+  const textSpan = document.getElementById(`time-left-${idx}`);
+
+  container.style.display = 'block';
+  let timeLeft = segundos;
+  textSpan.innerText = timeLeft;
+
+  activeTimers[idx] = {
+    interval: setInterval(() => {
+      timeLeft--;
+      if(timeLeft <= 0) {
+        window.terminarDescanso(idx);
+        showToast('⏰ ¡Tiempo terminado! A la batalla de nuevo.');
+      } else {
+        textSpan.innerText = timeLeft;
+      }
+    }, 1000)
+  };
+};
+
+window.terminarDescanso = function(idx) {
+  if(activeTimers[idx]) {
+    clearInterval(activeTimers[idx].interval);
+    delete activeTimers[idx];
+  }
+  const container = document.getElementById(`timer-container-${idx}`);
+  if(container) container.style.display = 'none';
+};
 
 window.abrirMenuReemplazoEj = function(index) {
   workoutSwapTargetIndex = index;
@@ -744,6 +839,7 @@ window.abrirMenuReemplazoEj = function(index) {
 window.confirmarReemplazoEj = function(encodedData) {
   if(workoutSwapTargetIndex > -1) {
     const newEx = JSON.parse(decodeURIComponent(encodedData));
+    newEx.loggedSets = []; 
     currentWorkoutRoutine[workoutSwapTargetIndex] = newEx;
     renderizarRutina(false);
     window.closeSheet();
@@ -759,6 +855,9 @@ document.getElementById('btn-start-workout')?.addEventListener('click', () => {
 });
 
 document.getElementById('btn-cancel-workout')?.addEventListener('click', () => {
+  for (let idx in activeTimers) clearInterval(activeTimers[idx].interval); 
+  activeTimers = {};
+  
   document.getElementById('workout-live-container').style.display = 'none';
   document.getElementById('workout-generator-card').style.display = 'block';
   document.getElementById('btn-start-workout').style.display = 'block';
@@ -766,22 +865,27 @@ document.getElementById('btn-cancel-workout')?.addEventListener('click', () => {
   currentWorkoutRoutine = [];
 });
 
-document.getElementById('btn-finish-workout')?.addEventListener('click', async () => {
-  const cards = document.querySelectorAll('.workout-card');
+// GUARDADO ANTI-DUPLICADO DE RUTINA
+document.getElementById('btn-finish-workout')?.addEventListener('click', async function() {
+  if (this.disabled) return; // Evita el doble click
+  this.disabled = true;
+
   let validExercises = 0;
+  for(let i = 0; i < currentWorkoutRoutine.length; i++) {
+    const ex = currentWorkoutRoutine[i];
+    
+    if(ex.loggedSets && ex.loggedSets.length > 0) {
+      const totalSets = ex.loggedSets.length;
+      const detalles = ex.loggedSets.map((s, idx) => `S${idx+1}: ${s.reps}x${s.peso}kg`).join(' | ');
+      const weightHighestOrLast = ex.loggedSets[ex.loggedSets.length - 1].peso; 
 
-  for(let card of cards) {
-    const name = card.getAttribute('data-name');
-    const sets = card.querySelector('.ex-sets')?.value;
-    const reps = card.querySelector('.ex-reps')?.value;
-    const weight = card.querySelector('.ex-weight')?.value;
-
-    if(sets && sets > 0) {
-      let setsStr = `${sets} x ${reps || 'Max'}`;
-      await registrarEntrenoNube(name, setsStr, weight || 0, "N/A");
+      await registrarEntrenoNube(ex.nombre, `${totalSets} series (${detalles})`, weightHighestOrLast, "N/A");
       validExercises++;
     }
   }
+
+  for (let idx in activeTimers) clearInterval(activeTimers[idx].interval);
+  activeTimers = {};
 
   if(validExercises > 0) {
     showToast(`✅ Entrenamiento finalizado. ${validExercises} ejercicios guardados.`);
@@ -794,8 +898,10 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async (
   document.getElementById('btn-start-workout').style.display = 'block';
   document.getElementById('btn-finish-workout').style.display = 'none';
   currentWorkoutRoutine = [];
+  this.disabled = false; // Reactivamos el botón
 });
 
+// GUARDADO MANUAL ANTI-DUPLICADO
 document.getElementById('btn-registrar-serie')?.addEventListener('click', () => { 
   document.getElementById('work-name').value = ''; 
   document.getElementById('work-sets').value = ''; 
@@ -803,15 +909,25 @@ document.getElementById('btn-registrar-serie')?.addEventListener('click', () => 
   window.openSheet('sheet-workout'); 
 });
 
-document.getElementById('btn-confirm-workout')?.addEventListener('click', async () => { 
+document.getElementById('btn-confirm-workout')?.addEventListener('click', async function() { 
+  if (this.disabled) return; // Evita el doble click
+  this.disabled = true;
+
   const n = document.getElementById('work-name').value; 
   const s = document.getElementById('work-sets').value; 
   const w = document.getElementById('work-weight').value; 
   const r = document.getElementById('work-rpe').value || '8'; 
-  if(!n || !s) { showToast('⚠️ Completa los campos.'); return; } 
+  
+  if(!n || !s) { 
+    showToast('⚠️ Completa los campos.'); 
+    this.disabled = false;
+    return; 
+  } 
+  
   await registrarEntrenoNube(n, s, w || 0, r); 
   window.closeSheet(); 
   showToast('💪 Ejercicio guardado.'); 
+  this.disabled = false; // Reactivamos
 });
 
 // --- PERSISTENCIA Y DASHBOARD ---
