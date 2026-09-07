@@ -31,7 +31,6 @@
       </div>
       <div class="ob-viewport">
         <div class="ob-track" id="ob-track">
-          <!-- Paso 1: Identidad -->
           <div class="ob-step">
             <img id="ob-avatar" src="" alt="Avatar" class="ob-avatar-img">
             <label>Elige tu Apodo en el Dojo</label>
@@ -39,7 +38,6 @@
             <p style="font-size:10px; color:var(--text-muted); margin-top:10px;">Este será tu nombre en el Ranking Global.</p>
             <button class="btn btn-primary" style="width:100%; margin-top:25px;" onclick="window.moverOnboarding(1)">Siguiente ➔</button>
           </div>
-          <!-- Paso 2: Biometría -->
           <div class="ob-step">
             <label style="margin-top:0;">Género Base (TMB)</label>
             <div class="ob-gender-box">
@@ -57,22 +55,13 @@
               <button class="btn btn-primary" style="flex:2;" onclick="window.moverOnboarding(1)">Siguiente ➔</button>
             </div>
           </div>
-          <!-- Paso 3: Objetivos -->
           <div class="ob-step">
             <label style="margin-top:0;">¿Cuál es tu senda?</label>
             <div class="ob-goals-grid">
-              <div class="ob-goal-card" data-val="-500" onclick="window.seleccionarMetaOb(this)">
-                <span>🔥</span><b>Déficit Agresivo</b><br><small>Pérdida de peso rápida</small>
-              </div>
-              <div class="ob-goal-card" data-val="-300" onclick="window.seleccionarMetaOb(this)">
-                <span>🔪</span><b>Definición</b><br><small>Perder grasa, cuidar músculo</small>
-              </div>
-              <div class="ob-goal-card active" data-val="0" onclick="window.seleccionarMetaOb(this)">
-                <span>⚖️</span><b>Recomposición</b><br><small>Mantenimiento y fuerza</small>
-              </div>
-              <div class="ob-goal-card" data-val="300" onclick="window.seleccionarMetaOb(this)">
-                <span>💪</span><b>Volumen</b><br><small>Hipertrofia máxima</small>
-              </div>
+              <div class="ob-goal-card" data-val="-500" onclick="window.seleccionarMetaOb(this)"><span>🔥</span><b>Déficit Agresivo</b><br><small>Pérdida rápida</small></div>
+              <div class="ob-goal-card" data-val="-300" onclick="window.seleccionarMetaOb(this)"><span>🔪</span><b>Definición</b><br><small>Perder grasa</small></div>
+              <div class="ob-goal-card active" data-val="0" onclick="window.seleccionarMetaOb(this)"><span>⚖️</span><b>Recomposición</b><br><small>Mantenimiento</small></div>
+              <div class="ob-goal-card" data-val="300" onclick="window.seleccionarMetaOb(this)"><span>💪</span><b>Volumen</b><br><small>Hipertrofia</small></div>
             </div>
             <div style="display:flex; gap:10px; margin-top:25px;">
               <button class="btn btn-secondary" style="flex:1;" onclick="window.moverOnboarding(-1)">⬅ Atrás</button>
@@ -134,22 +123,21 @@
       <h2 class="page-title">Nutrición Inteligente</h2>
       <div class="tab-container">
         <button class="tab-btn-diet active" data-tab="tab-registro">Registro</button>
-        <button class="tab-btn-diet" data-tab="tab-plan">Oráculo Nutricional</button>
+        <button class="tab-btn-diet" data-tab="tab-plan">Oráculo Semanal</button>
       </div>
 
       <div id="tab-registro" class="sub-tab-diet active">
         <div class="actions">
-          <button id="btn-abrir-manual" class="btn btn-primary">🔍 Buscar Alimento (Manual)</button>
-          <button id="btn-foto" class="btn btn-secondary">📸 Escáner IA (Próximamente)</button>
+          <button id="btn-abrir-manual" class="btn btn-primary">🔍 Buscar Producto (Global)</button>
+          <button id="btn-foto" class="btn btn-secondary">📸 Lector de Código / Plato (Pronto)</button>
         </div>
         <div class="log"><h3>Historial de Hoy</h3><ul id="lista-comidas"></ul></div>
       </div>
 
-      <!-- ORÁCULO NUTRICIONAL (SEMANAL E IA) -->
       <div id="tab-plan" class="sub-tab-diet" style="display: none;">
         <div class="card" style="text-align: left;" id="oracle-form-card">
           <h3 style="color: #00e5ff; margin-top:0;">Motor de Inteligencia Clínica</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">La IA estructurará tus 7 días ajustados a <b id="oracle-target-cals">0</b> kcal/día, basándose en tu meta de <span id="oracle-target-goal" style="color:var(--primary); font-weight:800;">Mantenimiento</span>.</p>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">Estructura tus 7 días ajustados a <b id="oracle-target-cals">0</b> kcal/día, basándose en tu meta de <span id="oracle-target-goal" style="color:var(--primary); font-weight:800;">Mantenimiento</span>.</p>
           
           <label>Preferencia Dietética:</label>
           <select id="oracle-diet-type" class="neon-input" style="margin-top:5px;">
@@ -166,10 +154,14 @@
             <span style="font-size:13px; color:#fff; font-weight:600;">Libre de Gluten (Celíaco)</span>
           </div>
 
-          <label style="margin-top:15px;">Otras Alergias (Opcional):</label>
-          <input type="text" id="oracle-allergies" class="neon-input" placeholder="Ej: maní, lactosa, mariscos" style="margin-top:5px;">
+          <!-- UI DE ALERGIAS CON CHIPS -->
+          <label style="margin-top:15px;">Alergias o Exclusiones:</label>
+          <div style="position: relative;">
+            <input type="text" id="oracle-allergies-input" class="neon-input" placeholder="Ej: maní, lactosa (Presiona Enter)" style="margin-top:5px;">
+          </div>
+          <div id="allergy-tags-container" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;"></div>
           
-          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 20px; box-shadow: 0 0 15px var(--primary-glow);">Generar Plan con IA 🔮</button>
+          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 25px; box-shadow: 0 0 15px var(--primary-glow);">Generar Plan Semanal 🔮</button>
         </div>
         
         <div id="plan-resultado" style="display: none;">
@@ -189,7 +181,6 @@
           </select>
 
           <div id="comidas-plan" style="margin-top:15px;"></div>
-          
           <button class="btn btn-secondary" style="width:100%; margin-top:15px; border-color:#ffaa00; color:#ffaa00;" onclick="window.generarListaCompras()">🛒 Lista de Compras (7 Días)</button>
         </div>
       </div>
@@ -207,7 +198,6 @@
       <div id="tab-rutina" class="sub-tab-train active">
         <div class="card" style="text-align: left;">
           <h3 style="color: #00e5ff; margin-top:0;">Foco Semanal y Biblioteca</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Selecciona tu prioridad para ver los ejercicios recomendados:</p>
           <div class="focus-grid" id="focus-selector">
             <div class="focus-card active" data-focus="piernas">🦵 Piernas</div>
             <div class="focus-card" data-focus="superior">🦍 Tren Superior</div>
@@ -218,7 +208,7 @@
         </div>
         <div class="card" style="text-align: left;">
           <h3 style="color: #00e5ff; margin-top:0;">Cuaderno de Bitácora</h3>
-          <button id="btn-registrar-serie" class="btn btn-primary" style="width: 100%; margin-bottom: 15px;">+ Registrar Ejercicio Realizado</button>
+          <button id="btn-registrar-serie" class="btn btn-primary" style="width: 100%; margin-bottom: 15px;">+ Registrar Ejercicio</button>
           <div class="log"><h3 style="font-size: 12px; color: var(--text-muted);">Series de Hoy</h3><ul id="lista-entrenos"></ul></div>
         </div>
       </div>
@@ -236,12 +226,9 @@
         </div>
         <div class="card" style="text-align: left;">
           <h3 style="color: #00e5ff; margin-top:0;">Prueba de Fuerza (1RM)</h3>
-          <label style="margin-top:0;">Press de Banca (kg)</label>
-          <input type="number" id="rm-bench" class="neon-input" placeholder="Ej: 100">
-          <label>Sentadilla (kg)</label>
-          <input type="number" id="rm-squat" class="neon-input" placeholder="Ej: 140">
-          <label>Peso Muerto (kg)</label>
-          <input type="number" id="rm-deadlift" class="neon-input" placeholder="Ej: 180">
+          <label style="margin-top:0;">Press de Banca (kg)</label><input type="number" id="rm-bench" class="neon-input" placeholder="Ej: 100">
+          <label>Sentadilla (kg)</label><input type="number" id="rm-squat" class="neon-input" placeholder="Ej: 140">
+          <label>Peso Muerto (kg)</label><input type="number" id="rm-deadlift" class="neon-input" placeholder="Ej: 180">
           <button id="btn-calcular-rango" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Evaluar y Publicar al Ranking</button>
         </div>
       </div>
@@ -332,7 +319,8 @@
   </div>
 
   <div id="sheet-add-food" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
-    <h3>Base de Alimentos</h3>
+    <h3>Base Global (OpenFoodFacts)</h3>
+    <p style="font-size:11px; color:var(--text-muted); text-align:center;">Busca marcas reales (ej: Yogurt Colun, Avena Quaker)</p>
     <label style="margin-top:0;">Tiempo de Comida:</label>
     <select id="food-meal-time" class="neon-input" style="margin-top:5px;">
       <option value="Desayuno">☀️ Desayuno</option>
@@ -340,18 +328,25 @@
       <option value="Cena">🌙 Cena</option>
       <option value="Snack">🍎 Snack / Suplemento</option>
     </select>
-    <input type="text" id="food-search" class="neon-input" placeholder="🔍 Buscar (Pollo, Arroz, Avena...)">
-    <div id="food-results-list" style="margin-top: 15px; max-height: 130px; overflow-y: auto; text-align: left;"></div>
     
-    <div id="food-custom-section" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
-      <h4 style="color: var(--primary); margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase;">Ajustar Cantidad y Macros</h4>
-      <label style="margin-top:0;">Cantidad (g / scoops):</label>
+    <div style="display:flex; gap:10px;">
+      <input type="text" id="food-search" class="neon-input" placeholder="🔍 Buscar producto...">
+      <button id="btn-trigger-search" class="btn btn-primary" style="margin-top:5px; padding: 0 20px;">Ir</button>
+    </div>
+    
+    <div id="food-loading" style="display:none; text-align:center; font-size:12px; color:var(--primary); margin-top:15px;">Buscando en la base mundial... ⏳</div>
+    <div id="food-results-list" style="margin-top: 15px; max-height: 200px; overflow-y: auto; text-align: left;"></div>
+    
+    <div id="food-custom-section" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; display:none;">
+      <h4 style="color: var(--primary); margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase;">Ajustar Gramos (Basado en 100g)</h4>
+      <p id="food-selected-name" style="font-size:12px; font-weight:800; color:#fff; margin-bottom:10px;">--</p>
+      <label style="margin-top:0;">Gramos a consumir:</label>
       <input type="number" id="edit-qty" class="neon-input" value="100">
       <div class="macros-grid" style="margin-top: 8px;">
-        <div><label style="font-size:9px;">Kcal</label><input type="number" id="edit-cal" class="neon-input" placeholder="0"></div>
-        <div><label style="font-size:9px;">Prot (g)</label><input type="number" id="edit-prot" class="neon-input" placeholder="0"></div>
-        <div><label style="font-size:9px;">Carb (g)</label><input type="number" id="edit-carb" class="neon-input" placeholder="0"></div>
-        <div><label style="font-size:9px;">Gras (g)</label><input type="number" id="edit-gras" class="neon-input" placeholder="0"></div>
+        <div><label style="font-size:9px;">Kcal</label><input type="number" id="edit-cal" class="neon-input" readonly></div>
+        <div><label style="font-size:9px;">Prot (g)</label><input type="number" id="edit-prot" class="neon-input" readonly></div>
+        <div><label style="font-size:9px;">Carb (g)</label><input type="number" id="edit-carb" class="neon-input" readonly></div>
+        <div><label style="font-size:9px;">Gras (g)</label><input type="number" id="edit-gras" class="neon-input" readonly></div>
       </div>
       <button id="btn-confirm-food-final" class="btn btn-primary" style="width: 100%; margin-top: 18px;">Confirmar y Registrar</button>
     </div>
@@ -383,7 +378,6 @@
     <button id="btn-confirm-workout" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Guardar Serie</button>
   </div>
 
-  <!-- MODAL DE LISTA DE COMPRAS -->
   <div id="sheet-compras" class="bottom-sheet" style="max-height: 80vh; overflow-y: auto;">
     <h3>🛒 Lista de Compras</h3>
     <p style="font-size: 11px; color: var(--text-muted); margin-bottom:15px; text-align:center;">Ingredientes consolidados para la semana basados en tu Oráculo.</p>
