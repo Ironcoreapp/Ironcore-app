@@ -78,24 +78,82 @@ async function cargarDatosDesdeNube(uid) { if(!db) return; const docSnap = await
 function actualizarUIHeader() { document.getElementById('user-display-name').innerText = userProfile.nickname.toUpperCase(); const avatarHeader = document.getElementById('user-avatar'); avatarHeader.src = generarAvatarPorRango(userProfile.nickname, currentRankName); avatarHeader.style.display = 'inline-block'; document.getElementById('user-welcome-box').style.display = 'flex'; }
 function actualizarUIPerfil() { document.getElementById('profile-card-name').innerText = userProfile.nickname.toUpperCase(); document.getElementById('profile-val-peso').innerText = `${userProfile.peso} kg`; document.getElementById('profile-val-altura').innerText = `${userProfile.altura} cm`; document.getElementById('profile-val-edad').innerText = `${userProfile.edad} años`; document.getElementById('profile-val-genero').innerText = userProfile.genero === 'M' ? 'Hombre' : 'Mujer'; let labelMeta = "Mantenimiento"; if(userProfile.metaObj === -500) labelMeta = "Déficit Agresivo"; if(userProfile.metaObj === -300) labelMeta = "Definición"; if(userProfile.metaObj === 300) labelMeta = "Volumen"; document.getElementById('profile-card-goal').innerText = `Meta: ${labelMeta}`; document.getElementById('profile-card-avatar').src = generarAvatarPorRango(userProfile.nickname, currentRankName); }
 
-// --- BASES DE DATOS EXTERNAS (ALIMENTOS Y EJERCICIOS) ---
+// --- BASES DE DATOS EXTERNAS (ALIMENTOS JSON Y EJERCICIOS CSV DIRECTO) ---
 let oracleDB = []; 
 let exercisesDB = [];
 
 async function inicializarBases() {
+  // 1. Cargar Alimentos JSON
   try {
-    const noCacheUrlFood = 'alimentos.json?v=' + new Date().getTime();
-    const resFood = await fetch(noCacheUrlFood);
+    const resFood = await fetch('alimentos.json?v=' + new Date().getTime());
     if (resFood.ok) oracleDB = await resFood.json();
   } catch (error) { console.error("Error Alimentos JSON:", error); }
   
+  // 2. Cargar Ejercicios CSV Directo (Los 1.324 ejercicios)
   try {
-    const noCacheUrlEx = 'ejercicios.json?v=' + new Date().getTime();
-    const resEx = await fetch(noCacheUrlEx);
-    if (resEx.ok) exercisesDB = await resEx.json();
-  } catch (error) { console.error("Error Ejercicios JSON:", error); }
+    const resEx = await fetch('exercises.csv?v=' + new Date().getTime());
+    if (!resEx.ok) throw new Error('No se pudo cargar exercises.csv');
+    const csvText = await resEx.text();
+    exercisesDB = parseCSVToExercises(csvText);
+    console.log(`⚔️ Base de Combate sincronizada con ${exercisesDB.length} ejercicios desde el CSV.`);
+  } catch (error) { 
+    console.error("Error cargando CSV, usando respaldo local:", error);
+  }
 }
 window.addEventListener('DOMContentLoaded', inicializarBases);
+
+// --- CONVERSOR NATIVO DE CSV A OBJETOS DE ENTRENAMIENTO ---
+function parseCSVToExercises(text) {
+  const lines = text.split('\n');
+  if(lines.length < 2) return [];
+  
+  const headers = lines[0].split(',').map(h => h.trim());
+  let results = [];
+
+  const bodyMap = { 'waist': 'core', 'upper legs': 'piernas', 'back': 'espalda', 'lower legs': 'piernas', 'chest': 'pecho', 'upper arms': 'brazos', 'shoulders': 'hombros', 'lower arms': 'brazos', 'neck': 'hombros', 'cardio': 'cardio' };
+  const equipMap = { 'body weight': ['corporal'], 'cable': ['gimnasio', 'polea'], 'leverage machine': ['gimnasio', 'maquina'], 'assisted': ['gimnasio', 'maquina'], 'barbell': ['gimnasio', 'barra'], 'dumbbell': ['gimnasio', 'mancuernas'], 'medicine ball': ['gimnasio'], 'stability ball': ['gimnasio'], 'band': ['gimnasio'], 'rope': ['gimnasio', 'polea'], 'smith machine': ['gimnasio', 'maquina'], 'ez barbell': ['gimnasio', 'barra'], 'kettlebell': ['gimnasio', 'mancuernas'] };
+
+  for(let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if(!line) continue;
+    
+    // Parseo simple separado por comas respetando comillas básicas del CSV
+    const row = [];
+    let inQuotes = false; let current = '';
+    for(let char of line) {
+      if(char === '"') { inQuotes = !inQuotes; }
+      else if(char === ',' && !inQuotes) { row.push(current); current = ''; }
+      else { current += char; }
+    }
+    row.push(current);
+
+    if(row.length >= 5) {
+      let bodyPart = (row[0] || '').trim().toLowerCase();
+      let equipment = (row[1] || '').trim().toLowerCase();
+      let exId = parseInt(row[2]) || i;
+      let name = (row[3] || 'Ejercicio').trim().replace(/^"|"$/g, '');
+      let target = (row[4] || 'General').trim().replace(/^"|"$/g, '');
+      let instruction = row[7] ? row[7].trim().replace(/^"|"$/g, '') : "Mantén la técnica estricta.";
+
+      let grupo = bodyMap[bodyPart] || 'general';
+      let equip = equipMap[equipment] || ['gimnasio'];
+      let formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+      let imgText = formattedName.replace(/ /g, '+');
+
+      results.push({
+        id: exId,
+        nombre: formattedName,
+        grupo: grupo,
+        musculoPrincipal: target.charAt(0).toUpperCase() + target.slice(1),
+        equipamiento: equip,
+        nivel: "intermedio",
+        imagen: `https://dummyimage.com/400x400/141a26/00e5ff&text=${imgText}`,
+        tips: instruction !== "nan" ? instruction : "Controla la fase excéntrica del movimiento."
+      });
+    }
+  }
+  return results;
+}
 
 // --- ORÁCULO DE NUTRICIÓN (PREVIO) ---
 let weeklyPlan = []; let selectedDayIndex = 0; let activeAllergies = [];
