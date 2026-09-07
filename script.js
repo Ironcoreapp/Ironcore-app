@@ -51,7 +51,6 @@ const customCSS = `
 const styleEl = document.createElement('style'); styleEl.innerHTML = customCSS; document.head.appendChild(styleEl);
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Cambiar el texto viejo por el entorno Pre-Alfa
   const allElements = document.querySelectorAll('span, p, div, h1, h2, h3, h4, h5, h6');
   allElements.forEach(el => {
     if(el.childNodes.length === 1 && el.innerText && el.innerText.toUpperCase().includes('ELITE PERFORMANCE SYSTEM')) { 
@@ -68,43 +67,37 @@ document.addEventListener('DOMContentLoaded', () => {
     rankElem.classList.add('user-badge-mini'); streakElem.classList.add('user-badge-mini');
   }
 
-  // Inyectar Pestaña Social en la Navegación Principal si existe
-  const navContainer = document.querySelector('.bottom-nav, nav, .nav-bar') || document.body;
+  // Creación automática de la Pestaña Social en la barra de navegación inferior
+  const navContainer = document.querySelector('.bottom-nav') || document.querySelector('nav');
   if(navContainer && !document.getElementById('nav-social-tab')) {
-    // Buscamos si podemos añadir un botón de navegación social dinámico
     const socialNavBtn = document.createElement('button');
     socialNavBtn.id = 'nav-social-tab';
     socialNavBtn.className = 'nav-item';
     socialNavBtn.setAttribute('data-target', 'page-social');
     socialNavBtn.innerHTML = `<span>👥</span><span style="font-size:9px;">Cofradía</span>`;
-    
-    // Lo añadimos al menú de navegación si encaja, o crearemos la página dedicada
-    const existingNavs = document.querySelectorAll('.nav-item');
-    if(existingNavs.length > 0) {
-      existingNavs[existingNavs.length - 1].parentNode.appendChild(socialNavBtn);
-    }
+    navContainer.appendChild(socialNavBtn);
   }
 
-  // Inyectar Contenedor de la Pestaña Social en el DOM si no existe
+  // Creación del contenedor de la página social
   if(!document.getElementById('page-social')) {
-    const mainContainer = document.querySelector('.main-container, main, body');
+    const mainContainer = document.querySelector('main') || document.body;
     const socialPage = document.createElement('div');
     socialPage.id = 'page-social';
     socialPage.className = 'page';
     socialPage.style.display = 'none';
     socialPage.innerHTML = `
-      <div style="padding: 20px; max-width: 600px; margin: 0 auto;">
+      <div style="padding: 20px; max-width: 600px; margin: 0 auto; padding-bottom: 80px;">
         <h2 style="color:#00e5ff; font-weight:900; text-transform:uppercase; margin-bottom:15px; font-size:18px;">Cofradía & Muro Social</h2>
         <div id="social-tab-content-root"></div>
       </div>
     `;
     mainContainer.appendChild(socialPage);
 
-    // Listener para cambiar de página al hacer click en el botón de navegación social
-    socialNavBtn?.addEventListener('click', () => {
+    // Evento de navegación
+    document.getElementById('nav-social-tab')?.addEventListener('click', () => {
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
-      socialNavBtn.classList.add('active');
+      document.getElementById('nav-social-tab').classList.add('active');
       socialPage.classList.add('active');
       socialPage.style.display = 'block';
       cargarModuloSocialCompleto();
@@ -128,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// --- IMPORTACIÓN FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -430,7 +422,7 @@ function cargarModuloSocialCompleto() {
 
   root.innerHTML = `
     <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-      <h4 style="font-size: 12px; color: #00e5ff; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 12px;">🔍 Reclutar Amigos</h4>
+      <h4 style="font-size: 12px; color: #00e5ff; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 12px;">👥 Reclutar Amigos</h4>
       <div style="display:flex; gap:8px; margin-bottom:12px;">
         <input type="text" id="input-search-friend" class="iron-input-modern" placeholder="Apodo exacto del amigo..." style="font-size:12px; padding:8px 12px;">
         <button id="btn-search-friend" class="iron-btn-primary" style="width:auto; margin-top:0; padding:8px 15px; font-size:12px;">Buscar</button>
@@ -573,7 +565,6 @@ async function cargarMuroSocialPrivado() {
   const feedContainer = document.getElementById('social-feed-container');
   if(!feedContainer || !db) return;
   try {
-    // Obtenemos la lista de UIDs de nuestros amigos aceptados
     const friendsSnap = await getDocs(collection(db, "users", currentUser.uid, "friends"));
     let allowedUids = [currentUser.uid];
     friendsSnap.forEach(f => allowedUids.push(f.data().friendUid));
@@ -583,7 +574,6 @@ async function cargarMuroSocialPrivado() {
     let html = '';
     snaps.forEach(d => {
       let post = d.data();
-      // FILTRO DE PRIVACIDAD: Solo mostramos posts si el autor es amigo o tú mismo
       if(allowedUids.includes(post.uid)) {
         html += `
           <div class="social-post-card">
@@ -606,7 +596,6 @@ async function cargarMuroSocialPrivado() {
 }
 
 window.aceptarSolicitud = async function(reqDocId, fromUid, fromNickname) {
-  // Añadimos sin duplicar revisando si ya existe
   const friendsRef = collection(db, "users", currentUser.uid, "friends");
   const checkDup = await getDocs(query(friendsRef, where("friendUid", "==", fromUid)));
   if(checkDup.empty) {
@@ -623,7 +612,6 @@ window.eliminarAmigo = async function(friendDocId, friendUid) {
   if(!confirm("¿Estás seguro de eliminar a este guerrero de tu cofradía?")) return;
   await deleteDoc(doc(db, "users", currentUser.uid, "friends", friendDocId));
   
-  // Opcional: borrar el vínculo recíproco si se desea
   const reciprocalQuery = query(collection(db, "users", friendUid, "friends"), where("friendUid", "==", currentUser.uid));
   const recSnap = await getDocs(reciprocalQuery);
   recSnap.forEach(async (rDoc) => { await deleteDoc(rDoc.ref); });
@@ -638,7 +626,6 @@ window.verPerfilAmigoCompleto = async function(friendUid) {
   if(!docSnap.exists()) { showToast("⚠️ No se encontró al usuario."); return; }
   const data = docSnap.data();
 
-  // Consultar sus últimos entrenamientos guardados en Firebase
   const workoutsSnap = await getDocs(query(collection(db, "users", friendUid, "history"), orderBy("timestamp", "desc"), limit(5)));
   let workoutsHtml = '';
   workoutsSnap.forEach(w => {
@@ -671,7 +658,6 @@ window.verPerfilAmigoCompleto = async function(friendUid) {
   window.openSheet('sheet-workout');
 };
 
-// --- NOTIFICACIONES EN VIVO (POLLING DE SOLICITUDES) ---
 function iniciarNotificacionesEnVivo(uid) {
   if(window.notifInterval) clearInterval(window.notifInterval);
   window.notifInterval = setInterval(async () => {
@@ -685,7 +671,7 @@ function iniciarNotificacionesEnVivo(uid) {
       }
       window.lastPendientesCount = pendientes;
     } catch(e) {}
-  }, 15000); // Revisa cada 15 segundos sin recargar la página
+  }, 15000);
 }
 
 // --- MODO ENTRENAMIENTO EN VIVO ---
