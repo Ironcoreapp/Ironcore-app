@@ -1,5 +1,5 @@
 // ============================================================================
-// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM, DASHBOARD Y RED SOCIAL ---
+// --- MOTOR PRINCIPAL DE IRONCORE (PRE-ALFA TESTNET) ---
 // ============================================================================
 const customCSS = `
   header, .top-header, #main-header {
@@ -57,19 +57,22 @@ document.addEventListener('DOMContentLoaded', () => {
     rankElem.classList.add('user-badge-mini'); streakElem.classList.add('user-badge-mini');
   }
 
-  // Sincronizar el botón de la barra inferior con la pestaña social inyectada
-  const socialNavBtn = document.getElementById('nav-social-tab');
+  // Navegación inferior sincronizada
+  const socialNavBtn = document.getElementById('nav-social-tab') || document.querySelector('[data-target="page-social"]');
   const socialPage = document.getElementById('page-social');
-  if(socialNavBtn && socialPage) {
-    socialNavBtn.addEventListener('click', () => {
+  
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
-      socialNavBtn.classList.add('active');
-      socialPage.classList.add('active');
-      socialPage.style.display = 'block';
-      cargarModuloSocialCompleto();
+      btn.classList.add('active');
+      const tgt = document.getElementById(btn.getAttribute('data-target'));
+      if(tgt) { tgt.classList.add('active'); tgt.style.display = 'block'; }
+      if(btn.getAttribute('data-target') === 'page-social') {
+        cargarModuloSocialCompleto();
+      }
     });
-  }
+  });
 
   const genBtn = document.getElementById('btn-generar-rutina');
   if(genBtn && !document.getElementById('check-warmup')) {
@@ -266,48 +269,184 @@ function actualizarUIPerfil() {
   const ca = document.getElementById('profile-card-avatar'); if(ca) ca.src = generarAvatarPorRango(userProfile.nickname, currentRankName); 
 }
 
+// --- BASES DE DATOS EXTERNAS (DIETA Y EJERCICIOS) ---
+let oracleDB = []; 
 let exercisesDB = [];
+
 async function inicializarBases() {
-  try { const resEx = await fetch('ejercicios.json?v=' + Date.now()); if (!resEx.ok) throw new Error('No se pudo cargar ejercicios.json'); exercisesDB = await resEx.json(); console.log(`⚔️ Base sincronizada con ${exercisesDB.length} ejercicios.`); } catch (error) { console.error("Error cargando ejercicios.json:", error); }
+  try { 
+    const resFood = await fetch('alimentos.json?v=' + Date.now()); 
+    if (resFood.ok) oracleDB = await resFood.json(); 
+  } catch (error) { console.error("Error Alimentos JSON:", error); }
+
+  try { 
+    const resEx = await fetch('ejercicios.json?v=' + Date.now()); 
+    if (!resEx.ok) throw new Error('No se pudo cargar ejercicios.json'); 
+    exercisesDB = await resEx.json(); 
+    console.log(`⚔️ Base sincronizada con ${exercisesDB.length} ejercicios.`); 
+  } catch (error) { console.error("Error cargando ejercicios.json:", error); }
 }
 inicializarBases();
+
+// --- ORÁCULO DE NUTRICIÓN (PLAN SEMANAL) ---
+let weeklyPlan = []; let selectedDayIndex = 0; let activeAllergies = [];
+const allergyInput = document.getElementById('oracle-allergies-input'); const allergyContainer = document.getElementById('allergy-tags-container');
+if(allergyInput) { 
+  allergyInput.addEventListener('keypress', (e) => { 
+    if(e.key === 'Enter' || e.key === ',') { 
+      e.preventDefault(); 
+      const val = allergyInput.value.trim().toLowerCase(); 
+      if(val && !activeAllergies.includes(val)) { activeAllergies.push(val); renderAllergyChips(); } 
+      allergyInput.value = ''; 
+    } 
+  }); 
+}
+
+function renderAllergyChips() { 
+  if(!allergyContainer) return; 
+  allergyContainer.innerHTML = ''; 
+  activeAllergies.forEach((allergy, index) => { 
+    const chip = document.createElement('div'); 
+    chip.className = 'allergy-chip'; 
+    chip.innerHTML = `<span>${allergy}</span><span class="allergy-chip-close" onclick="window.removeAllergy(${index})">×</span>`; 
+    allergyContainer.appendChild(chip); 
+  }); 
+} 
+window.removeAllergy = function(index) { activeAllergies.splice(index, 1); renderAllergyChips(); };
+
+let dynamicDays = [];
+function calcularFechasSemana() { 
+  dynamicDays = []; 
+  const date = new Date(); 
+  const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']; 
+  const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']; 
+  for(let i=0; i<7; i++) { 
+    let d = new Date(date); 
+    d.setDate(d.getDate() + i); 
+    dynamicDays.push({ index: i, shortName: dayNames[d.getDay()], fullName: `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}` }); 
+  } 
+}
+
+document.getElementById('btn-generar-plan')?.addEventListener('click', () => { 
+  if (oracleDB.length === 0) { showToast("⚠️ Sincronizando alimentos... Espera un segundo."); return; } 
+  calcularFechasSemana(); 
+  generarPlanSemanal(); 
+  document.getElementById('oracle-form-card').style.display = 'none'; 
+  document.getElementById('plan-resultado').style.display = 'block'; 
+  showToast('🤖 Plan clínico generado con éxito.'); 
+});
+
+window.seleccionarDiaPlan = function(index) { 
+  selectedDayIndex = index; 
+  document.querySelectorAll('.day-chip').forEach(btn => btn.classList.remove('active')); 
+  document.querySelector(`.day-chip[data-day="${index}"]`)?.classList.add('active'); 
+  const ph = document.getElementById('plan-date-header'); if(ph) ph.innerText = dynamicDays[index].fullName; 
+  renderizarDiaSeleccionado(); 
+};
+
+function generarPlanSemanal() { 
+  weeklyPlan = []; 
+  const distribution = [ 
+    { tipo: 'desayuno', cals: metaCalorias * 0.25 }, 
+    { tipo: 'almuerzo', cals: metaCalorias * 0.35 }, 
+    { tipo: 'cena', cals: metaCalorias * 0.30 }, 
+    { tipo: 'snack', cals: metaCalorias * 0.10 } 
+  ]; 
+  for(let i=0; i<7; i++) { 
+    let dayMeals = distribution.map(slot => obtenerComidaAlgoritmo(slot.tipo, slot.cals, [])); 
+    weeklyPlan.push(dayMeals); 
+  } 
+  const scrollContainer = document.getElementById('day-selector-container'); 
+  if(scrollContainer) {
+    scrollContainer.innerHTML = ''; 
+    dynamicDays.forEach(day => { 
+      scrollContainer.innerHTML += `<button class="day-chip ${day.index === 0 ? 'active' : ''}" data-day="${day.index}" onclick="window.seleccionarDiaPlan(${day.index})">${day.shortName}</button>`; 
+    }); 
+  }
+  window.seleccionarDiaPlan(0); 
+}
+
+function filtrarBaseDatos(tipo, excludesId) { 
+  let currentDietType = document.getElementById('oracle-diet-type')?.value || 'normal'; 
+  let isCeliac = document.getElementById('oracle-celiac')?.checked || false; 
+  let isLactose = document.getElementById('oracle-lactose')?.checked || false; 
+  let isSibo = document.getElementById('oracle-sibo')?.checked || false; 
+  let candidatos = oracleDB.filter(m => { 
+    if(m.tipo !== tipo) return false; 
+    if(m.dietas && !m.dietas.includes(currentDietType)) return false; 
+    if(excludesId && excludesId.includes(m.id)) return false; 
+    if(isCeliac && m.glutenFree === false) return false; 
+    if(isLactose && m.lactoseFree === false) return false; 
+    if(isSibo && m.siboSafe === false) return false; 
+    let jsonStr = JSON.stringify(m).toLowerCase(); 
+    for(let a of activeAllergies) { if(jsonStr.includes(a)) return false; } 
+    return true; 
+  }); 
+  if(candidatos.length === 0) candidatos = oracleDB.filter(m => m.tipo === tipo); 
+  return candidatos; 
+}
+
+function calcularMacrosPorcion(comidaBase, targetCals) { 
+  const factor = targetCals / (comidaBase.calBase || 1); 
+  let ingredientesAdaptados = (comidaBase.ingredientes || []).map(ing => { 
+    let qtyCalculada = ing.baseQty * factor; 
+    qtyCalculada = ing.unidad === 'unidades' || ing.unidad === 'scoops' ? parseFloat(qtyCalculada.toFixed(1)) : Math.round(qtyCalculada); 
+    return { nombre: ing.nombre, cantidad: qtyCalculada, unidad: ing.unidad }; 
+  }); 
+  return { 
+    id: comidaBase.id, tipo: comidaBase.tipo, name: comidaBase.name, 
+    cals: Math.round(comidaBase.calBase * factor), 
+    prot: Math.round(comidaBase.prot * factor), 
+    carb: Math.round(comidaBase.carb * factor), 
+    gras: Math.round(comidaBase.gras * factor), 
+    ingredientes: ingredientesAdaptados 
+  }; 
+}
+
+function obtenerComidaAlgoritmo(tipo, targetCals, excludesId) { 
+  const candidatos = filtrarBaseDatos(tipo, excludesId); 
+  if(candidatos.length === 0) return { id: 0, tipo: tipo, name: "Sin Opciones", cals: targetCals, prot: 0, carb: 0, gras: 0, ingredientes: [] }; 
+  const selected = candidatos[Math.floor(Math.random() * candidatos.length)]; 
+  return calcularMacrosPorcion(selected, targetCals); 
+}
+
+function renderizarDiaSeleccionado() { 
+  const container = document.getElementById('comidas-plan'); 
+  if(!container) return; 
+  container.innerHTML = ''; 
+  const dayMeals = weeklyPlan[selectedDayIndex] || []; 
+  dayMeals.forEach((meal, idx) => { 
+    let ingredientesHTML = meal.ingredientes.length > 0 ? meal.ingredientes.map(i => `<span style="display:block; margin-bottom:3px;">• ${i.cantidad} ${i.unidad} de ${i.nombre}</span>`).join('') : `• Sin ingredientes`; 
+    container.innerHTML += `<div class="plan-meal-card"><div class="plan-meal-header"><span class="plan-meal-title">${meal.tipo}</span><button class="btn-swap" onclick="window.abrirMenuReemplazo(${idx})">🔄 Cambiar</button></div><div class="plan-meal-desc"><b>${meal.name}</b>${ingredientesHTML}</div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;"><span class="plan-meal-cals">🔥 ${meal.cals} kcal</span><span style="font-size:11px; color:var(--text-muted); font-weight:800;">P: <span style="color:#ff3366;">${meal.prot}g</span> | C: <span style="color:#00e5ff;">${meal.carb}g</span> | G: <span style="color:#ffaa00;">${meal.gras}g</span></span></div></div>`; 
+  }); 
+}
 
 let profileChartInstance = null;
 function dibujarGraficoPerfil(historialPesos) {
   const tabProfile = document.getElementById('page-profile');
   if(!tabProfile) return;
-
   let canvasWrapper = document.getElementById('wrapper-profile-chart');
   if(!canvasWrapper) {
     canvasWrapper = document.createElement('div');
     canvasWrapper.id = 'wrapper-profile-chart';
     canvasWrapper.innerHTML = `
-      <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-top: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+      <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
         <h4 style="font-size: 12px; color: #9ca3af; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px;">📊 Evolución de Masa Corporal</h4>
         <div style="height: 200px; width: 100%;"><canvas id="profile-chart-canvas"></canvas></div>
       </div>
     `;
     tabProfile.appendChild(canvasWrapper);
   }
-
   const ctx = document.getElementById('profile-chart-canvas');
   if(!ctx) return;
   if(profileChartInstance) profileChartInstance.destroy();
-
   const labels = historialPesos.map(item => item.fecha.split('-').slice(1).join('/')); 
   const data = historialPesos.map(item => item.peso);
-
   profileChartInstance = new Chart(ctx.getContext('2d'), {
     type: 'line',
     data: {
       labels: labels.reverse(),
-      datasets: [{
-        label: 'Peso (kg)',
-        data: data.reverse(),
-        borderColor: '#00e5ff',
-        backgroundColor: 'rgba(0, 229, 255, 0.1)',
-        borderWidth: 3, fill: true, tension: 0.4, pointBackgroundColor: '#ffaa00', pointRadius: 4
-      }]
+      datasets: [{ label: 'Peso (kg)', data: data.reverse(), borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointBackgroundColor: '#ffaa00', pointRadius: 4 }]
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
   });
@@ -344,14 +483,8 @@ document.getElementById('btn-calcular-rango')?.addEventListener('click', async (
   actualizarUIHeader(); actualizarUIPerfil(); 
   if(currentUser && db) { 
     try { 
-      await setDoc(doc(db, "leaderboard", currentUser.uid), { 
-        userId: currentUser.uid, nombre: userProfile.nickname, foto: currentUser.photoURL || "", 
-        multiplicador: ratio, totalKg: total, pesoCorporal: userProfile.peso, rango: rango.nombre, 
-        colorRango: rango.color, updatedAt: Date.now() 
-      }, { merge: true }); 
-      showToast(`⚔️ ¡Ranking Actualizado!`); 
-      await guardarEstadoNube(); 
-      cargarLeaderboard();
+      await setDoc(doc(db, "leaderboard", currentUser.uid), { userId: currentUser.uid, nombre: userProfile.nickname, foto: currentUser.photoURL || "", multiplicador: ratio, totalKg: total, pesoCorporal: userProfile.peso, rango: rango.nombre, colorRango: rango.color, updatedAt: Date.now() }, { merge: true }); 
+      showToast(`⚔️ ¡Ranking Actualizado!`); await guardarEstadoNube(); cargarLeaderboard();
     } catch(e) { console.error(e); } 
   } 
 });
@@ -363,10 +496,7 @@ async function cargarLeaderboard() {
   try { 
     const q = query(collection(db, "leaderboard"), orderBy("multiplicador", "desc"), limit(20)); 
     const snapshot = await getDocs(q); 
-    if(snapshot.empty) { 
-      container.innerHTML = `<p style="font-size: 12px; color: #9ca3af; text-align: center;">El dojo está vacío.</p>`; 
-      return; 
-    } 
+    if(snapshot.empty) { container.innerHTML = `<p style="font-size: 12px; color: #9ca3af; text-align: center;">El dojo está vacío.</p>`; return; } 
     let html = "", pos = 1; 
     snapshot.forEach(docSnap => { 
       const d = docSnap.data(); 
@@ -376,12 +506,11 @@ async function cargarLeaderboard() {
       pos++; 
     }); 
     container.innerHTML = html; 
-  } catch(e) { 
-    container.innerHTML = `<p style="font-size: 12px; color: #ff3366; text-align: center;">Error al cargar.</p>`; 
-  } 
+  } catch(e) { container.innerHTML = `<p style="font-size: 12px; color: #ff3366; text-align: center;">Error al cargar.</p>`; } 
 }
 document.getElementById('btn-refresh-leaderboard')?.addEventListener('click', cargarLeaderboard);
 
+// --- MÓDULO SOCIAL Y COFRADÍA COMPLETO ---
 function cargarModuloSocialCompleto() {
   const root = document.getElementById('social-tab-content-root');
   if(!root) return;
@@ -448,21 +577,13 @@ function cargarModuloSocialCompleto() {
       document.getElementById('btn-send-req').onclick = async () => {
         try {
           await addDoc(collection(db, "users", friendDocId, "friend_requests"), {
-            fromUid: currentUser.uid,
-            fromNickname: userProfile.nickname,
-            status: "pendiente",
-            timestamp: Date.now()
+            fromUid: currentUser.uid, fromNickname: userProfile.nickname, status: "pendiente", timestamp: Date.now()
           });
           showToast("✅ Solicitud enviada con éxito.");
           resBox.innerHTML = '';
-        } catch(e) {
-          showToast("❌ Error al enviar solicitud.");
-        }
+        } catch(e) { showToast("❌ Error al enviar solicitud."); }
       };
-
-    } catch(err) {
-      resBox.innerHTML = '<p style="font-size:11px; color:#ff3366;">Error de conexión.</p>';
-    }
+    } catch(err) { resBox.innerHTML = '<p style="font-size:11px; color:#ff3366;">Error de conexión.</p>'; }
   });
 
   document.getElementById('btn-publish-social')?.addEventListener('click', async () => {
@@ -470,18 +591,12 @@ function cargarModuloSocialCompleto() {
     if(!txt) return;
     try {
       await addDoc(collection(db, "social_posts"), {
-        uid: currentUser.uid,
-        author: userProfile.nickname,
-        rango: currentRankName,
-        content: txt,
-        timestamp: Date.now()
+        uid: currentUser.uid, author: userProfile.nickname, rango: currentRankName, content: txt, timestamp: Date.now()
       });
       document.getElementById('social-post-text').value = '';
       showToast("📢 ¡Publicado en el muro!");
       cargarMuroSocialPrivado();
-    } catch(e) {
-      showToast("❌ Error al publicar.");
-    }
+    } catch(e) { showToast("❌ Error al publicar."); }
   });
 
   cargarSolicitudesYAmigosSocial();
@@ -556,9 +671,7 @@ async function cargarMuroSocialPrivado() {
       }
     });
     feedContainer.innerHTML = html || '<p style="font-size:12px; color:#9ca3af; text-align:center;">El muro privado está silencioso. ¡Publica algo para tu cofradía!</p>';
-  } catch(e) {
-    feedContainer.innerHTML = '<p style="font-size:12px; color:#ff3366;">Error cargando muro privado.</p>';
-  }
+  } catch(e) { feedContainer.innerHTML = '<p style="font-size:12px; color:#ff3366;">Error cargando muro privado.</p>'; }
 }
 
 window.aceptarSolicitud = async function(reqDocId, fromUid, fromNickname) {
@@ -577,11 +690,9 @@ window.aceptarSolicitud = async function(reqDocId, fromUid, fromNickname) {
 window.eliminarAmigo = async function(friendDocId, friendUid) {
   if(!confirm("¿Estás seguro de eliminar a este guerrero de tu cofradía?")) return;
   await deleteDoc(doc(db, "users", currentUser.uid, "friends", friendDocId));
-  
   const reciprocalQuery = query(collection(db, "users", friendUid, "friends"), where("friendUid", "==", currentUser.uid));
   const recSnap = await getDocs(reciprocalQuery);
   recSnap.forEach(async (rDoc) => { await deleteDoc(rDoc.ref); });
-
   showToast("🗑️ Amistad eliminada.");
   cargarSolicitudesYAmigosSocial();
   cargarMuroSocialPrivado();
@@ -591,14 +702,12 @@ window.verPerfilAmigoCompleto = async function(friendUid) {
   const docSnap = await getDoc(doc(db, "users", friendUid));
   if(!docSnap.exists()) { showToast("⚠️ No se encontró al usuario."); return; }
   const data = docSnap.data();
-
   const workoutsSnap = await getDocs(query(collection(db, "users", friendUid, "history"), orderBy("timestamp", "desc"), limit(5)));
   let workoutsHtml = '';
   workoutsSnap.forEach(w => {
     let item = w.data();
     workoutsHtml += `<div style="font-size:11px; color:#00e5ff; margin-bottom:4px;">• ${item.nombre}: ${item.detalle} (${item.date})</div>`;
   });
-
   const container = document.getElementById('sheet-workout');
   if(!container) return;
   container.innerHTML = `
@@ -606,18 +715,15 @@ window.verPerfilAmigoCompleto = async function(friendUid) {
       <img src="${generarAvatarPorRango(data.nickname, data.currentRankName || 'Ashigaru')}" style="width:70px; height:70px; border-radius:50%; border:2px solid #00e5ff; margin-bottom:10px;">
       <h3 style="color:#fff; font-weight:900; text-transform:uppercase;">${data.nickname}</h3>
       <p style="color:#ffaa00; font-size:12px; font-weight:bold; margin-bottom:15px;">Rango: ${data.currentRankName || 'Ashigaru'}</p>
-      
       <div style="background:#111827; padding:12px; border-radius:8px; text-align:left; font-size:12px; color:#9ca3af; margin-bottom:15px;">
         <p><b>Peso Actual:</b> ${data.peso || '--'} kg</p>
         <p><b>Altura:</b> ${data.altura || '--'} cm</p>
         <p><b>Meta:</b> ${data.metaObj === 300 ? 'Volumen' : 'Definición / Mantenimiento'}</p>
       </div>
-
       <div style="background:#1a2130; padding:12px; border-radius:8px; text-align:left; max-height:150px; overflow-y:auto; margin-bottom:15px;">
         <b style="color:#ffaa00; font-size:11px; text-transform:uppercase; display:block; margin-bottom:6px;">🏋️ Últimas Actividades</b>
         ${workoutsHtml || '<span style="font-size:11px; color:#9ca3af;">Sin actividad reciente registrada.</span>'}
       </div>
-
       <button class="iron-btn-primary" onclick="window.closeSheet()">Cerrar Expediente</button>
     </div>
   `;
@@ -640,44 +746,84 @@ function iniciarNotificacionesEnVivo(uid) {
   }, 15000);
 }
 
-// --- MODO ENTRENAMIENTO EN VIVO ---
+// --- ORÁCULO DE COMBATE Y ENTRENAMIENTO ---
 let currentWorkoutRoutine = [];
 let activeTimers = {}; 
 
 document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
-  if(exercisesDB.length === 0) { showToast('⚠️ Espera, sincronizando ejercicios...'); return; }
-  const equip = document.getElementById('train-equip')?.value || 'gimnasio'; const focus = document.getElementById('train-focus')?.value || 'fullbody';
+  if(exercisesDB.length === 0) { showToast('⚠️ Sincronizando ejercicios... Espera un segundo.'); return; }
+  const equip = document.getElementById('train-equip')?.value || 'gimnasio'; 
+  const focus = document.getElementById('train-focus')?.value || 'fullbody';
   currentWorkoutRoutine = [];
+
   const checkWarm = document.getElementById('check-warmup');
-  if(checkWarm && checkWarm.checked) { currentWorkoutRoutine.push({ id: 'warmup', nombre: '🔥 Calentamiento Articular', grupo: 'cardio', musculoPrincipal: 'Todo el cuerpo', equipamiento: ['corporal'], tips: '5 a 10 min de movilidad.', imagen: 'https://dummyimage.com/400x400/111827/ffaa00&text=Calentamiento', loggedSets: [], isPhase: true }); }
+  if(checkWarm && checkWarm.checked) {
+    currentWorkoutRoutine.push({ id: 'warmup', nombre: '🔥 Calentamiento Articular', grupo: 'cardio', musculoPrincipal: 'Todo el cuerpo', equipamiento: ['corporal'], tips: '5 a 10 min de movilidad.', imagen: 'https://dummyimage.com/400x400/111827/ffaa00&text=Calentamiento', loggedSets: [], isPhase: true });
+  }
+
   const getRandomEx = (grupoReq) => {
-    const valid = exercisesDB.filter(ex => { const matchGrupo = ex.grupo?.toLowerCase() === grupoReq.toLowerCase(); const matchEquip = Array.isArray(ex.equipamiento) ? ex.equipamiento.some(eq => eq.toLowerCase().includes(equip.toLowerCase())) : true; return matchGrupo && matchEquip; });
-    if(valid.length === 0) { const fallbackGrupo = exercisesDB.filter(ex => ex.grupo?.toLowerCase() === grupoReq.toLowerCase()); return fallbackGrupo.length > 0 ? fallbackGrupo[Math.floor(Math.random() * fallbackGrupo.length)] : null; }
+    const valid = exercisesDB.filter(ex => {
+      const matchGrupo = ex.grupo?.toLowerCase() === grupoReq.toLowerCase();
+      const matchEquip = Array.isArray(ex.equipamiento) ? ex.equipamiento.some(eq => eq.toLowerCase().includes(equip.toLowerCase())) : true;
+      return matchGrupo && matchEquip;
+    });
+    if(valid.length === 0) {
+      const fallbackGrupo = exercisesDB.filter(ex => ex.grupo?.toLowerCase() === grupoReq.toLowerCase());
+      return fallbackGrupo.length > 0 ? fallbackGrupo[Math.floor(Math.random() * fallbackGrupo.length)] : null;
+    }
     return valid[Math.floor(Math.random() * valid.length)];
   };
+
   let structure = [];
   if(focus === "fullbody") structure = ["piernas", "pecho", "espalda", "hombros", "core"];
   if(focus === "superior") structure = ["pecho", "espalda", "hombros", "brazos", "core"];
   if(focus === "piernas") structure = ["piernas", "piernas", "piernas", "core"];
-  structure.forEach(g => { let ex = getRandomEx(g); if(ex && !currentWorkoutRoutine.find(e => e.id === ex.id)) { ex.loggedSets = []; ex.estimatedCals = Math.floor(Math.random() * 20) + 35; currentWorkoutRoutine.push(ex); } });
+
+  structure.forEach(g => {
+    let ex = getRandomEx(g);
+    if(ex && !currentWorkoutRoutine.find(e => e.id === ex.id)) {
+      ex.loggedSets = []; 
+      ex.estimatedCals = Math.floor(Math.random() * 20) + 35;
+      currentWorkoutRoutine.push(ex);
+    }
+  });
+
   const checkCool = document.getElementById('check-cooldown');
-  if(checkCool && checkCool.checked) { currentWorkoutRoutine.push({ id: 'cooldown', nombre: '❄️ Enfriamiento', grupo: 'cardio', musculoPrincipal: 'Recuperación', equipamiento: ['corporal'], tips: '10 min zona 2 y elongación.', imagen: 'https://dummyimage.com/400x400/111827/00e5ff&text=Enfriamiento', loggedSets: [], isPhase: true }); }
-  if(currentWorkoutRoutine.length === 0) { showToast('⚠️ No hay ejercicios en base de datos.'); return; }
-  renderizarRutina(false); document.getElementById('workout-generator-card').style.display = 'none'; document.getElementById('workout-live-container').style.display = 'block'; showToast('⚔️ Rutina generada.');
+  if(checkCool && checkCool.checked) {
+    currentWorkoutRoutine.push({ id: 'cooldown', nombre: '❄️ Enfriamiento', grupo: 'cardio', musculoPrincipal: 'Recuperación', equipamiento: ['corporal'], tips: '10 min zona 2 y elongación.', imagen: 'https://dummyimage.com/400x400/111827/00e5ff&text=Enfriamiento', loggedSets: [], isPhase: true });
+  }
+
+  if(currentWorkoutRoutine.length === 0) { showToast('⚠️ No hay ejercicios para este filtro.'); return; }
+
+  // CORRECCIÓN: Mostramos primero la lista para que el usuario pueda cambiar opciones
+  renderizarRutina(false);
+  document.getElementById('workout-generator-card').style.display = 'none';
+  document.getElementById('workout-live-container').style.display = 'block';
+  document.getElementById('btn-start-workout').style.display = 'block';
+  document.getElementById('btn-finish-workout').style.display = 'none';
+  showToast('⚔️ Rutina táctica generada. Revisa o cambia opciones.');
 });
 
 function renderizarRutina(isLiveMode) {
-  const container = document.getElementById('rutina-generada-lista'); if(!container) return; container.innerHTML = '';
+  const container = document.getElementById('rutina-generada-lista'); 
+  if(!container) return; 
+  container.innerHTML = '';
+  
   currentWorkoutRoutine.forEach((ex, idx) => {
+    const displaySwap = (isLiveMode || ex.isPhase) ? 'none' : 'block';
     const displayInputs = isLiveMode ? 'block' : 'none';
-    const imgSource = ex.imagen && ex.imagen.trim() !== "" ? ex.imagen : `https://dummyimage.com/400x400/111827/00e5ff&text=${encodeURIComponent(ex.nombre)}`;
+    const fallbackNeon = `https://dummyimage.com/400x400/111827/00e5ff&text=${encodeURIComponent(ex.nombre)}`;
+    const imgSource = ex.imagen && ex.imagen.trim() !== "" ? ex.imagen : fallbackNeon;
     ex.loggedSets = ex.loggedSets || []; 
 
     let html = `
-      <div class="plan-meal-card workout-card" style="border: 1px solid rgba(0,229,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom:15px; background: #111827;">
-        <div style="margin-bottom:10px;"><span style="font-size:15px; font-weight:900; color:#fff; text-transform:uppercase;">${ex.nombre}</span></div>
+      <div class="plan-meal-card workout-card" data-index="${idx}" style="border: 1px solid rgba(0,229,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom:15px; background: #111827;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <span style="font-size:15px; font-weight:900; color:#fff; text-transform:uppercase;">${ex.nombre}</span>
+          <button class="btn-swap" style="display:${displaySwap}; font-size:10px; padding:4px 8px; border-radius:6px; background:rgba(0,229,255,0.1); color:#00e5ff; border:1px solid #00e5ff;" onclick="window.abrirMenuReemplazoEj(${idx})">🔄 Cambiar</button>
+        </div>
         <div style="display:flex; gap:15px; align-items:center;">
-          <img src="${imgSource}" style="width:75px; height:75px; border-radius:10px; object-fit:cover; border:2px solid rgba(0,229,255,0.4);">
+          <img src="${imgSource}" onerror="this.onerror=null; this.src='${fallbackNeon}';" style="width:75px; height:75px; border-radius:10px; object-fit:cover; border:2px solid rgba(0,229,255,0.4);">
           <div style="flex:1;">
             <p style="font-size:11px; color:#00e5ff; margin:0 0 5px 0; font-weight:800; text-transform:uppercase;">🎯 ${ex.musculoPrincipal || 'General'}</p>
             <p style="font-size:12px; color:#9ca3af; margin:0; line-height:1.4;">💡 ${ex.tips || 'Mantén la técnica estricta.'}</p>
@@ -703,9 +849,42 @@ function renderizarRutina(isLiveMode) {
         </div>
       `;
     }
-    html += `</div>`; container.innerHTML += html;
+    html += `</div>`; 
+    container.innerHTML += html;
   });
 }
+
+window.abrirMenuReemplazoEj = function(index) {
+  workoutSwapTargetIndex = index; 
+  const currentEx = currentWorkoutRoutine[index];
+  const alternativas = exercisesDB.filter(e => e.grupo === currentEx.grupo && e.id !== currentEx.id);
+  const listContainer = document.getElementById('sheet-swap-ex-list'); 
+  if(!listContainer) return; 
+  listContainer.innerHTML = '';
+  
+  if(alternativas.length === 0) { 
+    listContainer.innerHTML = `<p style="font-size:12px; color:#ff3366;">No hay más alternativas de este grupo muscular.</p>`; 
+  } else { 
+    alternativas.forEach(alt => { 
+      let objData = encodeURIComponent(JSON.stringify(alt)); 
+      listContainer.innerHTML += `<div class="swap-option-card" onclick="window.confirmarReemplazoEj('${objData}')" style="background:#1a2130; padding:12px; border-radius:8px; cursor:pointer; margin-bottom:8px;"><span style="font-size:10px; color:#00e5ff; font-weight:800; text-transform:uppercase;">${alt.musculoPrincipal}</span><b style="display:block; color:#fff; margin-top:4px;">${alt.nombre}</b></div>`; 
+    }); 
+  } 
+  window.openSheet('sheet-swap-exercise');
+};
+
+let workoutSwapTargetIndex = -1;
+window.confirmarReemplazoEj = function(encodedData) {
+  if(workoutSwapTargetIndex > -1) { 
+    const newEx = JSON.parse(decodeURIComponent(encodedData)); 
+    newEx.loggedSets = []; 
+    newEx.estimatedCals = Math.floor(Math.random() * 20) + 35;
+    currentWorkoutRoutine[workoutSwapTargetIndex] = newEx; 
+    renderizarRutina(false); 
+    window.closeSheet(); 
+    showToast(`✅ Ejercicio reemplazado con éxito.`); 
+  }
+};
 
 window.registrarSerieIndividual = function(idx) {
   const repsInput = document.getElementById(`reps-${idx}`); const pesoInput = document.getElementById(`peso-${idx}`); const descansoInput = document.getElementById(`descanso-${idx}`);
@@ -725,12 +904,18 @@ window.iniciarDescanso = function(idx, segundos) {
 };
 window.terminarDescanso = function(idx) { if(activeTimers[idx]) { clearInterval(activeTimers[idx].interval); delete activeTimers[idx]; } document.getElementById(`timer-container-${idx}`)?.style.setProperty('display', 'none'); };
 
-document.getElementById('btn-start-workout')?.addEventListener('click', () => { renderizarRutina(true); document.getElementById('btn-start-workout').style.display = 'none'; document.getElementById('btn-finish-workout').style.display = 'block'; showToast('🔥 ¡A darlo todo!'); });
+document.getElementById('btn-start-workout')?.addEventListener('click', () => { 
+  renderizarRutina(true); 
+  document.getElementById('btn-start-workout').style.display = 'none'; 
+  document.getElementById('btn-finish-workout').style.display = 'block'; 
+  showToast('🔥 ¡Modo en vivo activado!'); 
+});
 
 document.getElementById('btn-cancel-workout')?.addEventListener('click', () => {
   for (let idx in activeTimers) clearInterval(activeTimers[idx].interval); activeTimers = {};
-  document.getElementById('workout-live-container').style.display = 'none'; document.getElementById('workout-generator-card').style.display = 'block';
-  document.getElementById('btn-start-workout').style.display = 'block'; document.getElementById('btn-finish-workout').style.display = 'none'; currentWorkoutRoutine = [];
+  document.getElementById('workout-live-container').style.display = 'none'; 
+  document.getElementById('workout-generator-card').style.display = 'block';
+  currentWorkoutRoutine = [];
 });
 
 document.getElementById('btn-finish-workout')?.addEventListener('click', async function() {
@@ -749,43 +934,37 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async f
     }
   }
   for (let idx in activeTimers) clearInterval(activeTimers[idx].interval); activeTimers = {};
-  if(validExercises > 0) { sessionCals = Math.round(sessionCals); totalQuemadas += sessionCals; await guardarEstadoNube(); actualizarDashboard(); showToast(`✅ Entrenamiento finalizado. 🔥 ~${sessionCals} kcal quemadas.`); } 
-  else { showToast('⚠️ Entrenamiento descartado.'); }
-  document.getElementById('workout-live-container').style.display = 'none'; document.getElementById('workout-generator-card').style.display = 'block';
-  document.getElementById('btn-start-workout').style.display = 'block'; document.getElementById('btn-finish-workout').style.display = 'none';
+  if(validExercises > 0) { sessionCals = Math.round(sessionCals); totalQuemadas += sessionCals; await guardarEstadoNube(); actualizarDashboard(); showToast(`✅ Entrenamiento finalizado. 🔥 ~${sessionCals} kcal.`); } 
+  else { showToast('⚠️ Sin series registradas.'); }
+  document.getElementById('workout-live-container').style.display = 'none'; 
+  document.getElementById('workout-generator-card').style.display = 'block';
+  document.getElementById('btn-start-workout').style.display = 'block'; 
+  document.getElementById('btn-finish-workout').style.display = 'none';
   currentWorkoutRoutine = []; this.disabled = false; 
 });
 
+// --- BUSCADOR INTELIGENTE PARA SERIES MANUALES ---
 window.abrirBuscadorManual = function() {
   const container = document.getElementById('sheet-workout');
   if(!container) return;
-  
   container.innerHTML = `
     <div style="padding: 20px;">
       <h3 style="color:#00e5ff; font-weight:900; text-transform:uppercase; margin-bottom:15px; text-align:center;">Agregar Ejercicio Manual</h3>
       <div style="position:relative;">
-        <input type="text" id="search-manual-ex" class="iron-input-modern" placeholder="🔍 Buscar por nombre o músculo..." autocomplete="off">
-        <div id="search-manual-results" class="search-results-box"></div>
+        <input type="text" id="search-manual-ex" class="neon-input" placeholder="🔍 Buscar por nombre o músculo..." autocomplete="off">
+        <div id="search-manual-results" class="search-results-box" style="position:absolute; width:100%;"></div>
       </div>
-      
       <div id="manual-live-ui" style="display:none; margin-top:20px;">
         <div style="background:#111827; padding:15px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
-          <h4 id="manual-selected-name" style="color:#fff; font-weight:900; margin-bottom:15px;">Ejercicio Seleccionado</h4>
+          <h4 id="manual-selected-name" style="color:#fff; font-weight:900; margin-bottom:15px;">Ejercicio</h4>
           <div style="display:flex; gap:10px; margin-bottom:15px;">
-            <div style="flex:1;"><label style="font-size:10px; color:#9ca3af; font-weight:bold;">REPES</label><input type="number" id="manual-rep" class="iron-input-modern"></div>
-            <div style="flex:1;"><label style="font-size:10px; color:#9ca3af; font-weight:bold;">PESO (KG)</label><input type="number" id="manual-peso" class="iron-input-modern"></div>
-            <div style="flex:1;"><label style="font-size:10px; color:#9ca3af; font-weight:bold;">DESC (S)</label><input type="number" id="manual-descanso" class="iron-input-modern" value="90"></div>
+            <div style="flex:1;"><label style="font-size:10px; color:#9ca3af;">REPES</label><input type="number" id="manual-rep" class="neon-input" style="margin-top:2px;"></div>
+            <div style="flex:1;"><label style="font-size:10px; color:#9ca3af;">PESO (KG)</label><input type="number" id="manual-peso" class="neon-input" style="margin-top:2px;"></div>
+            <div style="flex:1;"><label style="font-size:10px; color:#9ca3af;">DESC (S)</label><input type="number" id="manual-descanso" class="neon-input" value="90" style="margin-top:2px;"></div>
           </div>
-          <button class="iron-btn-primary" id="btn-add-manual-set">✅ Registrar Serie</button>
-          
+          <button class="btn btn-primary" id="btn-add-manual-set" style="width:100%;">✅ Registrar Serie</button>
           <ul id="manual-sets-list" style="list-style:none; padding:0; margin:15px 0 0 0;"></ul>
-          
-          <div id="manual-timer" style="display:none; text-align:center; background:#1a2130; padding:15px; border-radius:10px; border:1px dashed #ffaa00; margin-top:15px;">
-            <span style="font-size:24px; font-weight:900; color:#ffaa00; display:block;">⏱️ <span id="manual-time-left">0</span>s</span>
-            <button class="iron-btn-danger" onclick="document.getElementById('manual-timer').style.display='none'; clearInterval(window.manualInterval);">⏹️ Terminar</button>
-          </div>
-          
-          <button class="iron-btn-warning" id="btn-save-manual-workout" style="margin-top:20px; display:none;">💾 GUARDAR EN BITÁCORA</button>
+          <button class="btn btn-primary" id="btn-save-manual-workout" style="margin-top:20px; width:100%; background:linear-gradient(90deg, #ffaa00, #ff5500); display:none;">💾 GUARDAR EN BITÁCORA</button>
         </div>
       </div>
     </div>
@@ -794,14 +973,12 @@ window.abrirBuscadorManual = function() {
   
   const searchInput = document.getElementById('search-manual-ex');
   const resultsBox = document.getElementById('search-manual-results');
-  let selectedExercise = null;
-  let manualSets = [];
+  let selectedExercise = null; let manualSets = [];
 
   searchInput.addEventListener('input', function() {
     const queryVal = this.value.toLowerCase();
     resultsBox.innerHTML = '';
     if(queryVal.length < 2) { resultsBox.style.display = 'none'; return; }
-    
     const matches = exercisesDB.filter(ex => ex.nombre.toLowerCase().includes(queryVal) || (ex.musculoPrincipal && ex.musculoPrincipal.toLowerCase().includes(queryVal)));
     if(matches.length > 0) {
       resultsBox.style.display = 'block';
@@ -825,17 +1002,9 @@ window.abrirBuscadorManual = function() {
     const r = parseInt(document.getElementById('manual-rep').value); const p = parseFloat(document.getElementById('manual-peso').value) || 0;
     if(!r) return;
     manualSets.push({reps: r, peso: p});
-    document.getElementById('manual-sets-list').innerHTML += `<li style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; color:#fff;">Serie ${manualSets.length}: <span style="color:#00e5ff; font-weight:900;">${r} reps x ${p} kg</span></li>`;
-    document.getElementById('manual-rep').value = ''; document.getElementById('btn-save-manual-workout').style.display = 'block';
-    
-    const d = parseInt(document.getElementById('manual-descanso').value) || 90;
-    document.getElementById('manual-timer').style.display = 'block';
-    let timeLeft = d; document.getElementById('manual-time-left').innerText = timeLeft;
-    if(window.manualInterval) clearInterval(window.manualInterval);
-    window.manualInterval = setInterval(() => {
-      timeLeft--; document.getElementById('manual-time-left').innerText = timeLeft;
-      if(timeLeft <= 0) { clearInterval(window.manualInterval); document.getElementById('manual-timer').style.display='none'; showToast('⏰ ¡A la batalla!'); }
-    }, 1000);
+    document.getElementById('manual-sets-list').innerHTML += `<li style="margin-bottom:6px; font-size:13px; color:#fff;">Serie ${manualSets.length}: <span style="color:#00e5ff; font-weight:900;">${r} reps x ${p} kg</span></li>`;
+    document.getElementById('manual-rep').value = ''; 
+    document.getElementById('btn-save-manual-workout').style.display = 'block';
   });
 
   document.getElementById('btn-save-manual-workout').addEventListener('click', async function() {
@@ -847,8 +1016,6 @@ window.abrirBuscadorManual = function() {
     
     await registrarEntrenoNube(selectedExercise.nombre, `${manualSets.length} series (${detalles})`, weightHighestOrLast, "N/A", cals);
     totalQuemadas += cals; await guardarEstadoNube(); actualizarDashboard();
-    
-    if(window.manualInterval) clearInterval(window.manualInterval);
     window.closeSheet(); showToast(`✅ Ejercicio Guardado. 🔥 ~${cals} kcal.`);
     this.disabled = false;
   });
@@ -856,21 +1023,19 @@ window.abrirBuscadorManual = function() {
 
 document.getElementById('btn-registrar-serie')?.addEventListener('click', window.abrirBuscadorManual);
 
+// --- DASHBOARD GRID ---
 function actualizarDashboard() { 
   const dashboardContainer = document.getElementById('dashboard-tab');
   if(!dashboardContainer) return;
-
   let gridBox = document.getElementById('iron-stats-grid');
   if(!gridBox) {
-    const oldTotals = document.querySelectorAll('.cal-card, .macro-card-container');
+    const oldTotals = document.querySelectorAll('.card-main, .macros');
     oldTotals.forEach(el => el.style.display = 'none');
-
     gridBox = document.createElement('div');
     gridBox.id = 'iron-stats-grid';
     gridBox.className = 'stats-grid';
     dashboardContainer.insertBefore(gridBox, document.getElementById('lista-comidas')?.parentElement || dashboardContainer.children[1]);
   }
-
   const calNetas = Math.max(0, totalCalorias - totalQuemadas);
   const prPct = Math.min(100, (totalProt/metaProt)*100) || 0;
   const cbPct = Math.min(100, (totalCarb/metaCarb)*100) || 0;
@@ -881,10 +1046,7 @@ function actualizarDashboard() {
     <div class="stat-panel stat-panel-full" style="background: linear-gradient(135deg, #111827 0%, #1a2130 100%);">
       <div class="stat-title">Balance Energético Neto <span style="color:#00e5ff;">📊</span></div>
       <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-        <div>
-          <span class="stat-value ${calColor}" style="font-size:32px;">${calNetas}</span>
-          <span style="color:#9ca3af; font-size:12px;"> / ${metaCalorias} kcal</span>
-        </div>
+        <div><span class="stat-value ${calColor}" style="font-size:32px;">${calNetas}</span><span style="color:#9ca3af; font-size:12px;"> / ${metaCalorias} kcal</span></div>
         <div style="text-align:right;">
           <div style="font-size:10px; color:#9ca3af; margin-bottom:4px;">Ingesta: <span style="color:#fff; font-weight:bold;">${totalCalorias} kcal</span></div>
           <div style="font-size:10px; color:#9ca3af;">Quemadas: <span style="color:#ffaa00; font-weight:bold;">🔥 ${totalQuemadas} kcal</span></div>
@@ -892,38 +1054,27 @@ function actualizarDashboard() {
       </div>
       <div class="macro-progress-container" style="margin-top:12px;"><div class="macro-progress-fill" style="width:${Math.min(100, (calNetas/metaCalorias)*100)}%; background:${calColor==='danger'?'#ff3366':'#00e5ff'};"></div></div>
     </div>
-
-    <div class="stat-panel">
-      <div class="stat-title">Proteína</div>
-      <div class="stat-value" style="font-size:18px;">${totalProt}g <span style="font-size:10px; color:#9ca3af;">/ ${metaProt}g</span></div>
-      <div class="macro-progress-container"><div class="macro-progress-fill" style="width:${prPct}%; background:#ff3366;"></div></div>
-    </div>
-
-    <div class="stat-panel">
-      <div class="stat-title">Hidratación</div>
-      <div class="stat-value" style="font-size:18px; color:#00e5ff;">${totalAgua/1000}L <span style="font-size:10px; color:#9ca3af;">/ 3.0L</span></div>
-      <div class="macro-progress-container"><div class="macro-progress-fill" style="width:${Math.min(100, (totalAgua/3000)*100)}%; background:#00e5ff;"></div></div>
-    </div>
-
-    <div class="stat-panel">
-      <div class="stat-title">Carbohidratos</div>
-      <div class="stat-value" style="font-size:18px;">${totalCarb}g <span style="font-size:10px; color:#9ca3af;">/ ${metaCarb}g</span></div>
-      <div class="macro-progress-container"><div class="macro-progress-fill" style="width:${cbPct}%; background:#00e5ff;"></div></div>
-    </div>
-
-    <div class="stat-panel">
-      <div class="stat-title">Grasas</div>
-      <div class="stat-value" style="font-size:18px;">${totalGrasa}g <span style="font-size:10px; color:#9ca3af;">/ ${metaGrasa}g</span></div>
-      <div class="macro-progress-container"><div class="macro-progress-fill" style="width:${grPct}%; background:#ffaa00;"></div></div>
-    </div>
+    <div class="stat-panel"><div class="stat-title">Proteína</div><div class="stat-value" style="font-size:18px;">${totalProt}g <span style="font-size:10px; color:#9ca3af;">/ ${metaProt}g</span></div><div class="macro-progress-container"><div class="macro-progress-fill" style="width:${prPct}%; background:#ff3366;"></div></div></div>
+    <div class="stat-panel"><div class="stat-title">Hidratación</div><div class="stat-value" style="font-size:18px; color:#00e5ff;">${totalAgua/1000}L <span style="font-size:10px; color:#9ca3af;">/ 3.0L</span></div><div class="macro-progress-container"><div class="macro-progress-fill" style="width:${Math.min(100, (totalAgua/3000)*100)}%; background:#00e5ff;"></div></div></div>
+    <div class="stat-panel"><div class="stat-title">Carbohidratos</div><div class="stat-value" style="font-size:18px;">${totalCarb}g <span style="font-size:10px; color:#9ca3af;">/ ${metaCarb}g</span></div><div class="macro-progress-container"><div class="macro-progress-fill" style="width:${cbPct}%; background:#00e5ff;"></div></div></div>
+    <div class="stat-panel"><div class="stat-title">Grasas</div><div class="stat-value" style="font-size:18px;">${totalGrasa}g <span style="font-size:10px; color:#9ca3af;">/ ${metaGrasa}g</span></div><div class="macro-progress-container"><div class="macro-progress-fill" style="width:${grPct}%; background:#ffaa00;"></div></div></div>
   `;
 }
 
 async function cargarRegistrosDelDia(uid) {
-  const hoyKey = getTodayKey(); const listaComidas = document.getElementById('lista-comidas');
-  if(listaComidas) { listaComidas.innerHTML = ''; const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "meals")); snapshot.forEach(docSnap => { const i = docSnap.data(); renderizarComidaEnUI(i.nombre, i.cal, i.prot, i.carb, i.gras, docSnap.id); }); }
+  const hoyKey = getTodayKey(); 
+  const listaComidas = document.getElementById('lista-comidas');
+  if(listaComidas) { 
+    listaComidas.innerHTML = ''; 
+    const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "meals")); 
+    snapshot.forEach(docSnap => { const i = docSnap.data(); renderizarComidaEnUI(i.nombre, i.cal, i.prot, i.carb, i.gras, docSnap.id); }); 
+  }
   const listaEntrenos = document.getElementById('lista-entrenos');
-  if(listaEntrenos) { listaEntrenos.innerHTML = ''; const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "workouts")); snapshot.forEach(docSnap => { const i = docSnap.data(); renderizarEntrenoEnUI(i.nombre, i.sets, i.weight, i.rpe, i.cals || 0, docSnap.id); }); }
+  if(listaEntrenos) { 
+    listaEntrenos.innerHTML = ''; 
+    const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "workouts")); 
+    snapshot.forEach(docSnap => { const i = docSnap.data(); renderizarEntrenoEnUI(i.nombre, i.sets, i.weight, i.rpe, i.cals || 0, docSnap.id); }); 
+  }
 }
 
 async function cargarHistorialYCheckins(uid) {
@@ -972,6 +1123,7 @@ window.borrarTodoHistorial = function() { if(confirm("¿Restablecer historial ar
 function actualizarAguaUI() { const metaAgua = 3000; let pct = Math.min(100, Math.round((totalAgua/metaAgua)*100)); const wb = document.getElementById('water-fill-bar'); if(wb) wb.style.height = `${pct}%`; const wt = document.getElementById('water-text-val'); if(wt) wt.innerText = `${totalAgua} / ${metaAgua} ml`; guardarEstadoNube(); }
 window.agregarAgua = ml => { totalAgua += ml; actualizarAguaUI(); showToast(`💧 +${ml} ml añadidos.`); }; window.resetAgua = () => { totalAgua = 0; actualizarAguaUI(); showToast(`🔄 Hidratación reiniciada.`); };
 
+// Bottom Sheets / Modales
 const overlay = document.getElementById('sheet-overlay'); let activeSheet = null;
 window.openSheet = function(sheetId) { activeSheet = document.getElementById(sheetId); if(overlay) overlay.style.display = 'block'; if(activeSheet) { activeSheet.classList.add('open'); setTimeout(() => activeSheet.style.bottom = '0', 10); } };
 window.closeSheet = function() { if(activeSheet) { activeSheet.style.bottom = '-100%'; setTimeout(() => { activeSheet.classList.remove('open'); if(overlay) overlay.style.display = 'none'; }, 300); } };
@@ -979,8 +1131,20 @@ document.querySelectorAll('.custom-select').forEach(sel => { sel.addEventListene
 document.querySelectorAll('.sheet-option').forEach(opt => { opt.addEventListener('click', function() { if(this.parentElement.id !== 'sheet-actividad') { this.parentElement.querySelectorAll('.sheet-option').forEach(o => o.classList.remove('active')); this.classList.add('active'); if(window.activeSelect) { window.activeSelect.innerText = this.innerText; window.activeSelect.setAttribute('data-val', this.getAttribute('data-val')); } window.closeSheet(); } else { window.closeSheet(); } }); });
 if(overlay) overlay.addEventListener('click', window.closeSheet);
 
+// Configuración de Pestañas Principales y Subtabs
 const navItems = document.querySelectorAll('.nav-item'); const pages = document.querySelectorAll('.page');
-navItems.forEach(btn => { btn.addEventListener('click', () => { navItems.forEach(nav => nav.classList.remove('active')); pages.forEach(page => page.classList.remove('active')); btn.classList.add('active'); const tgt = document.getElementById(btn.getAttribute('data-target')); if(tgt) tgt.classList.add('active'); }); });
+navItems.forEach(btn => { 
+  btn.addEventListener('click', () => { 
+    navItems.forEach(nav => nav.classList.remove('active')); 
+    pages.forEach(page => { page.classList.remove('active'); page.style.display = 'none'; }); 
+    btn.classList.add('active'); 
+    const tgt = document.getElementById(btn.getAttribute('data-target')); 
+    if(tgt) { tgt.classList.add('active'); tgt.style.display = 'block'; }
+    if(btn.getAttribute('data-target') === 'page-social') {
+      cargarModuloSocialCompleto();
+    }
+  }); 
+});
 
 function setupTabs(btnClass, subTabClass) { 
   const btns = document.querySelectorAll(`.${btnClass}`); const tabs = document.querySelectorAll(`.${subTabClass}`); 
