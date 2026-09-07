@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- LIBRERÍA DEL LECTOR DE CÓDIGOS DE BARRA -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
   <!-- PANTALLA DE LOGIN -->
@@ -118,7 +120,7 @@
       </div>
     </section>
 
-    <!-- 🍎 DIETA & ORÁCULO IA -->
+    <!-- 🍎 DIETA & ORÁCULO CLÍNICO -->
     <section id="page-diet" class="page">
       <h2 class="page-title">Nutrición Inteligente</h2>
       <div class="tab-container">
@@ -129,18 +131,19 @@
       <div id="tab-registro" class="sub-tab-diet active">
         <div class="actions">
           <button id="btn-abrir-manual" class="btn btn-primary">🔍 Buscar Producto (Global)</button>
-          <button id="btn-foto" class="btn btn-secondary">📸 Lector de Código / Plato (Pronto)</button>
+          <button id="btn-foto" class="btn btn-secondary">📸 Lector de Código de Barras</button>
         </div>
         <div class="log"><h3>Historial de Hoy</h3><ul id="lista-comidas"></ul></div>
       </div>
 
+      <!-- ORÁCULO NUTRICIONAL (SEMANAL, IA & CLÍNICO) -->
       <div id="tab-plan" class="sub-tab-diet" style="display: none;">
-        <div class="card" style="text-align: left;" id="oracle-form-card">
-          <h3 style="color: #00e5ff; margin-top:0;">Motor de Inteligencia Clínica</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">Estructura tus 7 días ajustados a <b id="oracle-target-cals">0</b> kcal/día, basándose en tu meta de <span id="oracle-target-goal" style="color:var(--primary); font-weight:800;">Mantenimiento</span>.</p>
+        <div class="card" style="text-align: left; background: linear-gradient(145deg, #141a26 0%, #0b0f17 100%); border: 1px solid rgba(0,229,255,0.2);" id="oracle-form-card">
+          <h3 style="color: #00e5ff; margin-top:0;">Motor Clínico Avanzado</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">Estructura tus 7 días ajustados a <b id="oracle-target-cals" style="color:#fff;">0</b> kcal/día. Meta: <span id="oracle-target-goal" style="color:var(--primary); font-weight:800;">Mantenimiento</span>.</p>
           
           <label>Preferencia Dietética:</label>
-          <select id="oracle-diet-type" class="neon-input" style="margin-top:5px;">
+          <select id="oracle-diet-type" class="neon-input" style="margin-top:5px; background: #0b0f17;">
             <option value="normal">Normal (Omnívoro)</option>
             <option value="lowcarb">Baja en Carbohidratos (Low-Carb)</option>
             <option value="keto">Cetogénica Estricta (Keto)</option>
@@ -148,40 +151,35 @@
             <option value="vegetariano">Vegetariana (Huevos/Lácteos)</option>
           </select>
 
-          <label style="margin-top:15px;">Condición Médica:</label>
-          <div style="display:flex; align-items:center; gap:10px; margin-top:8px; background:#141a26; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
-            <input type="checkbox" id="oracle-celiac" style="width:20px; height:20px; accent-color:#ff3366;">
-            <span style="font-size:13px; color:#fff; font-weight:600;">Libre de Gluten (Celíaco)</span>
+          <label style="margin-top:15px;">Restricciones Médicas Estrictas:</label>
+          <div class="clinical-filters">
+            <label><input type="checkbox" id="oracle-celiac"> Sin Gluten (Celíaco)</label>
+            <label><input type="checkbox" id="oracle-lactose"> Sin Lactosa</label>
+            <label><input type="checkbox" id="oracle-sibo"> Apto SIBO (Bajo en FODMAPs)</label>
           </div>
 
-          <!-- UI DE ALERGIAS CON CHIPS -->
-          <label style="margin-top:15px;">Alergias o Exclusiones:</label>
+          <label style="margin-top:15px;">Otras Alergias (Opcional):</label>
           <div style="position: relative;">
-            <input type="text" id="oracle-allergies-input" class="neon-input" placeholder="Ej: maní, lactosa (Presiona Enter)" style="margin-top:5px;">
+            <input type="text" id="oracle-allergies-input" class="neon-input" placeholder="Ej: maní, mariscos (Presiona Enter)" style="margin-top:5px; background: #0b0f17;">
           </div>
           <div id="allergy-tags-container" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;"></div>
           
-          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 25px; box-shadow: 0 0 15px var(--primary-glow);">Generar Plan Semanal 🔮</button>
+          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 25px; box-shadow: 0 10px 20px rgba(0,229,255,0.3); font-size: 14px;">Generar Plan Semanal 🔮</button>
         </div>
         
         <div id="plan-resultado" style="display: none;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-            <h3 style="color: #fff; margin: 0;">Plan de Batalla</h3>
-            <button class="btn-clear-history" onclick="document.getElementById('plan-resultado').style.display='none'; document.getElementById('oracle-form-card').style.display='block';">Volver</button>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 15px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size: 24px;">📅</span>
+              <h3 id="plan-date-header" style="color: #fff; margin: 0; font-size: 16px;">Cargando fecha...</h3>
+            </div>
+            <button class="btn-clear-history" onclick="document.getElementById('plan-resultado').style.display='none'; document.getElementById('oracle-form-card').style.display='block';">Ajustar Filtros</button>
           </div>
           
-          <select id="oracle-day-selector" class="custom-select" style="margin-top: 15px; font-weight:800; color:var(--primary); border-color:var(--primary);">
-            <option value="0">📅 Lunes</option>
-            <option value="1">📅 Martes</option>
-            <option value="2">📅 Miércoles</option>
-            <option value="3">📅 Jueves</option>
-            <option value="4">📅 Viernes</option>
-            <option value="5">📅 Sábado</option>
-            <option value="6">📅 Domingo</option>
-          </select>
-
-          <div id="comidas-plan" style="margin-top:15px;"></div>
-          <button class="btn btn-secondary" style="width:100%; margin-top:15px; border-color:#ffaa00; color:#ffaa00;" onclick="window.generarListaCompras()">🛒 Lista de Compras (7 Días)</button>
+          <div class="day-scroll-container" id="day-selector-container"></div>
+          <div id="comidas-plan" style="margin-top:20px;"></div>
+          
+          <button class="btn btn-primary" style="width:100%; margin-top:15px; background: linear-gradient(90deg, #ffaa00 0%, #ff5500 100%); color:#000; box-shadow: 0 5px 15px rgba(255,170,0,0.3);" onclick="window.generarListaCompras()">🛒 Generar Lista de Compras Total</button>
         </div>
       </div>
     </section>
@@ -308,9 +306,16 @@
     </section>
   </main>
 
-  <!-- MODALES -->
+  <!-- MODALES BOTTOM SHEETS -->
   <div id="sheet-overlay" class="sheet-overlay"></div>
   
+  <div id="sheet-scanner" class="bottom-sheet" style="max-height: 90vh; overflow-y: auto; text-align: center;">
+    <h3>📸 Escáner de Producto</h3>
+    <p style="font-size: 11px; color: var(--text-muted); margin-bottom:15px;">Apunta la cámara al código de barras del envase.</p>
+    <div id="qr-reader" style="width:100%; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary);"></div>
+    <button class="btn btn-secondary" style="width: 100%; margin-top: 20px; border-color: #ff3366; color: #ff3366;" onclick="window.closeScanner()">Cancelar y Cerrar</button>
+  </div>
+
   <div id="sheet-actividad" class="bottom-sheet">
     <h3>Selecciona Actividad</h3>
     <div class="sheet-option" data-val="1.2">Sedentario (Oficina / Nulo)</div>
@@ -338,11 +343,22 @@
     <div id="food-results-list" style="margin-top: 15px; max-height: 200px; overflow-y: auto; text-align: left;"></div>
     
     <div id="food-custom-section" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; display:none;">
-      <h4 style="color: var(--primary); margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase;">Ajustar Gramos (Basado en 100g)</h4>
+      <h4 style="color: var(--primary); margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase;">Ajustar Porción</h4>
       <p id="food-selected-name" style="font-size:12px; font-weight:800; color:#fff; margin-bottom:10px;">--</p>
-      <label style="margin-top:0;">Gramos a consumir:</label>
-      <input type="number" id="edit-qty" class="neon-input" value="100">
-      <div class="macros-grid" style="margin-top: 8px;">
+      
+      <label style="margin-top:0;">Cantidad consumida:</label>
+      <div style="display: flex; gap: 10px; margin-top: 5px;">
+        <input type="number" id="edit-qty" class="neon-input" value="100" style="flex: 1; margin-top: 0;">
+        <select id="edit-unit" class="neon-input" style="flex: 1; margin-top: 0; padding: 12px;">
+          <option value="1" selected>Gramos / ml</option>
+          <option value="15">Cucharada (15g)</option>
+          <option value="5">Cucharadita (5g)</option>
+          <option value="240">Taza (240ml)</option>
+          <option value="30">Scoop (30g)</option>
+        </select>
+      </div>
+
+      <div class="macros-grid" style="margin-top: 15px;">
         <div><label style="font-size:9px;">Kcal</label><input type="number" id="edit-cal" class="neon-input" readonly></div>
         <div><label style="font-size:9px;">Prot (g)</label><input type="number" id="edit-prot" class="neon-input" readonly></div>
         <div><label style="font-size:9px;">Carb (g)</label><input type="number" id="edit-carb" class="neon-input" readonly></div>
