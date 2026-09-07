@@ -1,5 +1,5 @@
 // ============================================================================
-// --- MOTOR PRINCIPAL DE IRONCORE (PRE-ALFA TESTNET - UNIFICADO Y DEPURADO) ---
+// --- MOTOR PRINCIPAL DE IRONCORE (PRE-ALFA TESTNET - CÓDIGO MAESTRO UNIFICADO) ---
 // ============================================================================
 const customCSS = `
   header, .top-header, #main-header {
@@ -57,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
     rankElem.classList.add('user-badge-mini'); streakElem.classList.add('user-badge-mini');
   }
 
-  // Navegación inferior sincronizada
   document.querySelectorAll('.nav-item').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -66,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const tgt = document.getElementById(btn.getAttribute('data-target'));
       if(tgt) { tgt.classList.add('active'); tgt.style.display = 'block'; }
       if(btn.getAttribute('data-target') === 'page-social') {
-        window.cargarModuloSocialCompleto();
+        cargarModuloSocialCompleto();
       }
     });
   });
@@ -418,6 +417,37 @@ function renderizarDiaSeleccionado() {
   }); 
 }
 
+let swapTargetIndex = -1;
+window.abrirMenuReemplazo = function(mealIndex) { 
+  swapTargetIndex = mealIndex; 
+  const oldMeal = weeklyPlan[selectedDayIndex][mealIndex]; 
+  const targetCals = oldMeal.cals; 
+  let candidatos = filtrarBaseDatos(oldMeal.tipo, [oldMeal.id]); 
+  const listContainer = document.getElementById('sheet-swap-list'); 
+  if(!listContainer) return;
+  listContainer.innerHTML = ''; 
+  if(candidatos.length === 0) { 
+    listContainer.innerHTML = `<p style="font-size:12px; color:#ff3366;">No hay más opciones para tus filtros.</p>`; 
+  } else { 
+    for(let i=0; i<candidatos.length; i++) { 
+      let opcionEscalada = calcularMacrosPorcion(candidatos[i], targetCals); 
+      let objData = encodeURIComponent(JSON.stringify(opcionEscalada)); 
+      listContainer.innerHTML += `<div class="swap-option-card" onclick="window.confirmarReemplazo('${objData}')" style="background:#1a2130; padding:12px; border-radius:8px; cursor:pointer; margin-bottom:8px;"><b style="display:block; color:#fff;">${opcionEscalada.name}</b><span style="font-size:11px; color:var(--primary);">🔥 ${opcionEscalada.cals} kcal | P: ${opcionEscalada.prot}g | C: ${opcionEscalada.carb}g | G: ${opcionEscalada.gras}g</span></div>`; 
+    } 
+  } 
+  window.openSheet('sheet-swap-meal'); 
+};
+
+window.confirmarReemplazo = function(encodedData) { 
+  if(swapTargetIndex > -1) { 
+    const newMeal = JSON.parse(decodeURIComponent(encodedData)); 
+    weeklyPlan[selectedDayIndex][swapTargetIndex] = newMeal; 
+    renderizarDiaSeleccionado(); 
+    window.closeSheet(); 
+    showToast(`✅ Actualizado.`); 
+  } 
+};
+
 // --- RESTAURACIÓN DE FUNCIONES FALTANTES (COMPRAS, ESCÁNER, REEMPLAZO) ---
 window.generarListaCompras = function() {
   const ul = document.getElementById('lista-compras-ui');
@@ -604,21 +634,6 @@ document.getElementById('btn-confirm-food-final')?.addEventListener('click', asy
   showToast(`✅ Alimento registrado.`);
   this.disabled = false;
 });
-
-// --- PERFIL ---
-function actualizarUIPerfil() { 
-  const cn = document.getElementById('profile-card-name'); if(cn) cn.innerText = userProfile.nickname.toUpperCase(); 
-  const vp = document.getElementById('profile-val-peso'); if(vp) vp.innerText = `${userProfile.peso} kg`; 
-  const va = document.getElementById('profile-val-altura'); if(va) va.innerText = `${userProfile.altura} cm`; 
-  const ve = document.getElementById('profile-val-edad'); if(ve) ve.innerText = `${userProfile.edad} años`; 
-  const vg = document.getElementById('profile-val-genero'); if(vg) vg.innerText = userProfile.genero === 'M' ? 'Hombre' : 'Mujer'; 
-  let labelMeta = "Mantenimiento"; 
-  if(userProfile.metaObj === -500) labelMeta = "Déficit Agresivo"; 
-  if(userProfile.metaObj === -300) labelMeta = "Definición"; 
-  if(userProfile.metaObj === 300) labelMeta = "Volumen"; 
-  const cg = document.getElementById('profile-card-goal'); if(cg) cg.innerText = `Meta: ${labelMeta}`; 
-  const ca = document.getElementById('profile-card-avatar'); if(ca) ca.src = generarAvatarPorRango(userProfile.nickname, currentRankName); 
-}
 
 // --- MÓDULO SOCIAL Y COFRADÍA COMPLETO ---
 function cargarModuloSocialCompleto() {
