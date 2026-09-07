@@ -121,6 +121,7 @@ window.seleccionarMetaOb = function(elem) {
   userProfile.metaObj = parseInt(elem.getAttribute('data-val')); 
 };
 
+// Cierre Seguro del Onboarding (Corrección de Bug)
 window.finalizarOnboarding = async function() {
   const nickInput = document.getElementById('ob-nickname');
   const edadInput = document.getElementById('ob-edad');
@@ -478,7 +479,7 @@ window.registrarComidaPlaneada = async function(encodedData) {
   showToast(`✅ Registrado al instante.`); 
 };
 
-// --- SCANNER DIRECTO CON CAMARA TRASERA (NUEVA LÓGICA) ---
+// --- LECTOR BARRAS (Html5Qrcode - Cámara Trasera Directa) ---
 let html5QrCode = null;
 document.getElementById('btn-foto')?.addEventListener('click', () => { 
   window.openSheet('sheet-scanner'); 
@@ -494,8 +495,8 @@ document.getElementById('btn-foto')?.addEventListener('click', () => {
     onScanSuccess, 
     onScanFailure
   ).catch(err => {
-    console.error("Error iniciando cámara trasera:", err);
-    showToast("⚠️ No se pudo iniciar la cámara trasera.");
+    console.error("Error iniciando cámara:", err);
+    showToast("⚠️ No se pudo iniciar la cámara.");
   });
 });
 
@@ -539,7 +540,7 @@ async function onScanSuccess(decodedText) {
     } 
   } catch (err) { showToast('⚠️ Error de conexión.'); } 
 }
-function onScanFailure(error) { /* Ignorar errores cuadro por cuadro */ }
+function onScanFailure(error) { /* Silenciamos los errores por frame */ }
 
 let currentSearchFoodBase = null;
 const fallbackDB = [ 
@@ -623,7 +624,10 @@ function recalcularMacros() {
   } 
 }
 
-document.getElementById('btn-confirm-food-final')?.addEventListener('click', async () => { 
+document.getElementById('btn-confirm-food-final')?.addEventListener('click', async function() {
+  if (this.disabled) return; 
+  this.disabled = true;
+
   let mt = document.getElementById('food-meal-time').value; 
   let n = document.getElementById('food-selected-name').innerText || "Alimento"; 
   let c = parseInt(document.getElementById('edit-cal').value)||0; 
@@ -633,11 +637,18 @@ document.getElementById('btn-confirm-food-final')?.addEventListener('click', asy
   let qtyVal = document.getElementById('edit-qty').value; 
   let unitSelect = document.getElementById('edit-unit'); 
   let unitText = unitSelect.options[unitSelect.selectedIndex].text.split(' ')[0]; 
-  if(!c && !p) { showToast('⚠️ Ingresa cantidad.'); return; } 
+  
+  if(!c && !p) { 
+    showToast('⚠️ Ingresa cantidad.'); 
+    this.disabled = false;
+    return; 
+  } 
+  
   let nombreFinalRegistro = `${n} (${qtyVal} ${unitText})`; 
   await registrarComidaNube(c, p, cb, g, `[${mt}] ${nombreFinalRegistro}`); 
   window.closeSheet(); 
   showToast(`✅ Registrado.`); 
+  this.disabled = false;
 });
 
 // ============================================================================
@@ -645,7 +656,7 @@ document.getElementById('btn-confirm-food-final')?.addEventListener('click', asy
 // ============================================================================
 let currentWorkoutRoutine = [];
 let workoutSwapTargetIndex = -1;
-let activeTimers = {}; // Guarda los cronómetros activos
+let activeTimers = {}; 
 
 document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
   if(exercisesDB.length === 0) { showToast('⚠️ Espera, sincronizando ejercicios...'); return; }
@@ -677,7 +688,7 @@ document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
   structure.forEach(g => {
     let ex = getRandomEx(g);
     if(ex && !currentWorkoutRoutine.find(e => e.id === ex.id)) {
-      ex.loggedSets = []; // Reseteamos series limpias
+      ex.loggedSets = []; 
       currentWorkoutRoutine.push(ex);
     }
   });
@@ -721,7 +732,6 @@ function renderizarRutina(isLiveMode) {
         </div>
     `;
 
-    // Interfaz del Modo En Vivo (Cargas Progresivas + Cronómetro)
     if (isLiveMode) {
       let seriesHTML = ex.loggedSets.map((s, i) => `<li style="margin-bottom:4px; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.05);">Serie ${i+1}: <span style="color:var(--primary); font-weight:800;">${s.reps} reps x ${s.peso} kg</span></li>`).join('');
 
@@ -752,7 +762,6 @@ function renderizarRutina(isLiveMode) {
   });
 }
 
-// --- LÓGICA DE REGISTRO DE SERIES Y CRONÓMETRO ---
 window.registrarSerieIndividual = function(idx) {
   const repsInput = document.getElementById(`reps-${idx}`);
   const pesoInput = document.getElementById(`peso-${idx}`);
@@ -774,7 +783,7 @@ window.registrarSerieIndividual = function(idx) {
   const numSerie = currentWorkoutRoutine[idx].loggedSets.length;
   lista.innerHTML += `<li style="margin-bottom:4px; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.05);">Serie ${numSerie}: <span style="color:var(--primary); font-weight:800;">${reps} reps x ${peso} kg</span></li>`;
 
-  repsInput.value = ''; // Limpiar campo
+  repsInput.value = ''; 
   window.iniciarDescanso(idx, descanso);
 };
 
@@ -865,10 +874,10 @@ document.getElementById('btn-cancel-workout')?.addEventListener('click', () => {
   currentWorkoutRoutine = [];
 });
 
-// GUARDADO ANTI-DUPLICADO DE RUTINA
+// Guardado de entrenamiento entero con prevención Anti-Duplicado
 document.getElementById('btn-finish-workout')?.addEventListener('click', async function() {
-  if (this.disabled) return; // Evita el doble click
-  this.disabled = true;
+  if (this.disabled) return; 
+  this.disabled = true; 
 
   let validExercises = 0;
   for(let i = 0; i < currentWorkoutRoutine.length; i++) {
@@ -898,10 +907,10 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async f
   document.getElementById('btn-start-workout').style.display = 'block';
   document.getElementById('btn-finish-workout').style.display = 'none';
   currentWorkoutRoutine = [];
-  this.disabled = false; // Reactivamos el botón
+  this.disabled = false; 
 });
 
-// GUARDADO MANUAL ANTI-DUPLICADO
+// Guardado manual con prevención Anti-Duplicado
 document.getElementById('btn-registrar-serie')?.addEventListener('click', () => { 
   document.getElementById('work-name').value = ''; 
   document.getElementById('work-sets').value = ''; 
@@ -910,7 +919,7 @@ document.getElementById('btn-registrar-serie')?.addEventListener('click', () => 
 });
 
 document.getElementById('btn-confirm-workout')?.addEventListener('click', async function() { 
-  if (this.disabled) return; // Evita el doble click
+  if (this.disabled) return; 
   this.disabled = true;
 
   const n = document.getElementById('work-name').value; 
@@ -927,7 +936,7 @@ document.getElementById('btn-confirm-workout')?.addEventListener('click', async 
   await registrarEntrenoNube(n, s, w || 0, r); 
   window.closeSheet(); 
   showToast('💪 Ejercicio guardado.'); 
-  this.disabled = false; // Reactivamos
+  this.disabled = false; 
 });
 
 // --- PERSISTENCIA Y DASHBOARD ---
