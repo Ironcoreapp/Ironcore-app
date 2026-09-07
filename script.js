@@ -148,8 +148,10 @@ function actualizarUIPerfil() {
   if(currentUser && currentUser.photoURL) document.getElementById('profile-card-avatar').src = currentUser.photoURL;
 }
 
-// --- EL ORÁCULO NUTRICIONAL (IA CLÍNICA JSON) ---
+// --- EL ORÁCULO NUTRICIONAL (IA CLÍNICA AVANZADA CON JSON EXTERNO) ---
 let oracleDB = []; 
+let dynamicDays = [];
+
 async function inicializarOraculo() {
   try {
     const respuesta = await fetch('alimentos.json');
@@ -162,8 +164,6 @@ window.addEventListener('DOMContentLoaded', inicializarOraculo);
 
 let weeklyPlan = [];
 let selectedDayIndex = 0;
-
-// CHIPS DE ALERGIAS
 let activeAllergies = [];
 const allergyInput = document.getElementById('oracle-allergies-input');
 const allergyContainer = document.getElementById('allergy-tags-container');
@@ -173,20 +173,16 @@ if(allergyInput) {
     if(e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       const val = allergyInput.value.trim().toLowerCase();
-      if(val && !activeAllergies.includes(val)) {
-        activeAllergies.push(val); renderAllergyChips();
-      }
+      if(val && !activeAllergies.includes(val)) { activeAllergies.push(val); renderAllergyChips(); }
       allergyInput.value = '';
     }
   });
 }
 
 function renderAllergyChips() {
-  if(!allergyContainer) return;
-  allergyContainer.innerHTML = '';
+  if(!allergyContainer) return; allergyContainer.innerHTML = '';
   activeAllergies.forEach((allergy, index) => {
-    const chip = document.createElement('div');
-    chip.className = 'allergy-chip';
+    const chip = document.createElement('div'); chip.className = 'allergy-chip';
     chip.innerHTML = `<span>${allergy}</span><span class="allergy-chip-close" onclick="window.removeAllergy(${index})">×</span>`;
     allergyContainer.appendChild(chip);
   });
@@ -194,40 +190,86 @@ function renderAllergyChips() {
 window.removeAllergy = function(index) { activeAllergies.splice(index, 1); renderAllergyChips(); };
 
 function actualizarLabelMetaIA() {
-  let label = "Mantenimiento"; if(userProfile.metaObj < 0) label = "Déficit Agresivo / Definición (Prioridad: Saciedad)"; if(userProfile.metaObj > 0) label = "Volumen / Hipertrofia (Prioridad: Densidad)";
+  let label = "Mantenimiento"; if(userProfile.metaObj < 0) label = "Déficit Agresivo (Prioridad: Volumen/Saciedad)"; if(userProfile.metaObj > 0) label = "Volumen (Prioridad: Densidad)";
   const metaLabel = document.getElementById('oracle-target-goal'); if(metaLabel) metaLabel.innerText = label;
   const calsLabel = document.getElementById('oracle-target-cals'); if(calsLabel) calsLabel.innerText = metaCalorias;
 }
 
+// Generador de fechas reales
+function calcularFechasSemana() {
+  dynamicDays = [];
+  const date = new Date();
+  const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  
+  for(let i=0; i<7; i++) {
+    let d = new Date(date);
+    d.setDate(d.getDate() + i);
+    dynamicDays.push({
+      index: i,
+      shortName: dayNames[d.getDay()],
+      fullName: `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}`
+    });
+  }
+}
+
 document.getElementById('btn-generar-plan')?.addEventListener('click', () => {
-  if (oracleDB.length === 0) { showToast("⚠️ El Oráculo sigue sincronizando la base de datos JSON. Espera un segundo."); return; }
+  if (oracleDB.length === 0) { showToast("⚠️ Sincronizando base de datos... Espera un segundo."); return; }
+  calcularFechasSemana();
   generarPlanSemanal();
-  document.getElementById('oracle-form-card').style.display = 'none'; document.getElementById('plan-resultado').style.display = 'block'; showToast('🤖 IA: Plan optimizado estructurado en 7 días.');
+  document.getElementById('oracle-form-card').style.display = 'none'; 
+  document.getElementById('plan-resultado').style.display = 'block'; 
+  showToast('🤖 IA: Plan clínico generado.');
 });
-document.getElementById('oracle-day-selector')?.addEventListener('change', (e) => { selectedDayIndex = parseInt(e.target.value); renderizarDiaSeleccionado(); });
+
+window.seleccionarDiaPlan = function(index) {
+  selectedDayIndex = index;
+  document.querySelectorAll('.day-chip').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`.day-chip[data-day="${index}"]`).classList.add('active');
+  document.getElementById('plan-date-header').innerText = dynamicDays[index].fullName;
+  renderizarDiaSeleccionado();
+};
 
 function generarPlanSemanal() {
   weeklyPlan = []; const distribution = [ { tipo: 'desayuno', cals: metaCalorias * 0.25 }, { tipo: 'almuerzo', cals: metaCalorias * 0.35 }, { tipo: 'cena', cals: metaCalorias * 0.30 }, { tipo: 'snack', cals: metaCalorias * 0.10 } ];
   for(let i=0; i<7; i++) { let dayMeals = distribution.map(slot => obtenerComidaAlgoritmo(slot.tipo, slot.cals, [])); weeklyPlan.push(dayMeals); }
-  selectedDayIndex = 0; document.getElementById('oracle-day-selector').value = "0"; renderizarDiaSeleccionado();
+  
+  const scrollContainer = document.getElementById('day-selector-container');
+  scrollContainer.innerHTML = '';
+  dynamicDays.forEach(day => {
+    scrollContainer.innerHTML += `<button class="day-chip ${day.index === 0 ? 'active' : ''}" data-day="${day.index}" onclick="window.seleccionarDiaPlan(${day.index})">${day.shortName}</button>`;
+  });
+  
+  window.seleccionarDiaPlan(0);
 }
 
 function obtenerComidaAlgoritmo(tipo, targetCals, excludesId) {
   let currentDietType = document.getElementById('oracle-diet-type').value;
   let isCeliac = document.getElementById('oracle-celiac').checked;
+  let isLactose = document.getElementById('oracle-lactose').checked;
+  let isSibo = document.getElementById('oracle-sibo').checked;
 
   let candidatos = oracleDB.filter(m => {
-    if(m.tipo !== tipo) return false; if(!m.dietas.includes(currentDietType)) return false; if(excludesId.includes(m.id)) return false; if(isCeliac && m.glutenFree === false) return false;
+    if(m.tipo !== tipo) return false; 
+    if(!m.dietas.includes(currentDietType)) return false; 
+    if(excludesId.includes(m.id)) return false; 
+    
+    if(isCeliac && m.glutenFree === false) return false;
+    if(isLactose && m.lactoseFree === false) return false;
+    if(isSibo && m.siboSafe === false) return false;
+    
     let jsonStr = JSON.stringify(m).toLowerCase();
     for(let a of activeAllergies) { if(jsonStr.includes(a)) return false; }
     return true;
   });
 
   if(candidatos.length === 0) candidatos = oracleDB.filter(m => m.tipo === tipo); 
+  
   let bestCandidates = [];
   if(userProfile.metaObj > 0) { bestCandidates = candidatos.filter(m => m.isDense === true); } else if (userProfile.metaObj < 0) { bestCandidates = candidatos.filter(m => m.isVolume === true); }
   if(bestCandidates.length > 0) candidatos = bestCandidates;
-  if(candidatos.length === 0) return { id: 0, tipo: tipo, name: "Ajustar Filtros", cals: targetCals, prot: 0, carb: 0, gras: 0, ingredientes: [] };
+  
+  if(candidatos.length === 0) return { id: 0, tipo: tipo, name: "Amplía tus filtros", cals: targetCals, prot: 0, carb: 0, gras: 0, ingredientes: [] };
 
   const selected = candidatos[Math.floor(Math.random() * candidatos.length)];
   const factor = targetCals / selected.calBase;
@@ -245,12 +287,27 @@ function renderizarDiaSeleccionado() {
   const container = document.getElementById('comidas-plan'); if(!container) return; container.innerHTML = '';
   const dayMeals = weeklyPlan[selectedDayIndex];
   dayMeals.forEach((meal, idx) => {
-    let ingredientesHTML = meal.ingredientes.length > 0 ? meal.ingredientes.map(i => `• ${i.cantidad} ${i.unidad} de ${i.nombre}`).join('<br>') : `• Intenta cambiar los filtros de dieta`;
-    container.innerHTML += `<div class="plan-meal-card"><div class="plan-meal-header"><span class="plan-meal-title">${meal.tipo}</span><button class="btn-swap" onclick="window.swapMealPlan(${idx})">🔄 Reemplazar</button></div><p class="plan-meal-desc"><b style="color:#fff;">${meal.name}</b><br><span style="color:#a0aec0; font-size:11px;">${ingredientesHTML}</span></p><div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;"><span class="plan-meal-cals">🔥 ${meal.cals} kcal</span><span style="font-size:10px; color:var(--text-muted); font-weight:800;">P: ${meal.prot}g | C: ${meal.carb}g | G: ${meal.gras}g</span></div></div>`;
+    let ingredientesHTML = meal.ingredientes.length > 0 ? meal.ingredientes.map(i => `<span style="display:block; margin-bottom:3px;">• ${i.cantidad} ${i.unidad} de ${i.nombre}</span>`).join('') : `• Intenta cambiar los filtros clínicos`;
+    container.innerHTML += `
+      <div class="plan-meal-card">
+        <div class="plan-meal-header">
+          <span class="plan-meal-title">${meal.tipo}</span>
+          <button class="btn-swap" onclick="window.swapMealPlan(${idx})">🔄 Cambiar</button>
+        </div>
+        <div class="plan-meal-desc">
+          <b>${meal.name}</b>
+          ${ingredientesHTML}
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+          <span class="plan-meal-cals">🔥 ${meal.cals} kcal</span>
+          <span style="font-size:11px; color:var(--text-muted); font-weight:800;">P: <span style="color:#ff3366;">${meal.prot}g</span> | C: <span style="color:#00e5ff;">${meal.carb}g</span> | G: <span style="color:#ffaa00;">${meal.gras}g</span></span>
+        </div>
+      </div>
+    `;
   });
 }
 
-window.swapMealPlan = function(mealIndex) { const oldMeal = weeklyPlan[selectedDayIndex][mealIndex]; const newMeal = obtenerComidaAlgoritmo(oldMeal.tipo, oldMeal.cals, [oldMeal.id]); weeklyPlan[selectedDayIndex][mealIndex] = newMeal; renderizarDiaSeleccionado(); showToast(`🔄 Opción recalculada.`); };
+window.swapMealPlan = function(mealIndex) { const oldMeal = weeklyPlan[selectedDayIndex][mealIndex]; const newMeal = obtenerComidaAlgoritmo(oldMeal.tipo, oldMeal.cals, [oldMeal.id]); weeklyPlan[selectedDayIndex][mealIndex] = newMeal; renderizarDiaSeleccionado(); showToast(`🔄 Plato modificado.`); };
 window.generarListaCompras = function() {
   const ul = document.getElementById('lista-compras-ui'); if(!ul) return; let listaConsolidada = {};
   weeklyPlan.forEach(dia => { dia.forEach(comida => { comida.ingredientes.forEach(ing => { let key = `${ing.nombre} (${ing.unidad})`; listaConsolidada[key] = (listaConsolidada[key] || 0) + ing.cantidad; }); }); });
@@ -263,11 +320,9 @@ window.generarListaCompras = function() {
   window.openSheet('sheet-compras');
 };
 
-
-// --- BUSCADOR GLOBAL Y BASE DE RESPALDO (ANTI-CAÍDAS) ---
+// --- BASE DE DATOS GLOBAL (OPEN FOOD FACTS API CON PROXY ANTI-ADBLOCK) ---
 let currentSearchFoodBase = null;
 
-// Base de datos de emergencia por si el usuario no tiene internet o su navegador bloquea APIs
 const fallbackDB = [
   { product_name: "Yogurt Protein Natural", brands: "Soprole", nutriments: { 'energy-kcal_100g': 55, 'proteins_100g': 8, 'carbohydrates_100g': 5, 'fat_100g': 0 } },
   { product_name: "Yogurt con Proteína", brands: "Colun", nutriments: { 'energy-kcal_100g': 60, 'proteins_100g': 9, 'carbohydrates_100g': 4, 'fat_100g': 0.5 } },
@@ -292,80 +347,61 @@ document.getElementById('btn-trigger-search')?.addEventListener('click', async (
   const query = document.getElementById('food-search').value.trim().toLowerCase();
   const c = document.getElementById('food-results-list');
   const loader = document.getElementById('food-loading');
-  
-  if(!query) return;
-  c.innerHTML = '';
-  loader.style.display = 'block';
+  if(!query) return; c.innerHTML = ''; loader.style.display = 'block';
 
   try {
-    // Intento directo, limpio y oficial a la API de OpenFoodFacts
-    const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15`);
-    const data = await res.json();
+    const targetUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15`;
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+    const res = await fetch(proxyUrl);
+    if (!res.ok) throw new Error('Error en el proxy');
+    const proxyData = await res.json(); const data = JSON.parse(proxyData.contents); 
     loader.style.display = 'none';
 
-    if(!data.products || data.products.length === 0) {
-      throw new Error("Sin resultados en API"); // Forzamos ir a la base de datos de respaldo
-    }
+    if(!data.products || data.products.length === 0) throw new Error("Sin resultados en API");
     renderizarResultadosBusqueda(data.products, c);
 
   } catch (error) {
-    console.warn("Fallo la API externa (Red/CORS), activando Base de Datos de Respaldo Offline.", error);
     loader.style.display = 'none';
-    
-    // Filtrar la base de datos local de emergencia
     const resultadosLocales = fallbackDB.filter(p => p.product_name.toLowerCase().includes(query) || p.brands.toLowerCase().includes(query));
-    
-    if(resultadosLocales.length > 0) {
-      renderizarResultadosBusqueda(resultadosLocales, c);
-      showToast('⚠️ Red inestable: Mostrando productos locales.');
-    } else {
-      c.innerHTML = `<div style="font-size:12px; color:#ff3366; text-align:center; margin-top:10px;">❌ No se encontró en la red ni en el respaldo offline.</div>`;
-    }
+    if(resultadosLocales.length > 0) { renderizarResultadosBusqueda(resultadosLocales, c); showToast('⚠️ Red inestable: Mostrando locales.'); } 
+    else { c.innerHTML = `<div style="font-size:12px; color:#ff3366; text-align:center; margin-top:10px;">❌ No se encontró en la red.</div>`; }
   }
 });
 
 function renderizarResultadosBusqueda(productos, contenedor) {
   productos.forEach(p => {
     if(!p.nutriments || p.nutriments['energy-kcal_100g'] == null) return;
-
-    const d = document.createElement('div'); 
-    d.className = 'food-search-item'; 
+    const d = document.createElement('div'); d.className = 'food-search-item'; 
     let brand = p.brands ? ` (${p.brands.split(',')[0]})` : '';
-    let nombre = `${p.product_name || 'Producto Desconocido'}${brand}`;
-    
+    let nombre = `${p.product_name || 'Producto'}${brand}`;
     let cal100 = Math.round(p.nutriments['energy-kcal_100g']);
     let prot100 = Math.round(p.nutriments['proteins_100g'] || 0);
     let carb100 = Math.round(p.nutriments['carbohydrates_100g'] || 0);
     let gras100 = Math.round(p.nutriments['fat_100g'] || 0);
 
-    d.innerHTML = `
-      <div style="display:flex; flex-direction:column;">
-        <span>${nombre}</span>
-        <span style="font-size:9px; color:var(--text-muted);">Por 100g: P:${prot100}g C:${carb100}g G:${gras100}g</span>
-      </div>
-      <span style="color:var(--primary); font-weight:800; display:flex; align-items:center;">${cal100} kcal</span>
-    `;
-    
+    d.innerHTML = `<div style="display:flex; flex-direction:column;"><span>${nombre}</span><span style="font-size:9px; color:var(--text-muted);">Por 100g: P:${prot100}g C:${carb100}g G:${gras100}g</span></div><span style="color:var(--primary); font-weight:800; display:flex; align-items:center;">${cal100} kcal</span>`;
     d.addEventListener('click', () => { 
       currentSearchFoodBase = { cal: cal100, prot: prot100, carb: carb100, gras: gras100 };
       document.getElementById('food-selected-name').innerText = nombre;
       document.getElementById('food-results-list').innerHTML = ''; 
-      document.getElementById('edit-qty').value = '100';
-      actualizarMacrosManual(100);
+      document.getElementById('edit-qty').value = '100'; document.getElementById('edit-unit').value = '1';
+      recalcularMacros();
       document.getElementById('food-custom-section').style.display = 'block';
     }); 
     contenedor.appendChild(d); 
   });
 }
 
-document.getElementById('edit-qty')?.addEventListener('input', (e) => { 
-  let q = parseFloat(e.target.value)||100; 
-  actualizarMacrosManual(q);
-});
+// --- CONVERSIÓN DE MEDIDAS MANUALES ---
+document.getElementById('edit-qty')?.addEventListener('input', recalcularMacros);
+document.getElementById('edit-unit')?.addEventListener('change', recalcularMacros);
 
-function actualizarMacrosManual(gramos) {
+function recalcularMacros() {
   if(currentSearchFoodBase) { 
-    let factor = gramos/100; 
+    let q = parseFloat(document.getElementById('edit-qty').value) || 0; 
+    let multiplicador = parseFloat(document.getElementById('edit-unit').value) || 1;
+    let gramosTotales = q * multiplicador;
+    let factor = gramosTotales / 100; 
     document.getElementById('edit-cal').value = Math.round(currentSearchFoodBase.cal * factor); 
     document.getElementById('edit-prot').value = Math.round(currentSearchFoodBase.prot * factor); 
     document.getElementById('edit-carb').value = Math.round(currentSearchFoodBase.carb * factor); 
@@ -377,10 +413,75 @@ document.getElementById('btn-confirm-food-final')?.addEventListener('click', asy
   let mt = document.getElementById('food-meal-time').value; 
   let n = document.getElementById('food-selected-name').innerText || "Alimento"; 
   let c = parseInt(document.getElementById('edit-cal').value)||0; let p = parseInt(document.getElementById('edit-prot').value)||0; let cb = parseInt(document.getElementById('edit-carb').value)||0; let g = parseInt(document.getElementById('edit-gras').value)||0;
-  if(!c && !p) { showToast('⚠️ Ingresa calorías o proteína.'); return; } 
-  await registrarComidaNube(c, p, cb, g, `[${mt}] ${n}`); 
-  window.closeSheet(); showToast(`✅ ${n.toUpperCase()} registrado.`);
+  
+  let qtyVal = document.getElementById('edit-qty').value;
+  let unitSelect = document.getElementById('edit-unit');
+  let unitText = unitSelect.options[unitSelect.selectedIndex].text.split(' ')[0]; 
+  
+  if(!c && !p) { showToast('⚠️ Ingresa una cantidad válida.'); return; } 
+  let nombreFinalRegistro = `${n} (${qtyVal} ${unitText})`;
+  await registrarComidaNube(c, p, cb, g, `[${mt}] ${nombreFinalRegistro}`); 
+  window.closeSheet(); showToast(`✅ Registrado.`);
 });
+
+
+// --- LECTOR DE CÓDIGO DE BARRAS (HTML5-QRCODE) ---
+let html5QrcodeScanner = null;
+
+document.getElementById('btn-foto')?.addEventListener('click', () => {
+  window.openSheet('sheet-scanner');
+  if (!html5QrcodeScanner) {
+    html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false);
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+  }
+});
+
+window.closeScanner = function() {
+  if(html5QrcodeScanner) {
+    html5QrcodeScanner.clear().catch(error => console.error("Error al limpiar escáner.", error));
+    html5QrcodeScanner = null;
+  }
+  window.closeSheet();
+};
+
+async function onScanSuccess(decodedText, decodedResult) {
+  window.closeScanner(); 
+  showToast(`🔍 Código detectado: ${decodedText}. Buscando...`);
+
+  try {
+    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${decodedText}.json`);
+    const data = await res.json();
+
+    if (data.status === 1) {
+      const p = data.product;
+      if(!p.nutriments || !p.nutriments['energy-kcal_100g']) { showToast('⚠️ Producto sin info nutricional.'); return; }
+
+      let brand = p.brands ? ` (${p.brands.split(',')[0]})` : '';
+      let nombre = `${p.product_name || 'Producto Escaneado'}${brand}`;
+      let cal100 = Math.round(p.nutriments['energy-kcal_100g']);
+      let prot100 = Math.round(p.nutriments['proteins_100g'] || 0);
+      let carb100 = Math.round(p.nutriments['carbohydrates_100g'] || 0);
+      let gras100 = Math.round(p.nutriments['fat_100g'] || 0);
+
+      currentSearchFoodBase = { cal: cal100, prot: prot100, carb: carb100, gras: gras100 };
+      document.getElementById('food-selected-name').innerText = nombre;
+      document.getElementById('food-results-list').innerHTML = ''; 
+      document.getElementById('edit-qty').value = '100';
+      document.getElementById('edit-unit').value = '1';
+      recalcularMacros();
+      
+      document.getElementById('food-custom-section').style.display = 'block';
+      window.openSheet('sheet-add-food'); 
+    } else {
+      showToast('❌ Producto no encontrado en la base mundial.');
+    }
+  } catch (err) {
+     showToast('⚠️ Error de conexión al buscar el código.');
+  }
+}
+
+function onScanFailure(error) { /* Se ignora cuando no detecta frame a frame */ }
+
 
 // --- PERSISTENCIA DE LISTAS DIARIAS (COMIDAS Y ENTRENOS) ---
 async function cargarRegistrosDelDia(uid) {
