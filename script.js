@@ -1,5 +1,5 @@
 // ============================================================================
-// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM, DASHBOARD Y RED SOCIAL ---
+// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM, PESTAÑA SOCIAL Y PRE-ALFA ---
 // ============================================================================
 const customCSS = `
   header, .top-header, #main-header {
@@ -19,8 +19,6 @@ const customCSS = `
   .stat-title { font-size: 10px; color: #9ca3af; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
   .stat-value { font-size: 24px; font-weight: 900; color: #fff; }
   .stat-value.primary { color: #00e5ff; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
-  .stat-value.warning { color: #ffaa00; }
-  .stat-value.danger { color: #ff3366; }
 
   .iron-btn-primary { width: 100%; padding: 14px; margin-top: 12px; background: linear-gradient(135deg, #00e5ff 0%, #007acc 100%); color: #fff; font-size: 14px; font-weight: 900; border: none; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,229,255,0.4); text-transform: uppercase; cursor: pointer; letter-spacing: 1px; transition: all 0.2s ease; }
   .iron-btn-primary:active { transform: scale(0.98); }
@@ -32,7 +30,6 @@ const customCSS = `
   .search-results-box { max-height: 200px; overflow-y: auto; background: #1a2130; border: 1px solid #00e5ff; border-radius: 8px; margin-top: 5px; position: absolute; width: calc(100% - 40px); z-index: 100; display: none; }
   .search-item { padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; font-size: 13px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
   .search-item:hover { background: rgba(0,229,255,0.1); }
-  .search-item-muscle { font-size: 10px; color: #ffaa00; font-weight: 800; text-transform: uppercase; }
 
   .history-day { background: #111827; margin-bottom: 12px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
   .history-day-header { padding: 15px; background: linear-gradient(90deg, rgba(0,229,255,0.1) 0%, transparent 100%); font-weight: 800; color: #00e5ff; display: flex; justify-content: space-between; cursor: pointer; font-size: 14px; }
@@ -42,8 +39,6 @@ const customCSS = `
   .iron-welcome-overlay.active { opacity: 1; pointer-events: auto; }
   .iron-welcome-modal { background: linear-gradient(145deg, #111827, #1a2130); padding: 35px 25px; border-radius: 15px; border: 1px solid #00e5ff; box-shadow: 0 10px 40px rgba(0, 229, 255, 0.15); text-align: center; max-width: 90%; width: 380px; transform: translateY(30px); transition: transform 0.4s ease; }
   .iron-welcome-overlay.active .iron-welcome-modal { transform: translateY(0); }
-  .iron-welcome-title { font-size: 18px; font-weight: 900; color: #fff; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
-  .iron-welcome-quote { font-size: 14px; color: #9ca3af; font-style: italic; margin-bottom: 25px; line-height: 1.6; }
   
   .macro-progress-container { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 6px; overflow: hidden; }
   .macro-progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease-out; }
@@ -56,15 +51,64 @@ const customCSS = `
 const styleEl = document.createElement('style'); styleEl.innerHTML = customCSS; document.head.appendChild(styleEl);
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Cambiar el texto viejo por el entorno Pre-Alfa
   const allElements = document.querySelectorAll('span, p, div, h1, h2, h3, h4, h5, h6');
   allElements.forEach(el => {
-    if(el.childNodes.length === 1 && el.innerText && el.innerText.toUpperCase().includes('ELITE PERFORMANCE SYSTEM')) { el.style.display = 'none'; }
+    if(el.childNodes.length === 1 && el.innerText && el.innerText.toUpperCase().includes('ELITE PERFORMANCE SYSTEM')) { 
+      el.innerHTML = '⚡ IRONCORE // PRE-ALFA TESTNET (ENV)';
+      el.style.color = '#ffaa00';
+      el.style.fontSize = '10px';
+      el.style.letterSpacing = '1px';
+    }
   });
   
   const rankElem = document.getElementById('header-rank'); const streakElem = document.getElementById('header-streak');
   if(rankElem && streakElem) {
     const parent = rankElem.parentElement; parent.classList.add('user-badges-row');
     rankElem.classList.add('user-badge-mini'); streakElem.classList.add('user-badge-mini');
+  }
+
+  // Inyectar Pestaña Social en la Navegación Principal si existe
+  const navContainer = document.querySelector('.bottom-nav, nav, .nav-bar') || document.body;
+  if(navContainer && !document.getElementById('nav-social-tab')) {
+    // Buscamos si podemos añadir un botón de navegación social dinámico
+    const socialNavBtn = document.createElement('button');
+    socialNavBtn.id = 'nav-social-tab';
+    socialNavBtn.className = 'nav-item';
+    socialNavBtn.setAttribute('data-target', 'page-social');
+    socialNavBtn.innerHTML = `<span>👥</span><span style="font-size:9px;">Cofradía</span>`;
+    
+    // Lo añadimos al menú de navegación si encaja, o crearemos la página dedicada
+    const existingNavs = document.querySelectorAll('.nav-item');
+    if(existingNavs.length > 0) {
+      existingNavs[existingNavs.length - 1].parentNode.appendChild(socialNavBtn);
+    }
+  }
+
+  // Inyectar Contenedor de la Pestaña Social en el DOM si no existe
+  if(!document.getElementById('page-social')) {
+    const mainContainer = document.querySelector('.main-container, main, body');
+    const socialPage = document.createElement('div');
+    socialPage.id = 'page-social';
+    socialPage.className = 'page';
+    socialPage.style.display = 'none';
+    socialPage.innerHTML = `
+      <div style="padding: 20px; max-width: 600px; margin: 0 auto;">
+        <h2 style="color:#00e5ff; font-weight:900; text-transform:uppercase; margin-bottom:15px; font-size:18px;">Cofradía & Muro Social</h2>
+        <div id="social-tab-content-root"></div>
+      </div>
+    `;
+    mainContainer.appendChild(socialPage);
+
+    // Listener para cambiar de página al hacer click en el botón de navegación social
+    socialNavBtn?.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+      socialNavBtn.classList.add('active');
+      socialPage.classList.add('active');
+      socialPage.style.display = 'block';
+      cargarModuloSocialCompleto();
+    });
   }
 
   const genBtn = document.getElementById('btn-generar-rutina');
@@ -84,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// --- IMPORTACIÓN FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -158,6 +203,7 @@ onAuthStateChanged(auth, async (user) => {
     const nickElem = document.getElementById('ob-nickname'); if(nickElem) nickElem.value = (user.displayName || "Guerrero").split(' ')[0]; 
     await cargarDatosDesdeNube(user.uid);
     mostrarMensajeMotivacional(); 
+    iniciarNotificacionesEnVivo(user.uid);
   } else { 
     currentUser = null; if(authScreen) authScreen.style.display = 'flex'; 
     const wb = document.getElementById('user-welcome-box'); if(wb) wb.style.display = 'none'; 
@@ -377,38 +423,38 @@ async function cargarLeaderboard() {
 }
 document.getElementById('btn-refresh-leaderboard')?.addEventListener('click', cargarLeaderboard);
 
-function inyectarModuloSocial() {
-  const tabProfile = document.getElementById('page-profile');
-  if(!tabProfile || document.getElementById('social-friends-card')) return;
+// --- MÓDULO SOCIAL DEDICADO Y PRIVADO ---
+function cargarModuloSocialCompleto() {
+  const root = document.getElementById('social-tab-content-root');
+  if(!root) return;
 
-  const socialCard = document.createElement('div');
-  socialCard.id = 'social-friends-card';
-  socialCard.innerHTML = `
-    <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-      <h4 style="font-size: 12px; color: #00e5ff; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 12px;">👥 Cofradía de Amigos (Social)</h4>
+  root.innerHTML = `
+    <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+      <h4 style="font-size: 12px; color: #00e5ff; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 12px;">🔍 Reclutar Amigos</h4>
       <div style="display:flex; gap:8px; margin-bottom:12px;">
         <input type="text" id="input-search-friend" class="iron-input-modern" placeholder="Apodo exacto del amigo..." style="font-size:12px; padding:8px 12px;">
         <button id="btn-search-friend" class="iron-btn-primary" style="width:auto; margin-top:0; padding:8px 15px; font-size:12px;">Buscar</button>
       </div>
-      <div id="friend-search-result" style="margin-bottom:15px;"></div>
-      
+      <div id="friend-search-result"></div>
+    </div>
+
+    <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
       <h5 style="font-size: 11px; color: #ffaa00; text-transform: uppercase; font-weight: 800; margin-bottom: 8px;">📩 Solicitudes Pendientes</h5>
       <div id="friend-requests-list" style="font-size:12px; color:#9ca3af;">Buscando solicitudes...</div>
       
-      <h5 style="font-size: 11px; color: #00e5ff; text-transform: uppercase; font-weight: 800; margin: 15px 0 8px 0;">⚔️ Tus Amigos Conectados</h5>
+      <h5 style="font-size: 11px; color: #00e5ff; text-transform: uppercase; font-weight: 800; margin: 15px 0 8px 0;">⚔️ Cofradía Conectada</h5>
       <div id="my-friends-list" style="font-size:12px; color:#9ca3af;">No hay amigos en la cofradía aún.</div>
+    </div>
 
-      <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-        <h4 style="font-size: 12px; color: #ffaa00; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 10px;">📰 Muro de la Cofradía</h4>
-        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
-          <textarea id="social-post-text" class="iron-input-modern" placeholder="Comparte tu progreso o rutina con la cofradía..." style="height: 60px; font-size:12px; resize:none;"></textarea>
-          <button id="btn-publish-social" class="iron-btn-primary" style="padding: 8px; font-size:12px; margin-top:8px;">📢 Publicar en el Muro</button>
-        </div>
-        <div id="social-feed-container">Cargando muro...</div>
+    <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px;">
+      <h4 style="font-size: 12px; color: #ffaa00; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 10px;">📰 Muro Privado de la Cofradía</h4>
+      <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+        <textarea id="social-post-text" class="iron-input-modern" placeholder="Comparte tu progreso solo visible para tu cofradía..." style="height: 60px; font-size:12px; resize:none;"></textarea>
+        <button id="btn-publish-social" class="iron-btn-primary" style="padding: 8px; font-size:12px; margin-top:8px;">📢 Publicar en el Muro</button>
       </div>
+      <div id="social-feed-container">Cargando muro privado...</div>
     </div>
   `;
-  tabProfile.appendChild(socialCard);
 
   document.getElementById('btn-search-friend')?.addEventListener('click', async () => {
     const val = document.getElementById('input-search-friend').value.trim().toLowerCase();
@@ -452,7 +498,7 @@ function inyectarModuloSocial() {
           showToast("✅ Solicitud enviada con éxito.");
           resBox.innerHTML = '';
         } catch(e) {
-          showToast("❌ Error al enviar solicitud. Revisa permisos.");
+          showToast("❌ Error al enviar solicitud.");
         }
       };
 
@@ -474,17 +520,17 @@ function inyectarModuloSocial() {
       });
       document.getElementById('social-post-text').value = '';
       showToast("📢 ¡Publicado en el muro!");
-      cargarMuroSocial();
+      cargarMuroSocialPrivado();
     } catch(e) {
       showToast("❌ Error al publicar.");
     }
   });
 
-  cargarSolicitudesYAmigos();
-  cargarMuroSocial();
+  cargarSolicitudesYAmigosSocial();
+  cargarMuroSocialPrivado();
 }
 
-async function cargarSolicitudesYAmigos() {
+async function cargarSolicitudesYAmigosSocial() {
   if(!currentUser || !db) return;
   const reqContainer = document.getElementById('friend-requests-list');
   const friendsContainer = document.getElementById('my-friends-list');
@@ -497,7 +543,7 @@ async function cargarSolicitudesYAmigos() {
       if(req.status === 'pendiente') {
         reqHtml += `
           <div style="background:rgba(255,170,0,0.05); border:1px solid rgba(255,170,0,0.2); padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <span><b>${req.fromNickname}</b> quiere unirse a tu cofradía</span>
+            <span><b>${req.fromNickname}</b> quiere unirse</span>
             <button onclick="window.aceptarSolicitud('${d.id}', '${req.fromUid}', '${req.fromNickname}')" style="background:#00e5ff; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; color:#111827;">Aceptar</button>
           </div>
         `;
@@ -512,7 +558,10 @@ async function cargarSolicitudesYAmigos() {
       friendHtml += `
         <div style="background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.2); padding:8px; border-radius:6px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
           <span>⚔️ <b>${f.friendNickname}</b></span>
-          <button onclick="window.verPerfilAmigo('${f.friendUid}')" style="background:transparent; color:#00e5ff; border:1px solid #00e5ff; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">Ver Expediente</button>
+          <div style="display:flex; gap:5px;">
+            <button onclick="window.verPerfilAmigoCompleto('${f.friendUid}')" style="background:transparent; color:#00e5ff; border:1px solid #00e5ff; padding:3px 6px; border-radius:4px; font-size:10px; cursor:pointer;">Ver Expediente</button>
+            <button onclick="window.eliminarAmigo('${d.id}', '${f.friendUid}')" style="background:rgba(255,51,102,0.1); color:#ff3366; border:1px solid #ff3366; padding:3px 6px; border-radius:4px; font-size:10px; cursor:pointer;">Eliminar</button>
+          </div>
         </div>
       `;
     });
@@ -520,46 +569,82 @@ async function cargarSolicitudesYAmigos() {
   } catch(e) { console.error(e); }
 }
 
-async function cargarMuroSocial() {
+async function cargarMuroSocialPrivado() {
   const feedContainer = document.getElementById('social-feed-container');
   if(!feedContainer || !db) return;
   try {
-    const q = query(collection(db, "social_posts"), orderBy("timestamp", "desc"), limit(20));
+    // Obtenemos la lista de UIDs de nuestros amigos aceptados
+    const friendsSnap = await getDocs(collection(db, "users", currentUser.uid, "friends"));
+    let allowedUids = [currentUser.uid];
+    friendsSnap.forEach(f => allowedUids.push(f.data().friendUid));
+
+    const q = query(collection(db, "social_posts"), orderBy("timestamp", "desc"), limit(30));
     const snaps = await getDocs(q);
     let html = '';
     snaps.forEach(d => {
       let post = d.data();
-      html += `
-        <div class="social-post-card">
-          <div class="social-post-header">
-            <img class="social-post-avatar" src="${generarAvatarPorRango(post.author, post.rango || 'Ashigaru')}">
-            <div>
-              <b style="color:#fff; font-size:13px;">${post.author}</b><br>
-              <span style="font-size:9px; color:#ffaa00;">${post.rango || 'Guerrero'} • ${new Date(post.timestamp).toLocaleDateString()}</span>
+      // FILTRO DE PRIVACIDAD: Solo mostramos posts si el autor es amigo o tú mismo
+      if(allowedUids.includes(post.uid)) {
+        html += `
+          <div class="social-post-card">
+            <div class="social-post-header">
+              <img class="social-post-avatar" src="${generarAvatarPorRango(post.author, post.rango || 'Ashigaru')}">
+              <div>
+                <b style="color:#fff; font-size:13px;">${post.author}</b><br>
+                <span style="font-size:9px; color:#ffaa00;">${post.rango || 'Guerrero'} • ${new Date(post.timestamp).toLocaleDateString()}</span>
+              </div>
             </div>
+            <div class="social-post-body">${post.content}</div>
           </div>
-          <div class="social-post-body">${post.content}</div>
-        </div>
-      `;
+        `;
+      }
     });
-    feedContainer.innerHTML = html || '<p style="font-size:12px; color:#9ca3af; text-align:center;">El muro está silencioso. ¡Sé el primero en publicar!</p>';
+    feedContainer.innerHTML = html || '<p style="font-size:12px; color:#9ca3af; text-align:center;">El muro privado está silencioso. ¡Publica algo para tu cofradía!</p>';
   } catch(e) {
-    feedContainer.innerHTML = '<p style="font-size:12px; color:#ff3366;">Error cargando muro social.</p>';
+    feedContainer.innerHTML = '<p style="font-size:12px; color:#ff3366;">Error cargando muro privado.</p>';
   }
 }
 
 window.aceptarSolicitud = async function(reqDocId, fromUid, fromNickname) {
-  await addDoc(collection(db, "users", currentUser.uid, "friends"), { friendUid: fromUid, friendNickname: fromNickname, timestamp: Date.now() });
-  await addDoc(collection(db, "users", fromUid, "friends"), { friendUid: currentUser.uid, friendNickname: userProfile.nickname, timestamp: Date.now() });
+  // Añadimos sin duplicar revisando si ya existe
+  const friendsRef = collection(db, "users", currentUser.uid, "friends");
+  const checkDup = await getDocs(query(friendsRef, where("friendUid", "==", fromUid)));
+  if(checkDup.empty) {
+    await addDoc(friendsRef, { friendUid: fromUid, friendNickname: fromNickname, timestamp: Date.now() });
+    await addDoc(collection(db, "users", fromUid, "friends"), { friendUid: currentUser.uid, friendNickname: userProfile.nickname, timestamp: Date.now() });
+  }
   await deleteDoc(doc(db, "users", currentUser.uid, "friend_requests", reqDocId));
   showToast(`⚔️ ¡Ahora ${fromNickname} es parte de tu cofradía!`);
-  cargarHistorialYCheckins(currentUser.uid);
+  cargarSolicitudesYAmigosSocial();
+  cargarMuroSocialPrivado();
 };
 
-window.verPerfilAmigo = async function(friendUid) {
+window.eliminarAmigo = async function(friendDocId, friendUid) {
+  if(!confirm("¿Estás seguro de eliminar a este guerrero de tu cofradía?")) return;
+  await deleteDoc(doc(db, "users", currentUser.uid, "friends", friendDocId));
+  
+  // Opcional: borrar el vínculo recíproco si se desea
+  const reciprocalQuery = query(collection(db, "users", friendUid, "friends"), where("friendUid", "==", currentUser.uid));
+  const recSnap = await getDocs(reciprocalQuery);
+  recSnap.forEach(async (rDoc) => { await deleteDoc(rDoc.ref); });
+
+  showToast("🗑️ Amistad eliminada.");
+  cargarSolicitudesYAmigosSocial();
+  cargarMuroSocialPrivado();
+};
+
+window.verPerfilAmigoCompleto = async function(friendUid) {
   const docSnap = await getDoc(doc(db, "users", friendUid));
   if(!docSnap.exists()) { showToast("⚠️ No se encontró al usuario."); return; }
   const data = docSnap.data();
+
+  // Consultar sus últimos entrenamientos guardados en Firebase
+  const workoutsSnap = await getDocs(query(collection(db, "users", friendUid, "history"), orderBy("timestamp", "desc"), limit(5)));
+  let workoutsHtml = '';
+  workoutsSnap.forEach(w => {
+    let item = w.data();
+    workoutsHtml += `<div style="font-size:11px; color:#00e5ff; margin-bottom:4px;">• ${item.nombre}: ${item.detalle} (${item.date})</div>`;
+  });
 
   const container = document.getElementById('sheet-workout');
   if(!container) return;
@@ -568,17 +653,42 @@ window.verPerfilAmigo = async function(friendUid) {
       <img src="${generarAvatarPorRango(data.nickname, data.currentRankName || 'Ashigaru')}" style="width:70px; height:70px; border-radius:50%; border:2px solid #00e5ff; margin-bottom:10px;">
       <h3 style="color:#fff; font-weight:900; text-transform:uppercase;">${data.nickname}</h3>
       <p style="color:#ffaa00; font-size:12px; font-weight:bold; margin-bottom:15px;">Rango: ${data.currentRankName || 'Ashigaru'}</p>
+      
       <div style="background:#111827; padding:12px; border-radius:8px; text-align:left; font-size:12px; color:#9ca3af; margin-bottom:15px;">
         <p><b>Peso Actual:</b> ${data.peso || '--'} kg</p>
         <p><b>Altura:</b> ${data.altura || '--'} cm</p>
         <p><b>Meta:</b> ${data.metaObj === 300 ? 'Volumen' : 'Definición / Mantenimiento'}</p>
       </div>
+
+      <div style="background:#1a2130; padding:12px; border-radius:8px; text-align:left; max-height:150px; overflow-y:auto; margin-bottom:15px;">
+        <b style="color:#ffaa00; font-size:11px; text-transform:uppercase; display:block; margin-bottom:6px;">🏋️ Últimas Actividades</b>
+        ${workoutsHtml || '<span style="font-size:11px; color:#9ca3af;">Sin actividad reciente registrada.</span>'}
+      </div>
+
       <button class="iron-btn-primary" onclick="window.closeSheet()">Cerrar Expediente</button>
     </div>
   `;
   window.openSheet('sheet-workout');
 };
 
+// --- NOTIFICACIONES EN VIVO (POLLING DE SOLICITUDES) ---
+function iniciarNotificacionesEnVivo(uid) {
+  if(window.notifInterval) clearInterval(window.notifInterval);
+  window.notifInterval = setInterval(async () => {
+    if(!db || !currentUser) return;
+    try {
+      const reqSnap = await getDocs(collection(db, "users", uid, "friend_requests"));
+      let pendientes = 0;
+      reqSnap.forEach(d => { if(d.data().status === 'pendiente') pendientes++; });
+      if(pendientes > (window.lastPendientesCount || 0) && window.lastPendientesCount !== undefined) {
+        showToast("🔔 ¡Has recibido una nueva solicitud de amistad en la Cofradía!");
+      }
+      window.lastPendientesCount = pendientes;
+    } catch(e) {}
+  }, 15000); // Revisa cada 15 segundos sin recargar la página
+}
+
+// --- MODO ENTRENAMIENTO EN VIVO ---
 let currentWorkoutRoutine = [];
 let activeTimers = {}; 
 
@@ -884,7 +994,6 @@ async function cargarHistorialYCheckins(uid) {
     }
     histContainer.innerHTML = html2 || '<p style="text-align:center; font-size:12px; color:#9ca3af;">Aún no hay historial de jornadas registradas.</p>';
   }
-  inyectarModuloSocial();
 }
 
 function renderizarComidaEnUI(nombre, cal, prot, carb, gras, docId = null) { const l = document.getElementById('lista-comidas'); if(!l) return; const li = document.createElement('li'); if(docId) li.setAttribute('data-id', docId); li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre}</span><button class="btn-delete-item" onclick="window.eliminarComidaNube('${docId}', ${cal}, ${prot}, ${carb}, ${gras}, this)">🗑️</button><br><span style="color: #9ca3af; font-size: 11px; margin-top:5px; display:block;">🔥 ${cal} kcal &nbsp;|&nbsp; <span style="color:#ff3366;">P: ${prot}g</span> &nbsp;|&nbsp; <span style="color:#00e5ff;">C: ${carb}g</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">G: ${gras}g</span></span>`; l.appendChild(li); }
