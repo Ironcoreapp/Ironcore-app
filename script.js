@@ -48,12 +48,10 @@ const customCSS = `
   .macro-progress-container { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 6px; overflow: hidden; }
   .macro-progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease-out; }
 
-  /* Estilos del Muro Social */
   .social-post-card { background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
   .social-post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .social-post-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #00e5ff; }
   .social-post-body { font-size: 13px; color: #e5e7eb; line-height: 1.5; margin-bottom: 10px; }
-  .social-post-img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1); }
 `;
 const styleEl = document.createElement('style'); styleEl.innerHTML = customCSS; document.head.appendChild(styleEl);
 
@@ -86,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// --- IMPORTACIÓN FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -105,7 +102,6 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 let currentUser = null;
 
-// --- ESTADO Y BIOMETRÍA ---
 let totalCalorias = 0, totalProt = 0, totalCarb = 0, totalGrasa = 0, totalAgua = 0, totalQuemadas = 0, userStreak = 1;
 let metaCalorias = 2500, metaProt = 165, metaCarb = 275, metaGrasa = 69;
 let currentRankName = "Ashigaru";
@@ -114,7 +110,6 @@ let userProfile = { perfilCompleto: false, nickname: "", genero: "M", edad: 25, 
 function getTodayKey() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 function showToast(msg) { const toast = document.getElementById('toast-notif'); if(!toast) return; toast.innerHTML = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3500); }
 
-// --- TIPS Y MODAL MOTIVACIONAL ---
 const ironCoreTips = [
   "⚡ La creatina (5g) funciona por acumulación. Tómatela a diario.",
   "🥩 Hipertrofia: Consume entre 1.8g y 2.2g de proteína por kilo.",
@@ -148,7 +143,6 @@ function mostrarMensajeMotivacional() {
   sessionStorage.setItem('ironcore_welcome_shown', 'true');
 }
 
-// --- AUTENTICACIÓN GOOGLE ---
 const authScreen = document.getElementById('auth-screen');
 getRedirectResult(auth).then((result) => { if (result && result.user) showToast('⚔️ ¡Acceso autorizado!'); }).catch(console.error);
 document.getElementById('btn-google-login')?.addEventListener('click', async () => {
@@ -175,7 +169,6 @@ function generarAvatarPorRango(nickname, rango) {
   return `https://api.dicebear.com/7.x/bottts/svg?seed=${nickname}-${rango}&backgroundColor=${bg}`;
 }
 
-// --- ONBOARDING Y FIREBASE ---
 const obScreen = document.getElementById('onboarding-screen'); const obTrack = document.getElementById('ob-track'); const obBar = document.getElementById('ob-bar'); let currentObStep = 0;
 window.abrirOnboarding = function(isEdit = false) { 
   if(!obScreen) return; obScreen.style.display = 'flex'; currentObStep = 0; if(obTrack) obTrack.style.transform = `translateX(0%)`; if(obBar) obBar.style.width = '33.33%'; 
@@ -268,14 +261,12 @@ function actualizarUIPerfil() {
   const ca = document.getElementById('profile-card-avatar'); if(ca) ca.src = generarAvatarPorRango(userProfile.nickname, currentRankName); 
 }
 
-// --- BASES DE DATOS EXTERNAS ---
 let exercisesDB = [];
 async function inicializarBases() {
   try { const resEx = await fetch('ejercicios.json?v=' + Date.now()); if (!resEx.ok) throw new Error('No se pudo cargar ejercicios.json'); exercisesDB = await resEx.json(); console.log(`⚔️ Base sincronizada con ${exercisesDB.length} ejercicios.`); } catch (error) { console.error("Error cargando ejercicios.json:", error); }
 }
 inicializarBases();
 
-// --- GRÁFICO DE PERFIL ---
 let profileChartInstance = null;
 function dibujarGraficoPerfil(historialPesos) {
   const tabProfile = document.getElementById('page-profile');
@@ -317,7 +308,6 @@ function dibujarGraficoPerfil(historialPesos) {
   });
 }
 
-// --- LEADERBOARD ---
 const rangos = [ 
   { nombre: "Ashigaru", minRatio: 0, color: "#6b7c93" }, 
   { nombre: "Rōnin", minRatio: 1.5, color: "#ffaa00" }, 
@@ -369,7 +359,7 @@ async function cargarLeaderboard() {
     const q = query(collection(db, "leaderboard"), orderBy("multiplicador", "desc"), limit(20)); 
     const snapshot = await getDocs(q); 
     if(snapshot.empty) { 
-      container.innerHTML = `<p style="font-size: 12px; color: #9ca3af; text-align: center;">El dojo está vacío.</p>"; 
+      container.innerHTML = `<p style="font-size: 12px; color: #9ca3af; text-align: center;">El dojo está vacío.</p>`; 
       return; 
     } 
     let html = "", pos = 1; 
@@ -387,7 +377,6 @@ async function cargarLeaderboard() {
 }
 document.getElementById('btn-refresh-leaderboard')?.addEventListener('click', cargarLeaderboard);
 
-// --- MÓDULO SOCIAL, AMIGOS Y MURO (FEED) PRIVADO ---
 function inyectarModuloSocial() {
   const tabProfile = document.getElementById('page-profile');
   if(!tabProfile || document.getElementById('social-friends-card')) return;
@@ -409,7 +398,6 @@ function inyectarModuloSocial() {
       <h5 style="font-size: 11px; color: #00e5ff; text-transform: uppercase; font-weight: 800; margin: 15px 0 8px 0;">⚔️ Tus Amigos Conectados</h5>
       <div id="my-friends-list" style="font-size:12px; color:#9ca3af;">No hay amigos en la cofradía aún.</div>
 
-      <!-- MURO SOCIAL (FEED) -->
       <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
         <h4 style="font-size: 12px; color: #ffaa00; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 10px;">📰 Muro de la Cofradía</h4>
         <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
@@ -591,7 +579,6 @@ window.verPerfilAmigo = async function(friendUid) {
   window.openSheet('sheet-workout');
 };
 
-// --- MODO ENTRENAMIENTO EN VIVO ---
 let currentWorkoutRoutine = [];
 let activeTimers = {}; 
 
@@ -707,7 +694,6 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async f
   currentWorkoutRoutine = []; this.disabled = false; 
 });
 
-// --- BUSCADOR INTELIGENTE PARA SERIES MANUALES ---
 window.abrirBuscadorManual = function() {
   const container = document.getElementById('sheet-workout');
   if(!container) return;
@@ -808,7 +794,6 @@ window.abrirBuscadorManual = function() {
 
 document.getElementById('btn-registrar-serie')?.addEventListener('click', window.abrirBuscadorManual);
 
-// --- DASHBOARD GRID ---
 function actualizarDashboard() { 
   const dashboardContainer = document.getElementById('dashboard-tab');
   if(!dashboardContainer) return;
@@ -872,7 +857,6 @@ function actualizarDashboard() {
   `;
 }
 
-// --- HISTORIAL Y CHECKINS ---
 async function cargarRegistrosDelDia(uid) {
   const hoyKey = getTodayKey(); const listaComidas = document.getElementById('lista-comidas');
   if(listaComidas) { listaComidas.innerHTML = ''; const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "meals")); snapshot.forEach(docSnap => { const i = docSnap.data(); renderizarComidaEnUI(i.nombre, i.cal, i.prot, i.carb, i.gras, docSnap.id); }); }
