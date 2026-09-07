@@ -1,38 +1,71 @@
 // ============================================================================
-// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM (ANTI-FEALDAD) ---
+// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM Y REDISEÑO DE HEADER ---
 // ============================================================================
 const customCSS = `
-  .iron-btn-primary {
-    width: 100%; padding: 14px; margin-top: 12px;
-    background: linear-gradient(135deg, #00e5ff 0%, #007acc 100%);
-    color: #fff; font-size: 14px; font-weight: 800; border: none; border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,229,255,0.4); text-transform: uppercase; cursor: pointer;
-    letter-spacing: 1px; transition: all 0.2s ease;
+  /* Rediseño del Header Superior (Barra Horizontal) */
+  header, .top-header, #main-header {
+    display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important;
+    padding: 10px 20px !important; background: rgba(20, 26, 38, 0.98) !important; border-bottom: 1px solid rgba(0,229,255,0.2) !important;
+    position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   }
-  .iron-btn-primary:active { transform: scale(0.98); }
-  
-  .iron-btn-danger {
-    width: 100%; padding: 12px; margin-top: 15px;
-    background: rgba(255, 51, 102, 0.1); color: #ff3366; border: 1px solid #ff3366;
-    border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer;
-    text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease;
-  }
-  .iron-btn-danger:active { transform: scale(0.98); background: rgba(255, 51, 102, 0.3); }
+  header img[src*="logo"], .top-header img[src*="logo"] { height: 40px !important; width: auto !important; margin: 0 !important; }
+  #user-welcome-box { display: flex; flex-direction: row !important; align-items: center !important; gap: 10px !important; margin: 0 !important; text-align: right; }
+  #user-welcome-box img#user-avatar { width: 40px !important; height: 40px !important; border-radius: 50%; border: 2px solid #00e5ff; }
+  .user-badges-row { display: flex; gap: 8px; flex-direction: row; margin-top: 3px; }
+  .user-badge-mini { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); padding: 3px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; }
 
-  .iron-input-modern {
-    width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,229,255,0.5);
-    border-radius: 8px; color: #fff; font-weight: bold; font-size: 14px; text-align: center;
-    box-sizing: border-box; transition: border 0.3s;
-  }
+  /* Estilos Botones y Formularios */
+  .iron-btn-primary { width: 100%; padding: 14px; margin-top: 12px; background: linear-gradient(135deg, #00e5ff 0%, #007acc 100%); color: #fff; font-size: 14px; font-weight: 800; border: none; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,229,255,0.4); text-transform: uppercase; cursor: pointer; letter-spacing: 1px; transition: all 0.2s ease; }
+  .iron-btn-primary:active { transform: scale(0.98); }
+  .iron-btn-danger { width: 100%; padding: 12px; margin-top: 15px; background: rgba(255, 51, 102, 0.1); color: #ff3366; border: 1px solid #ff3366; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease; }
+  .iron-btn-danger:active { transform: scale(0.98); background: rgba(255, 51, 102, 0.3); }
+  .iron-input-modern { width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,229,255,0.5); border-radius: 8px; color: #fff; font-weight: bold; font-size: 14px; text-align: center; box-sizing: border-box; transition: border 0.3s; }
   .iron-input-modern:focus { outline: none; border-color: #00e5ff; box-shadow: 0 0 8px rgba(0,229,255,0.5); }
 
+  /* Historial Desplegable */
   .history-day { background: rgba(26, 33, 48, 0.8); margin-bottom: 12px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
-  .history-day-header { padding: 15px; background: rgba(0, 229, 255, 0.1); font-weight: 800; color: #00e5ff; display: flex; justify-content: space-between; cursor: pointer; font-size: 14px; }
-  .history-day-content { padding: 15px; display: none; background: rgba(0,0,0,0.2); }
+  .history-day-header { padding: 15px; background: linear-gradient(90deg, rgba(0,229,255,0.1) 0%, transparent 100%); font-weight: 800; color: #00e5ff; display: flex; justify-content: space-between; cursor: pointer; font-size: 14px; transition: background 0.3s; }
+  .history-day-header:hover { background: rgba(0,229,255,0.2); }
+  .history-day-content { padding: 15px; display: none; background: rgba(0,0,0,0.3); }
 `;
-const styleEl = document.createElement('style');
-styleEl.innerHTML = customCSS;
-document.head.appendChild(styleEl);
+const styleEl = document.createElement('style'); styleEl.innerHTML = customCSS; document.head.appendChild(styleEl);
+
+// Limpieza DOM inmediata: Borrar el texto feo
+document.addEventListener('DOMContentLoaded', () => {
+  const allElements = document.querySelectorAll('span, p, div, h1, h2, h3, h4, h5, h6');
+  allElements.forEach(el => {
+    if(el.childNodes.length === 1 && el.innerText && el.innerText.toUpperCase().includes('ELITE PERFORMANCE SYSTEM')) {
+      el.style.display = 'none';
+    }
+  });
+  
+  // Reestructurar los badges del header para que quepan en la barra
+  const rankElem = document.getElementById('header-rank');
+  const streakElem = document.getElementById('header-streak');
+  if(rankElem && streakElem) {
+    const parent = rankElem.parentElement;
+    parent.classList.add('user-badges-row');
+    rankElem.classList.add('user-badge-mini');
+    streakElem.classList.add('user-badge-mini');
+  }
+
+  // Inyectar controles de Calentamiento/Enfriamiento
+  const genBtn = document.getElementById('btn-generar-rutina');
+  if(genBtn && !document.getElementById('check-warmup')) {
+    const fasesDiv = document.createElement('div');
+    fasesDiv.innerHTML = `
+      <div style="display:flex; justify-content:space-between; margin-bottom:15px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+        <label style="color:#ffaa00; font-size:12px; font-weight:800; display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="check-warmup" checked style="accent-color:#ffaa00; width:16px; height:16px;"> 🔥 Calentamiento
+        </label>
+        <label style="color:#00e5ff; font-size:12px; font-weight:800; display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="check-cooldown" checked style="accent-color:#00e5ff; width:16px; height:16px;"> ❄️ Enfriamiento
+        </label>
+      </div>
+    `;
+    genBtn.parentNode.insertBefore(fasesDiv, genBtn);
+  }
+});
 
 // --- IMPORTACIÓN MODULAR DE FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -54,7 +87,7 @@ const db = getFirestore(app);
 let currentUser = null;
 
 // --- ESTADO Y BIOMETRÍA ---
-let totalCalorias = 0, totalProt = 0, totalCarb = 0, totalGrasa = 0, totalAgua = 0, userStreak = 1;
+let totalCalorias = 0, totalProt = 0, totalCarb = 0, totalGrasa = 0, totalAgua = 0, totalQuemadas = 0, userStreak = 1;
 let metaCalorias = 2500, metaProt = 165, metaCarb = 275, metaGrasa = 69;
 let currentRankName = "Ashigaru";
 let userProfile = { perfilCompleto: false, nickname: "", genero: "M", edad: 25, peso: 75, altura: 175, metaObj: 0, actividad: 1.55 };
@@ -62,20 +95,9 @@ let userProfile = { perfilCompleto: false, nickname: "", genero: "M", edad: 25, 
 function getTodayKey() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 function showToast(msg) { const toast = document.getElementById('toast-notif'); if(!toast) return; toast.innerHTML = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3500); }
 
-// --- TIPS DEL COACH ---
-const ironCoreTips = [
-  "⚡ La creatina (5g) funciona por acumulación. Tómala a cualquier hora, idealmente con carbohidratos.",
-  "🥩 Hipertrofia: Consume entre 1.8g y 2.2g de proteína por cada kilo de tu peso corporal.",
-  "💧 La hidratación lubrica tus articulaciones. Intenta tomar 1 litro por cada 25kg de peso.",
-  "💤 El descanso es vital: duerme 8 horas para reparar tu Sistema Nervioso Central.",
-  "🔥 En déficit agresivo, prioriza alimentos voluminosos como verduras para engañar la saciedad."
-];
-window.addEventListener('DOMContentLoaded', () => { 
-  const dt = document.getElementById('daily-tip');
-  if(dt) dt.innerText = ironCoreTips[Math.floor(Math.random() * ironCoreTips.length)]; 
-});
+const ironCoreTips = ["⚡ La creatina (5g) funciona por acumulación.", "🥩 Consume entre 1.8g y 2.2g de proteína por kilo.", "💧 Toma 1 litro por cada 25kg de peso.", "💤 Duerme 8 horas para reparar tu SNC.", "🔥 Prioriza alimentos voluminosos en déficit."];
+window.addEventListener('DOMContentLoaded', () => { const dt = document.getElementById('daily-tip'); if(dt) dt.innerText = ironCoreTips[Math.floor(Math.random() * ironCoreTips.length)]; });
 
-// --- AUTENTICACIÓN GOOGLE ---
 const authScreen = document.getElementById('auth-screen');
 getRedirectResult(auth).then((result) => { if (result && result.user) showToast('⚔️ ¡Acceso autorizado al Dojo!'); }).catch(console.error);
 
@@ -89,16 +111,12 @@ document.getElementById('btn-logout-profile')?.addEventListener('click', () => s
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    currentUser = user; 
-    if(authScreen) authScreen.style.display = 'none'; 
-    const nickElem = document.getElementById('ob-nickname');
-    if(nickElem) nickElem.value = (user.displayName || "Guerrero").split(' ')[0]; 
+    currentUser = user; if(authScreen) authScreen.style.display = 'none'; 
+    const nickElem = document.getElementById('ob-nickname'); if(nickElem) nickElem.value = (user.displayName || "Guerrero").split(' ')[0]; 
     await cargarDatosDesdeNube(user.uid);
   } else { 
-    currentUser = null; 
-    if(authScreen) authScreen.style.display = 'flex'; 
-    const wb = document.getElementById('user-welcome-box');
-    if(wb) wb.style.display = 'none'; 
+    currentUser = null; if(authScreen) authScreen.style.display = 'flex'; 
+    const wb = document.getElementById('user-welcome-box'); if(wb) wb.style.display = 'none'; 
   }
 });
 
@@ -107,14 +125,9 @@ function generarAvatarPorRango(nickname, rango) {
   return `https://api.dicebear.com/7.x/bottts/svg?seed=${nickname}-${rango}&backgroundColor=${bg}`;
 }
 
-// --- ONBOARDING Y FIREBASE ---
 const obScreen = document.getElementById('onboarding-screen'); const obTrack = document.getElementById('ob-track'); const obBar = document.getElementById('ob-bar'); let currentObStep = 0;
 window.abrirOnboarding = function(isEdit = false) { 
-  if(!obScreen) return;
-  obScreen.style.display = 'flex'; 
-  currentObStep = 0; 
-  if(obTrack) obTrack.style.transform = `translateX(0%)`; 
-  if(obBar) obBar.style.width = '33.33%'; 
+  if(!obScreen) return; obScreen.style.display = 'flex'; currentObStep = 0; if(obTrack) obTrack.style.transform = `translateX(0%)`; if(obBar) obBar.style.width = '33.33%'; 
   if(isEdit) { 
     const t = document.getElementById('ob-title'); if(t) t.innerText = "Editar Credencial"; 
     const nick = document.getElementById('ob-nickname'); if(nick) nick.value = userProfile.nickname; 
@@ -122,87 +135,37 @@ window.abrirOnboarding = function(isEdit = false) {
     const ed = document.getElementById('ob-edad'); if(ed) ed.value = userProfile.edad; 
     const pe = document.getElementById('ob-peso'); if(pe) pe.value = userProfile.peso; 
     const al = document.getElementById('ob-altura'); if(al) al.value = userProfile.altura; 
-    document.querySelectorAll('.ob-goal-card').forEach(c => { 
-      c.classList.remove('active'); 
-      if(parseInt(c.getAttribute('data-val')) === userProfile.metaObj) c.classList.add('active'); 
-    }); 
-  } else { 
-    const t = document.getElementById('ob-title'); if(t) t.innerText = "Ritual de Iniciación"; 
-  } 
+    document.querySelectorAll('.ob-goal-card').forEach(c => { c.classList.remove('active'); if(parseInt(c.getAttribute('data-val')) === userProfile.metaObj) c.classList.add('active'); }); 
+  } else { const t = document.getElementById('ob-title'); if(t) t.innerText = "Ritual de Iniciación"; } 
 };
-
 window.moverOnboarding = function(dir) { 
-  if(dir === 1 && currentObStep === 0) { 
-    const nickVal = document.getElementById('ob-nickname')?.value.trim();
-    if(!nickVal) { showToast('⚠️ Elige un apodo.'); return; } 
-  } 
-  currentObStep += dir; 
-  if(currentObStep < 0) currentObStep = 0; 
-  if(currentObStep > 2) currentObStep = 2; 
-  if(obTrack) obTrack.style.transform = `translateX(-${currentObStep * 33.333}%)`; 
-  if(obBar) obBar.style.width = `${(currentObStep + 1) * 33.33}%`; 
+  if(dir === 1 && currentObStep === 0) { const nickVal = document.getElementById('ob-nickname')?.value.trim(); if(!nickVal) { showToast('⚠️ Elige un apodo.'); return; } } 
+  currentObStep += dir; if(currentObStep < 0) currentObStep = 0; if(currentObStep > 2) currentObStep = 2; 
+  if(obTrack) obTrack.style.transform = `translateX(-${currentObStep * 33.333}%)`; if(obBar) obBar.style.width = `${(currentObStep + 1) * 33.33}%`; 
 };
-
-window.seleccionarGenero = function(gen) { 
-  userProfile.genero = gen; 
-  document.querySelectorAll('.ob-gender-btn').forEach(b => { 
-    if(b.getAttribute('data-gen') === gen) b.classList.add('active'); 
-    else b.classList.remove('active'); 
-  }); 
-};
-
-window.seleccionarMetaOb = function(elem) { 
-  document.querySelectorAll('.ob-goal-card').forEach(c => c.classList.remove('active')); 
-  elem.classList.add('active'); 
-  userProfile.metaObj = parseInt(elem.getAttribute('data-val')); 
-};
+window.seleccionarGenero = function(gen) { userProfile.genero = gen; document.querySelectorAll('.ob-gender-btn').forEach(b => { if(b.getAttribute('data-gen') === gen) b.classList.add('active'); else b.classList.remove('active'); }); };
+window.seleccionarMetaOb = function(elem) { document.querySelectorAll('.ob-goal-card').forEach(c => c.classList.remove('active')); elem.classList.add('active'); userProfile.metaObj = parseInt(elem.getAttribute('data-val')); };
 
 window.finalizarOnboarding = async function() {
-  const nickInput = document.getElementById('ob-nickname');
-  const edadInput = document.getElementById('ob-edad');
-  const pesoInput = document.getElementById('ob-peso');
-  const alturaInput = document.getElementById('ob-altura');
-  const actSelect = document.getElementById('select-actividad');
-
-  userProfile.nickname = nickInput?.value.trim() || "Guerrero";
-  userProfile.edad = parseInt(edadInput?.value) || 25;
-  userProfile.peso = parseFloat(pesoInput?.value) || 75;
-  userProfile.altura = parseInt(alturaInput?.value) || 175;
+  const nickInput = document.getElementById('ob-nickname'); const edadInput = document.getElementById('ob-edad'); const pesoInput = document.getElementById('ob-peso'); const alturaInput = document.getElementById('ob-altura'); const actSelect = document.getElementById('select-actividad');
+  userProfile.nickname = nickInput?.value.trim() || "Guerrero"; userProfile.edad = parseInt(edadInput?.value) || 25; userProfile.peso = parseFloat(pesoInput?.value) || 75; userProfile.altura = parseInt(alturaInput?.value) || 175;
   userProfile.actividad = actSelect && actSelect.getAttribute('data-val') ? parseFloat(actSelect.getAttribute('data-val')) : (userProfile.actividad || 1.55);
   userProfile.perfilCompleto = true;
-
-  let tmb = userProfile.genero === 'M' 
-    ? (10 * userProfile.peso) + (6.25 * userProfile.altura) - (5 * userProfile.edad) + 5 
-    : (10 * userProfile.peso) + (6.25 * userProfile.altura) - (5 * userProfile.edad) - 161;
+  let tmb = userProfile.genero === 'M' ? (10 * userProfile.peso) + (6.25 * userProfile.altura) - (5 * userProfile.edad) + 5 : (10 * userProfile.peso) + (6.25 * userProfile.altura) - (5 * userProfile.edad) - 161;
   let tdee = tmb * userProfile.actividad;
-
   metaCalorias = Math.round(tdee + (userProfile.metaObj || 0));
   metaProt = (userProfile.metaObj || 0) > 0 ? Math.round(userProfile.peso * 2.0) : Math.round(userProfile.peso * 2.2);
   metaGrasa = Math.round((metaCalorias * 0.25) / 9);
   metaCarb = Math.round((metaCalorias - ((metaProt * 4) + (metaGrasa * 9))) / 4);
 
-  await guardarEstadoNube();
-  actualizarUIHeader();
-  actualizarUIPerfil();
-  actualizarDashboard();
-  actualizarGraficoProyeccion(userProfile.peso, userProfile.metaObj);
-  actualizarLabelMetaIA();
-
+  await guardarEstadoNube(); actualizarUIHeader(); actualizarUIPerfil(); actualizarDashboard(); actualizarGraficoProyeccion(userProfile.peso, userProfile.metaObj); actualizarLabelMetaIA();
   if(obScreen) obScreen.style.display = 'none';
-  showToast(`✅ Credencial Sincronizada`);
-  document.querySelector('[data-target="page-dashboard"]')?.click();
+  showToast(`✅ Credencial Sincronizada`); document.querySelector('[data-target="page-dashboard"]')?.click();
 };
 
 async function guardarEstadoNube() { 
   if(!currentUser || !db) return; 
-  try { 
-    await setDoc(doc(db, "users", currentUser.uid), { 
-      calorias: totalCalorias, proteina: totalProt, carbos: totalCarb, grasa: totalGrasa, agua: totalAgua, 
-      metaCal: metaCalorias, metaProt: metaProt, metaCarb: metaCarb, metaGrasa: metaGrasa, 
-      streak: userStreak, ultimaFecha: localStorage.getItem('ic_ultima_fecha'), 
-      currentRankName, ...userProfile 
-    }, { merge: true }); 
-  } catch(e) { console.error(e); } 
+  try { await setDoc(doc(db, "users", currentUser.uid), { calorias: totalCalorias, proteina: totalProt, carbos: totalCarb, grasa: totalGrasa, agua: totalAgua, quemadas: totalQuemadas, metaCal: metaCalorias, metaProt: metaProt, metaCarb: metaCarb, metaGrasa: metaGrasa, streak: userStreak, ultimaFecha: localStorage.getItem('ic_ultima_fecha'), currentRankName, ...userProfile }, { merge: true }); } catch(e) { console.error(e); } 
 }
 
 async function cargarDatosDesdeNube(uid) { 
@@ -210,49 +173,18 @@ async function cargarDatosDesdeNube(uid) {
   const docSnap = await getDoc(doc(db, "users", uid)); 
   if (docSnap.exists()) { 
     const d = docSnap.data(); 
-    totalCalorias = d.calorias || 0; 
-    totalProt = d.proteina || 0; 
-    totalCarb = d.carbos || 0; 
-    totalGrasa = d.grasa || 0; 
-    totalAgua = d.agua || 0; 
-    metaCalorias = d.metaCal || 2500; 
-    metaProt = d.metaProt || 165; 
-    metaCarb = d.metaCarb || 275; 
-    metaGrasa = d.metaGrasa || 69; 
-    userStreak = d.streak || 1; 
-    userProfile.perfilCompleto = d.perfilCompleto || false; 
-    userProfile.nickname = d.nickname || ""; 
-    userProfile.genero = d.genero || "M"; 
-    userProfile.edad = d.edad || 25; 
-    userProfile.peso = d.peso || 75; 
-    userProfile.altura = d.altura || 175; 
-    userProfile.metaObj = d.metaObj !== undefined ? d.metaObj : 0; 
-    userProfile.actividad = d.actividad || 1.55; 
-    currentRankName = d.currentRankName || "Ashigaru"; 
+    totalCalorias = d.calorias || 0; totalProt = d.proteina || 0; totalCarb = d.carbos || 0; totalGrasa = d.grasa || 0; totalAgua = d.agua || 0; totalQuemadas = d.quemadas || 0;
+    metaCalorias = d.metaCal || 2500; metaProt = d.metaProt || 165; metaCarb = d.metaCarb || 275; metaGrasa = d.metaGrasa || 69; userStreak = d.streak || 1;
+    userProfile.perfilCompleto = d.perfilCompleto || false; userProfile.nickname = d.nickname || ""; userProfile.genero = d.genero || "M"; userProfile.edad = d.edad || 25; userProfile.peso = d.peso || 75; userProfile.altura = d.altura || 175; userProfile.metaObj = d.metaObj !== undefined ? d.metaObj : 0; userProfile.actividad = d.actividad || 1.55; currentRankName = d.currentRankName || "Ashigaru"; 
   } 
-  if(!userProfile.perfilCompleto) { 
-    window.abrirOnboarding(false); 
-  } else { 
-    actualizarUIHeader(); 
-    actualizarUIPerfil(); 
-    actualizarLabelMetaIA(); 
-  } 
-  iniciarSakuraBackground(); 
-  verificarCambioDeDia(); 
-  actualizarDashboard(); 
-  actualizarAguaUI(); 
-  await cargarRegistrosDelDia(uid); 
-  await cargarHistorialYCheckins(uid); // NUEVO: Carga del historial y checks
-  actualizarGraficoProyeccion(userProfile.peso, userProfile.metaObj); 
+  if(!userProfile.perfilCompleto) { window.abrirOnboarding(false); } else { actualizarUIHeader(); actualizarUIPerfil(); actualizarLabelMetaIA(); } 
+  iniciarSakuraBackground(); verificarCambioDeDia(); actualizarDashboard(); actualizarAguaUI(); await cargarRegistrosDelDia(uid); await cargarHistorialYCheckins(uid); actualizarGraficoProyeccion(userProfile.peso, userProfile.metaObj); 
 }
 
 function actualizarUIHeader() { 
   const dn = document.getElementById('user-display-name'); if(dn) dn.innerText = userProfile.nickname.toUpperCase(); 
   const avatarHeader = document.getElementById('user-avatar'); 
-  if(avatarHeader) {
-    avatarHeader.src = generarAvatarPorRango(userProfile.nickname, currentRankName); 
-    avatarHeader.style.display = 'inline-block'; 
-  }
+  if(avatarHeader) { avatarHeader.src = generarAvatarPorRango(userProfile.nickname, currentRankName); avatarHeader.style.display = 'inline-block'; }
   const wb = document.getElementById('user-welcome-box'); if(wb) wb.style.display = 'flex'; 
 }
 
@@ -262,433 +194,62 @@ function actualizarUIPerfil() {
   const va = document.getElementById('profile-val-altura'); if(va) va.innerText = `${userProfile.altura} cm`; 
   const ve = document.getElementById('profile-val-edad'); if(ve) ve.innerText = `${userProfile.edad} años`; 
   const vg = document.getElementById('profile-val-genero'); if(vg) vg.innerText = userProfile.genero === 'M' ? 'Hombre' : 'Mujer'; 
-  let labelMeta = "Mantenimiento"; 
-  if(userProfile.metaObj === -500) labelMeta = "Déficit Agresivo"; 
-  if(userProfile.metaObj === -300) labelMeta = "Definición"; 
-  if(userProfile.metaObj === 300) labelMeta = "Volumen"; 
+  let labelMeta = "Mantenimiento"; if(userProfile.metaObj === -500) labelMeta = "Déficit Agresivo"; if(userProfile.metaObj === -300) labelMeta = "Definición"; if(userProfile.metaObj === 300) labelMeta = "Volumen"; 
   const cg = document.getElementById('profile-card-goal'); if(cg) cg.innerText = `Meta: ${labelMeta}`; 
   const ca = document.getElementById('profile-card-avatar'); if(ca) ca.src = generarAvatarPorRango(userProfile.nickname, currentRankName); 
 }
 
 // --- BASES DE DATOS EXTERNAS ---
-let oracleDB = []; 
-let exercisesDB = [];
-
+let oracleDB = []; let exercisesDB = [];
 async function inicializarBases() {
-  try {
-    const resFood = await fetch('alimentos.json?v=' + Date.now());
-    if (resFood.ok) oracleDB = await resFood.json();
-  } catch (error) { console.error("Error Alimentos JSON:", error); }
-  
-  try {
-    const resEx = await fetch('ejercicios.json?v=' + Date.now());
-    if (!resEx.ok) throw new Error('No se pudo cargar ejercicios.json (HTTP ' + resEx.status + ')');
-    exercisesDB = await resEx.json();
-    console.log(`⚔️ Base de Combate sincronizada con ${exercisesDB.length} ejercicios.`);
-  } catch (error) { 
-    console.error("Error cargando ejercicios.json:", error);
-  }
+  try { const resFood = await fetch('alimentos.json?v=' + Date.now()); if (resFood.ok) oracleDB = await resFood.json(); } catch (error) { console.error("Error Alimentos JSON:", error); }
+  try { const resEx = await fetch('ejercicios.json?v=' + Date.now()); if (!resEx.ok) throw new Error('No se pudo cargar ejercicios.json'); exercisesDB = await resEx.json(); console.log(`⚔️ Base de Combate sincronizada con ${exercisesDB.length} ejercicios.`); } catch (error) { console.error("Error cargando ejercicios.json:", error); }
 }
-// Ejecución Inmediata
 inicializarBases();
 
 // --- ORÁCULO DE NUTRICIÓN ---
 let weeklyPlan = []; let selectedDayIndex = 0; let activeAllergies = [];
 const allergyInput = document.getElementById('oracle-allergies-input'); const allergyContainer = document.getElementById('allergy-tags-container');
-if(allergyInput) { 
-  allergyInput.addEventListener('keypress', (e) => { 
-    if(e.key === 'Enter' || e.key === ',') { 
-      e.preventDefault(); 
-      const val = allergyInput.value.trim().toLowerCase(); 
-      if(val && !activeAllergies.includes(val)) { activeAllergies.push(val); renderAllergyChips(); } 
-      allergyInput.value = ''; 
-    } 
-  }); 
-}
+if(allergyInput) { allergyInput.addEventListener('keypress', (e) => { if(e.key === 'Enter' || e.key === ',') { e.preventDefault(); const val = allergyInput.value.trim().toLowerCase(); if(val && !activeAllergies.includes(val)) { activeAllergies.push(val); renderAllergyChips(); } allergyInput.value = ''; } }); }
+function renderAllergyChips() { if(!allergyContainer) return; allergyContainer.innerHTML = ''; activeAllergies.forEach((allergy, index) => { const chip = document.createElement('div'); chip.className = 'allergy-chip'; chip.innerHTML = `<span>${allergy}</span><span class="allergy-chip-close" onclick="window.removeAllergy(${index})">×</span>`; allergyContainer.appendChild(chip); }); } window.removeAllergy = function(index) { activeAllergies.splice(index, 1); renderAllergyChips(); };
+function actualizarLabelMetaIA() { let label = "Mantenimiento"; if(userProfile.metaObj < 0) label = "Déficit Agresivo"; if(userProfile.metaObj > 0) label = "Volumen"; const metaLabel = document.getElementById('oracle-target-goal'); if(metaLabel) metaLabel.innerText = label; const calsLabel = document.getElementById('oracle-target-cals'); if(calsLabel) calsLabel.innerText = metaCalorias; }
+let dynamicDays = []; function calcularFechasSemana() { dynamicDays = []; const date = new Date(); const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']; const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']; for(let i=0; i<7; i++) { let d = new Date(date); d.setDate(d.getDate() + i); dynamicDays.push({ index: i, shortName: dayNames[d.getDay()], fullName: `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}` }); } }
+document.getElementById('btn-generar-plan')?.addEventListener('click', () => { if (oracleDB.length === 0) { showToast("⚠️ Sincronizando... Espera."); return; } calcularFechasSemana(); generarPlanSemanal(); document.getElementById('oracle-form-card').style.display = 'none'; document.getElementById('plan-resultado').style.display = 'block'; showToast('🤖 Plan clínico generado.'); });
+window.seleccionarDiaPlan = function(index) { selectedDayIndex = index; document.querySelectorAll('.day-chip').forEach(btn => btn.classList.remove('active')); document.querySelector(`.day-chip[data-day="${index}"]`)?.classList.add('active'); const ph = document.getElementById('plan-date-header'); if(ph) ph.innerText = dynamicDays[index].fullName; renderizarDiaSeleccionado(); };
+function generarPlanSemanal() { weeklyPlan = []; const distribution = [ { tipo: 'desayuno', cals: metaCalorias * 0.25 }, { tipo: 'almuerzo', cals: metaCalorias * 0.35 }, { tipo: 'cena', cals: metaCalorias * 0.30 }, { tipo: 'snack', cals: metaCalorias * 0.10 } ]; for(let i=0; i<7; i++) { let dayMeals = distribution.map(slot => obtenerComidaAlgoritmo(slot.tipo, slot.cals, [])); weeklyPlan.push(dayMeals); } const scrollContainer = document.getElementById('day-selector-container'); if(scrollContainer) { scrollContainer.innerHTML = ''; dynamicDays.forEach(day => { scrollContainer.innerHTML += `<button class="day-chip ${day.index === 0 ? 'active' : ''}" data-day="${day.index}" onclick="window.seleccionarDiaPlan(${day.index})">${day.shortName}</button>`; }); } window.seleccionarDiaPlan(0); }
+function filtrarBaseDatos(tipo, excludesId) { let currentDietType = document.getElementById('oracle-diet-type')?.value || 'todo'; let isCeliac = document.getElementById('oracle-celiac')?.checked || false; let isLactose = document.getElementById('oracle-lactose')?.checked || false; let isSibo = document.getElementById('oracle-sibo')?.checked || false; let candidatos = oracleDB.filter(m => { if(m.tipo !== tipo) return false; if(m.dietas && !m.dietas.includes(currentDietType)) return false; if(excludesId && excludesId.includes(m.id)) return false; if(isCeliac && m.glutenFree === false) return false; if(isLactose && m.lactoseFree === false) return false; if(isSibo && m.siboSafe === false) return false; let jsonStr = JSON.stringify(m).toLowerCase(); for(let a of activeAllergies) { if(jsonStr.includes(a)) return false; } return true; }); if(candidatos.length === 0) candidatos = oracleDB.filter(m => m.tipo === tipo); let bestCandidates = []; if(userProfile.metaObj > 0) { bestCandidates = candidatos.filter(m => m.isDense === true); } else if (userProfile.metaObj < 0) { bestCandidates = candidatos.filter(m => m.isVolume === true); } if(bestCandidates.length > 0) candidatos = bestCandidates; return candidatos; }
+function calcularMacrosPorcion(comidaBase, targetCals) { const factor = targetCals / (comidaBase.calBase || 1); let ingredientesAdaptados = (comidaBase.ingredientes || []).map(ing => { let qtyCalculada = ing.baseQty * factor; qtyCalculada = ing.unidad === 'unidades' || ing.unidad === 'scoops' || ing.unidad === 'rebanadas' || ing.unidad === 'porción' ? parseFloat(qtyCalculada.toFixed(1)) : Math.round(qtyCalculada); return { nombre: ing.nombre, cantidad: qtyCalculada, unidad: ing.unidad }; }); return { id: comidaBase.id, tipo: comidaBase.tipo, name: comidaBase.name, cals: Math.round(comidaBase.calBase * factor), prot: Math.round(comidaBase.prot * factor), carb: Math.round(comidaBase.carb * factor), gras: Math.round(comidaBase.gras * factor), ingredientes: ingredientesAdaptados }; }
+function obtenerComidaAlgoritmo(tipo, targetCals, excludesId) { const candidatos = filtrarBaseDatos(tipo, excludesId); if(candidatos.length === 0) return { id: 0, tipo: tipo, name: "Sin Opciones", cals: targetCals, prot: 0, carb: 0, gras: 0, ingredientes: [] }; const selected = candidatos[Math.floor(Math.random() * candidatos.length)]; return calcularMacrosPorcion(selected, targetCals); }
+function renderizarDiaSeleccionado() { const container = document.getElementById('comidas-plan'); if(!container) return; container.innerHTML = ''; const dayMeals = weeklyPlan[selectedDayIndex] || []; dayMeals.forEach((meal, idx) => { let ingredientesHTML = meal.ingredientes.length > 0 ? meal.ingredientes.map(i => `<span style="display:block; margin-bottom:3px;">• ${i.cantidad} ${i.unidad} de ${i.nombre}</span>`).join('') : `• Intenta cambiar filtros`; container.innerHTML += `<div class="plan-meal-card"><div class="plan-meal-header"><span class="plan-meal-title">${meal.tipo}</span><button class="btn-swap" onclick="window.abrirMenuReemplazo(${idx})">🔄 Cambiar</button></div><div class="plan-meal-desc"><b>${meal.name}</b>${ingredientesHTML}</div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;"><span class="plan-meal-cals">🔥 ${meal.cals} kcal</span><span style="font-size:11px; color:var(--text-muted); font-weight:800;">P: <span style="color:#ff3366;">${meal.prot}g</span> | C: <span style="color:#00e5ff;">${meal.carb}g</span> | G: <span style="color:#ffaa00;">${meal.gras}g</span></span></div></div>`; }); }
+let swapTargetIndex = -1; window.abrirMenuReemplazo = function(mealIndex) { swapTargetIndex = mealIndex; const oldMeal = weeklyPlan[selectedDayIndex][mealIndex]; const targetCals = oldMeal.cals; let candidatos = filtrarBaseDatos(oldMeal.tipo, [oldMeal.id]); const listContainer = document.getElementById('sheet-swap-list'); if(!listContainer) return; listContainer.innerHTML = ''; if(candidatos.length === 0) { listContainer.innerHTML = `<p style="font-size:12px; color:#ff3366;">No hay más opciones para tus filtros.</p>`; } else { for(let i=0; i<candidatos.length; i++) { let opcionEscalada = calcularMacrosPorcion(candidatos[i], targetCals); let objData = encodeURIComponent(JSON.stringify(opcionEscalada)); listContainer.innerHTML += `<div class="swap-option-card" onclick="window.confirmarReemplazo('${objData}')"><b>${opcionEscalada.name}</b><span>🔥 ${opcionEscalada.cals} kcal | P: ${opcionEscalada.prot}g | C: ${opcionEscalada.carb}g | G: ${opcionEscalada.gras}g</span></div>`; } } window.openSheet('sheet-swap-meal'); };
+window.confirmarReemplazo = function(encodedData) { if(swapTargetIndex > -1) { const newMeal = JSON.parse(decodeURIComponent(encodedData)); weeklyPlan[selectedDayIndex][swapTargetIndex] = newMeal; renderizarDiaSeleccionado(); window.closeSheet(); showToast(`✅ Actualizado.`); } };
+window.generarListaCompras = function() { const ul = document.getElementById('lista-compras-ui'); if(!ul) return; let listaConsolidada = {}; weeklyPlan.forEach(dia => { dia.forEach(comida => { comida.ingredientes.forEach(ing => { let key = `${ing.nombre} (${ing.unidad})`; listaConsolidada[key] = (listaConsolidada[key] || 0) + ing.cantidad; }); }); }); ul.innerHTML = ''; for (let key in listaConsolidada) { let rawQty = listaConsolidada[key]; let qtyDisplay = key.includes('unidades') || key.includes('scoops') || key.includes('rebanadas') || key.includes('porción') ? rawQty.toFixed(1) : Math.round(rawQty); let match = key.match(/(.*) \((.*)\)/); let nombreLimpio = match ? match[1] : key; let unidadLimpia = match ? match[2] : ''; ul.innerHTML += `<li><input type="checkbox" style="accent-color:var(--primary); width:18px; height:18px;"> <span style="flex:1;">${nombreLimpio}</span> <b style="color:var(--primary); font-size:12px;">${qtyDisplay} ${unidadLimpia}</b></li>`; } window.openSheet('sheet-compras'); };
+document.getElementById('btn-add-planned')?.addEventListener('click', () => { if(!weeklyPlan || weeklyPlan.length === 0) { showToast('⚠️ Primero genera un Plan Semanal.'); return; } const listContainer = document.getElementById('sheet-planned-list'); if(!listContainer) return; listContainer.innerHTML = ''; const todaysPlan = weeklyPlan[0]; todaysPlan.forEach(meal => { let objData = encodeURIComponent(JSON.stringify(meal)); listContainer.innerHTML += `<div class="swap-option-card" onclick="window.registrarComidaPlaneada('${objData}')"><span style="font-size:10px; color:var(--primary); font-weight:800; text-transform:uppercase;">${meal.tipo}</span><b style="margin-top:2px;">${meal.name}</b><span>🔥 ${meal.cals} kcal | P: ${meal.prot}g | C: ${meal.carb}g | G: ${meal.gras}g</span></div>`; }); window.openSheet('sheet-planned-meals'); });
+window.registrarComidaPlaneada = async function(encodedData) { const meal = JSON.parse(decodeURIComponent(encodedData)); let nombreFinal = `[${meal.tipo.charAt(0).toUpperCase() + meal.tipo.slice(1)}] ${meal.name}`; await registrarComidaNube(meal.cals, meal.prot, meal.carb, meal.gras, nombreFinal); window.closeSheet(); showToast(`✅ Registrado al instante.`); };
 
-function renderAllergyChips() { 
-  if(!allergyContainer) return; 
-  allergyContainer.innerHTML = ''; 
-  activeAllergies.forEach((allergy, index) => { 
-    const chip = document.createElement('div'); 
-    chip.className = 'allergy-chip'; 
-    chip.innerHTML = `<span>${allergy}</span><span class="allergy-chip-close" onclick="window.removeAllergy(${index})">×</span>`; 
-    allergyContainer.appendChild(chip); 
-  }); 
-} 
-window.removeAllergy = function(index) { activeAllergies.splice(index, 1); renderAllergyChips(); };
-
-function actualizarLabelMetaIA() { 
-  let label = "Mantenimiento"; 
-  if(userProfile.metaObj < 0) label = "Déficit Agresivo (Prioridad: Volumen)"; 
-  if(userProfile.metaObj > 0) label = "Volumen (Prioridad: Densidad)"; 
-  const metaLabel = document.getElementById('oracle-target-goal'); if(metaLabel) metaLabel.innerText = label; 
-  const calsLabel = document.getElementById('oracle-target-cals'); if(calsLabel) calsLabel.innerText = metaCalorias; 
-}
-
-let dynamicDays = [];
-function calcularFechasSemana() { 
-  dynamicDays = []; 
-  const date = new Date(); 
-  const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']; 
-  const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']; 
-  for(let i=0; i<7; i++) { 
-    let d = new Date(date); 
-    d.setDate(d.getDate() + i); 
-    dynamicDays.push({ index: i, shortName: dayNames[d.getDay()], fullName: `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}` }); 
-  } 
-}
-
-document.getElementById('btn-generar-plan')?.addEventListener('click', () => { 
-  if (oracleDB.length === 0) { showToast("⚠️ Sincronizando... Espera."); return; } 
-  calcularFechasSemana(); 
-  generarPlanSemanal(); 
-  document.getElementById('oracle-form-card').style.display = 'none'; 
-  document.getElementById('plan-resultado').style.display = 'block'; 
-  showToast('🤖 Plan clínico generado.'); 
-});
-
-window.seleccionarDiaPlan = function(index) { 
-  selectedDayIndex = index; 
-  document.querySelectorAll('.day-chip').forEach(btn => btn.classList.remove('active')); 
-  document.querySelector(`.day-chip[data-day="${index}"]`)?.classList.add('active'); 
-  const ph = document.getElementById('plan-date-header'); if(ph) ph.innerText = dynamicDays[index].fullName; 
-  renderizarDiaSeleccionado(); 
-};
-
-function generarPlanSemanal() { 
-  weeklyPlan = []; 
-  const distribution = [ 
-    { tipo: 'desayuno', cals: metaCalorias * 0.25 }, 
-    { tipo: 'almuerzo', cals: metaCalorias * 0.35 }, 
-    { tipo: 'cena', cals: metaCalorias * 0.30 }, 
-    { tipo: 'snack', cals: metaCalorias * 0.10 } 
-  ]; 
-  for(let i=0; i<7; i++) { 
-    let dayMeals = distribution.map(slot => obtenerComidaAlgoritmo(slot.tipo, slot.cals, [])); 
-    weeklyPlan.push(dayMeals); 
-  } 
-  const scrollContainer = document.getElementById('day-selector-container'); 
-  if(scrollContainer) {
-    scrollContainer.innerHTML = ''; 
-    dynamicDays.forEach(day => { 
-      scrollContainer.innerHTML += `<button class="day-chip ${day.index === 0 ? 'active' : ''}" data-day="${day.index}" onclick="window.seleccionarDiaPlan(${day.index})">${day.shortName}</button>`; 
-    }); 
-  }
-  window.seleccionarDiaPlan(0); 
-}
-
-function filtrarBaseDatos(tipo, excludesId) { 
-  let currentDietType = document.getElementById('oracle-diet-type')?.value || 'todo'; 
-  let isCeliac = document.getElementById('oracle-celiac')?.checked || false; 
-  let isLactose = document.getElementById('oracle-lactose')?.checked || false; 
-  let isSibo = document.getElementById('oracle-sibo')?.checked || false; 
-  let candidatos = oracleDB.filter(m => { 
-    if(m.tipo !== tipo) return false; 
-    if(m.dietas && !m.dietas.includes(currentDietType)) return false; 
-    if(excludesId && excludesId.includes(m.id)) return false; 
-    if(isCeliac && m.glutenFree === false) return false; 
-    if(isLactose && m.lactoseFree === false) return false; 
-    if(isSibo && m.siboSafe === false) return false; 
-    let jsonStr = JSON.stringify(m).toLowerCase(); 
-    for(let a of activeAllergies) { if(jsonStr.includes(a)) return false; } 
-    return true; 
-  }); 
-  if(candidatos.length === 0) candidatos = oracleDB.filter(m => m.tipo === tipo); 
-  let bestCandidates = []; 
-  if(userProfile.metaObj > 0) { bestCandidates = candidatos.filter(m => m.isDense === true); } 
-  else if (userProfile.metaObj < 0) { bestCandidates = candidatos.filter(m => m.isVolume === true); } 
-  if(bestCandidates.length > 0) candidatos = bestCandidates; 
-  return candidatos; 
-}
-
-function calcularMacrosPorcion(comidaBase, targetCals) { 
-  const factor = targetCals / (comidaBase.calBase || 1); 
-  let ingredientesAdaptados = (comidaBase.ingredientes || []).map(ing => { 
-    let qtyCalculada = ing.baseQty * factor; 
-    qtyCalculada = ing.unidad === 'unidades' || ing.unidad === 'scoops' || ing.unidad === 'rebanadas' || ing.unidad === 'porción' ? parseFloat(qtyCalculada.toFixed(1)) : Math.round(qtyCalculada); 
-    return { nombre: ing.nombre, cantidad: qtyCalculada, unidad: ing.unidad }; 
-  }); 
-  return { 
-    id: comidaBase.id, 
-    tipo: comidaBase.tipo, 
-    name: comidaBase.name, 
-    cals: Math.round(comidaBase.calBase * factor), 
-    prot: Math.round(comidaBase.prot * factor), 
-    carb: Math.round(comidaBase.carb * factor), 
-    gras: Math.round(comidaBase.gras * factor), 
-    ingredientes: ingredientesAdaptados 
-  }; 
-}
-
-function obtenerComidaAlgoritmo(tipo, targetCals, excludesId) { 
-  const candidatos = filtrarBaseDatos(tipo, excludesId); 
-  if(candidatos.length === 0) return { id: 0, tipo: tipo, name: "Sin Opciones", cals: targetCals, prot: 0, carb: 0, gras: 0, ingredientes: [] }; 
-  const selected = candidatos[Math.floor(Math.random() * candidatos.length)]; 
-  return calcularMacrosPorcion(selected, targetCals); 
-}
-
-function renderizarDiaSeleccionado() { 
-  const container = document.getElementById('comidas-plan'); 
-  if(!container) return; 
-  container.innerHTML = ''; 
-  const dayMeals = weeklyPlan[selectedDayIndex] || []; 
-  dayMeals.forEach((meal, idx) => { 
-    let ingredientesHTML = meal.ingredientes.length > 0 ? meal.ingredientes.map(i => `<span style="display:block; margin-bottom:3px;">• ${i.cantidad} ${i.unidad} de ${i.nombre}</span>`).join('') : `• Intenta cambiar filtros`; 
-    container.innerHTML += `<div class="plan-meal-card"><div class="plan-meal-header"><span class="plan-meal-title">${meal.tipo}</span><button class="btn-swap" onclick="window.abrirMenuReemplazo(${idx})">🔄 Cambiar</button></div><div class="plan-meal-desc"><b>${meal.name}</b>${ingredientesHTML}</div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;"><span class="plan-meal-cals">🔥 ${meal.cals} kcal</span><span style="font-size:11px; color:var(--text-muted); font-weight:800;">P: <span style="color:#ff3366;">${meal.prot}g</span> | C: <span style="color:#00e5ff;">${meal.carb}g</span> | G: <span style="color:#ffaa00;">${meal.gras}g</span></span></div></div>`; 
-  }); 
-}
-
-let swapTargetIndex = -1;
-window.abrirMenuReemplazo = function(mealIndex) { 
-  swapTargetIndex = mealIndex; 
-  const oldMeal = weeklyPlan[selectedDayIndex][mealIndex]; 
-  const targetCals = oldMeal.cals; 
-  let candidatos = filtrarBaseDatos(oldMeal.tipo, [oldMeal.id]); 
-  const listContainer = document.getElementById('sheet-swap-list'); 
-  if(!listContainer) return;
-  listContainer.innerHTML = ''; 
-  if(candidatos.length === 0) { 
-    listContainer.innerHTML = `<p style="font-size:12px; color:#ff3366;">No hay más opciones para tus filtros.</p>`; 
-  } else { 
-    for(let i=0; i<candidatos.length; i++) { 
-      let opcionEscalada = calcularMacrosPorcion(candidatos[i], targetCals); 
-      let objData = encodeURIComponent(JSON.stringify(opcionEscalada)); 
-      listContainer.innerHTML += `<div class="swap-option-card" onclick="window.confirmarReemplazo('${objData}')"><b>${opcionEscalada.name}</b><span>🔥 ${opcionEscalada.cals} kcal | P: ${opcionEscalada.prot}g | C: ${opcionEscalada.carb}g | G: ${opcionEscalada.gras}g</span></div>`; 
-    } 
-  } 
-  window.openSheet('sheet-swap-meal'); 
-};
-
-window.confirmarReemplazo = function(encodedData) { 
-  if(swapTargetIndex > -1) { 
-    const newMeal = JSON.parse(decodeURIComponent(encodedData)); 
-    weeklyPlan[selectedDayIndex][swapTargetIndex] = newMeal; 
-    renderizarDiaSeleccionado(); 
-    window.closeSheet(); 
-    showToast(`✅ Actualizado.`); 
-  } 
-};
-
-window.generarListaCompras = function() { 
-  const ul = document.getElementById('lista-compras-ui'); 
-  if(!ul) return; 
-  let listaConsolidada = {}; 
-  weeklyPlan.forEach(dia => { 
-    dia.forEach(comida => { 
-      comida.ingredientes.forEach(ing => { 
-        let key = `${ing.nombre} (${ing.unidad})`; 
-        listaConsolidada[key] = (listaConsolidada[key] || 0) + ing.cantidad; 
-      }); 
-    }); 
-  }); 
-  ul.innerHTML = ''; 
-  for (let key in listaConsolidada) { 
-    let rawQty = listaConsolidada[key]; 
-    let qtyDisplay = key.includes('unidades') || key.includes('scoops') || key.includes('rebanadas') || key.includes('porción') ? rawQty.toFixed(1) : Math.round(rawQty); 
-    let match = key.match(/(.*) \((.*)\)/); 
-    let nombreLimpio = match ? match[1] : key; 
-    let unidadLimpia = match ? match[2] : ''; 
-    ul.innerHTML += `<li><input type="checkbox" style="accent-color:var(--primary); width:18px; height:18px;"> <span style="flex:1;">${nombreLimpio}</span> <b style="color:var(--primary); font-size:12px;">${qtyDisplay} ${unidadLimpia}</b></li>`; 
-  } 
-  window.openSheet('sheet-compras'); 
-};
-
-document.getElementById('btn-add-planned')?.addEventListener('click', () => { 
-  if(!weeklyPlan || weeklyPlan.length === 0) { showToast('⚠️ Primero genera un Plan Semanal.'); return; } 
-  const listContainer = document.getElementById('sheet-planned-list'); 
-  if(!listContainer) return;
-  listContainer.innerHTML = ''; 
-  const todaysPlan = weeklyPlan[0]; 
-  todaysPlan.forEach(meal => { 
-    let objData = encodeURIComponent(JSON.stringify(meal)); 
-    listContainer.innerHTML += `<div class="swap-option-card" onclick="window.registrarComidaPlaneada('${objData}')"><span style="font-size:10px; color:var(--primary); font-weight:800; text-transform:uppercase;">${meal.tipo}</span><b style="margin-top:2px;">${meal.name}</b><span>🔥 ${meal.cals} kcal | P: ${meal.prot}g | C: ${meal.carb}g | G: ${meal.gras}g</span></div>`; 
-  }); 
-  window.openSheet('sheet-planned-meals'); 
-});
-
-window.registrarComidaPlaneada = async function(encodedData) { 
-  const meal = JSON.parse(decodeURIComponent(encodedData)); 
-  let nombreFinal = `[${meal.tipo.charAt(0).toUpperCase() + meal.tipo.slice(1)}] ${meal.name}`; 
-  await registrarComidaNube(meal.cals, meal.prot, meal.carb, meal.gras, nombreFinal); 
-  window.closeSheet(); 
-  showToast(`✅ Registrado al instante.`); 
-};
-
-// --- LECTOR BARRAS (Html5Qrcode - Cámara Trasera Directa) ---
+// --- LECTOR BARRAS (CÁMARA TRASERA DIRECTA) ---
 let html5QrCode = null;
 document.getElementById('btn-foto')?.addEventListener('click', () => { 
   window.openSheet('sheet-scanner'); 
-  if (!html5QrCode) { 
-    html5QrCode = new Html5Qrcode("qr-reader"); 
-  } 
-  
+  if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader"); 
   const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
-  
-  html5QrCode.start(
-    { facingMode: "environment" }, 
-    config, 
-    onScanSuccess, 
-    onScanFailure
-  ).catch(err => {
-    console.error("Error iniciando cámara:", err);
-    showToast("⚠️ No se pudo iniciar la cámara.");
-  });
+  html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure).catch(err => { console.error("Error iniciando cámara:", err); showToast("⚠️ No se pudo iniciar la cámara."); });
 });
-
-window.closeScanner = function() { 
-  if (html5QrCode && html5QrCode.isScanning) { 
-    html5QrCode.stop().then(() => {
-      html5QrCode.clear(); 
-    }).catch(e => console.error(e));
-  } 
-  window.closeSheet(); 
-};
-
-async function onScanSuccess(decodedText) { 
-  if (html5QrCode && html5QrCode.isScanning) { 
-    await html5QrCode.stop();
-  }
-  window.closeScanner(); 
-  showToast(`🔍 Buscando ${decodedText}...`); 
-  try { 
-    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${decodedText}.json`); 
-    const data = await res.json(); 
-    if (data.status === 1) { 
-      const p = data.product; 
-      if(!p.nutriments || !p.nutriments['energy-kcal_100g']) { showToast('⚠️ Sin info nutricional.'); return; } 
-      let brand = p.brands ? ` (${p.brands.split(',')[0]})` : ''; 
-      let nombre = `${p.product_name || 'Producto Escaneado'}${brand}`; 
-      let cal100 = Math.round(p.nutriments['energy-kcal_100g']); 
-      let prot100 = Math.round(p.nutriments['proteins_100g'] || 0); 
-      let carb100 = Math.round(p.nutriments['carbohydrates_100g'] || 0); 
-      let gras100 = Math.round(p.nutriments['fat_100g'] || 0); 
-      currentSearchFoodBase = { cal: cal100, prot: prot100, carb: carb100, gras: gras100 }; 
-      document.getElementById('food-selected-name').innerText = nombre; 
-      document.getElementById('food-results-list').innerHTML = ''; 
-      document.getElementById('edit-qty').value = '100'; 
-      document.getElementById('edit-unit').value = '1'; 
-      recalcularMacros(); 
-      document.getElementById('food-custom-section').style.display = 'block'; 
-      window.openSheet('sheet-add-food'); 
-    } else { 
-      showToast('❌ No encontrado.'); 
-    } 
-  } catch (err) { showToast('⚠️ Error de conexión.'); } 
-}
-function onScanFailure(error) { /* Silenciamos los errores por frame */ }
+window.closeScanner = function() { if (html5QrCode && html5QrCode.isScanning) { html5QrCode.stop().then(() => { html5QrCode.clear(); }).catch(e => console.error(e)); } window.closeSheet(); };
+async function onScanSuccess(decodedText) { if (html5QrCode && html5QrCode.isScanning) { await html5QrCode.stop(); } window.closeScanner(); showToast(`🔍 Buscando ${decodedText}...`); try { const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${decodedText}.json`); const data = await res.json(); if (data.status === 1) { const p = data.product; if(!p.nutriments || !p.nutriments['energy-kcal_100g']) { showToast('⚠️ Sin info nutricional.'); return; } let brand = p.brands ? ` (${p.brands.split(',')[0]})` : ''; let nombre = `${p.product_name || 'Producto Escaneado'}${brand}`; let cal100 = Math.round(p.nutriments['energy-kcal_100g']); let prot100 = Math.round(p.nutriments['proteins_100g'] || 0); let carb100 = Math.round(p.nutriments['carbohydrates_100g'] || 0); let gras100 = Math.round(p.nutriments['fat_100g'] || 0); currentSearchFoodBase = { cal: cal100, prot: prot100, carb: carb100, gras: gras100 }; document.getElementById('food-selected-name').innerText = nombre; document.getElementById('food-results-list').innerHTML = ''; document.getElementById('edit-qty').value = '100'; document.getElementById('edit-unit').value = '1'; recalcularMacros(); document.getElementById('food-custom-section').style.display = 'block'; window.openSheet('sheet-add-food'); } else { showToast('❌ No encontrado.'); } } catch (err) { showToast('⚠️ Error de conexión.'); } }
+function onScanFailure(error) {}
 
 let currentSearchFoodBase = null;
-const fallbackDB = [ 
-  { product_name: "Yogurt Protein Natural", brands: "Soprole", nutriments: { 'energy-kcal_100g': 55, 'proteins_100g': 8, 'carbohydrates_100g': 5, 'fat_100g': 0 } }, 
-  { product_name: "Avena Tradicional", brands: "Quaker", nutriments: { 'energy-kcal_100g': 370, 'proteins_100g': 13, 'carbohydrates_100g': 60, 'fat_100g': 7 } }, 
-  { product_name: "Pechuga de Pollo", brands: "SuperPollo", nutriments: { 'energy-kcal_100g': 110, 'proteins_100g': 23, 'carbohydrates_100g': 0, 'fat_100g': 1.5 } } 
-];
-
-document.getElementById('btn-abrir-manual')?.addEventListener('click', () => { 
-  document.getElementById('food-search').value = ''; 
-  document.getElementById('food-results-list').innerHTML = ''; 
-  document.getElementById('food-custom-section').style.display = 'none'; 
-  window.openSheet('sheet-add-food'); 
-});
-
-document.getElementById('btn-trigger-search')?.addEventListener('click', async () => { 
-  const query = document.getElementById('food-search').value.trim().toLowerCase(); 
-  const c = document.getElementById('food-results-list'); 
-  const loader = document.getElementById('food-loading'); 
-  if(!query) return; 
-  c.innerHTML = ''; 
-  loader.style.display = 'block'; 
-  try { 
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15`)}`; 
-    const res = await fetch(proxyUrl); 
-    if (!res.ok) throw new Error('Proxy error'); 
-    const proxyData = await res.json(); 
-    const data = JSON.parse(proxyData.contents); 
-    loader.style.display = 'none'; 
-    if(!data.products || data.products.length === 0) throw new Error("Sin resultados"); 
-    renderizarResultadosBusqueda(data.products, c); 
-  } catch (error) { 
-    loader.style.display = 'none'; 
-    const resultadosLocales = fallbackDB.filter(p => p.product_name.toLowerCase().includes(query) || p.brands.toLowerCase().includes(query)); 
-    if(resultadosLocales.length > 0) { 
-      renderizarResultadosBusqueda(resultadosLocales, c); 
-      showToast('⚠️ Mostrando base local.'); 
-    } else { 
-      c.innerHTML = `<div style="font-size:12px; color:#ff3366; text-align:center; margin-top:10px;">❌ No encontrado.</div>`; 
-    } 
-  } 
-});
-
-function renderizarResultadosBusqueda(productos, contenedor) { 
-  productos.forEach(p => { 
-    if(!p.nutriments || p.nutriments['energy-kcal_100g'] == null) return; 
-    const d = document.createElement('div'); 
-    d.className = 'food-search-item'; 
-    let brand = p.brands ? ` (${p.brands.split(',')[0]})` : ''; 
-    let nombre = `${p.product_name || 'Producto'}${brand}`; 
-    let cal100 = Math.round(p.nutriments['energy-kcal_100g']); 
-    let prot100 = Math.round(p.nutriments['proteins_100g'] || 0); 
-    let carb100 = Math.round(p.nutriments['carbohydrates_100g'] || 0); 
-    let gras100 = Math.round(p.nutriments['fat_100g'] || 0); 
-    d.innerHTML = `<div style="display:flex; flex-direction:column;"><span>${nombre}</span><span style="font-size:9px; color:var(--text-muted);">Por 100g: P:${prot100}g C:${carb100}g G:${gras100}g</span></div><span style="color:var(--primary); font-weight:800; display:flex; align-items:center;">${cal100} kcal</span>`; 
-    d.addEventListener('click', () => { 
-      currentSearchFoodBase = { cal: cal100, prot: prot100, carb: carb100, gras: gras100 }; 
-      document.getElementById('food-selected-name').innerText = nombre; 
-      document.getElementById('food-results-list').innerHTML = ''; 
-      document.getElementById('edit-qty').value = '100'; 
-      document.getElementById('edit-unit').value = '1'; 
-      recalcularMacros(); 
-      document.getElementById('food-custom-section').style.display = 'block'; 
-    }); 
-    contenedor.appendChild(d); 
-  }); 
-}
-
-document.getElementById('edit-qty')?.addEventListener('input', recalcularMacros); 
-document.getElementById('edit-unit')?.addEventListener('change', recalcularMacros);
-
-function recalcularMacros() { 
-  if(currentSearchFoodBase) { 
-    let q = parseFloat(document.getElementById('edit-qty').value) || 0; 
-    let m = parseFloat(document.getElementById('edit-unit').value) || 1; 
-    let factor = (q * m) / 100; 
-    document.getElementById('edit-cal').value = Math.round(currentSearchFoodBase.cal * factor); 
-    document.getElementById('edit-prot').value = Math.round(currentSearchFoodBase.prot * factor); 
-    document.getElementById('edit-carb').value = Math.round(currentSearchFoodBase.carb * factor); 
-    document.getElementById('edit-gras').value = Math.round(currentSearchFoodBase.gras * factor); 
-  } 
-}
-
-document.getElementById('btn-confirm-food-final')?.addEventListener('click', async function() {
-  if (this.disabled) return; 
-  this.disabled = true;
-
-  let mt = document.getElementById('food-meal-time').value; 
-  let n = document.getElementById('food-selected-name').innerText || "Alimento"; 
-  let c = parseInt(document.getElementById('edit-cal').value)||0; 
-  let p = parseInt(document.getElementById('edit-prot').value)||0; 
-  let cb = parseInt(document.getElementById('edit-carb').value)||0; 
-  let g = parseInt(document.getElementById('edit-gras').value)||0; 
-  let qtyVal = document.getElementById('edit-qty').value; 
-  let unitSelect = document.getElementById('edit-unit'); 
-  let unitText = unitSelect.options[unitSelect.selectedIndex].text.split(' ')[0]; 
-  
-  if(!c && !p) { 
-    showToast('⚠️ Ingresa cantidad.'); 
-    this.disabled = false;
-    return; 
-  } 
-  
-  let nombreFinalRegistro = `${n} (${qtyVal} ${unitText})`; 
-  await registrarComidaNube(c, p, cb, g, `[${mt}] ${nombreFinalRegistro}`); 
-  window.closeSheet(); 
-  showToast(`✅ Registrado.`); 
-  this.disabled = false;
-});
+const fallbackDB = [ { product_name: "Yogurt Protein Natural", brands: "Soprole", nutriments: { 'energy-kcal_100g': 55, 'proteins_100g': 8, 'carbohydrates_100g': 5, 'fat_100g': 0 } }, { product_name: "Avena Tradicional", brands: "Quaker", nutriments: { 'energy-kcal_100g': 370, 'proteins_100g': 13, 'carbohydrates_100g': 60, 'fat_100g': 7 } }, { product_name: "Pechuga de Pollo", brands: "SuperPollo", nutriments: { 'energy-kcal_100g': 110, 'proteins_100g': 23, 'carbohydrates_100g': 0, 'fat_100g': 1.5 } } ];
+document.getElementById('btn-abrir-manual')?.addEventListener('click', () => { document.getElementById('food-search').value = ''; document.getElementById('food-results-list').innerHTML = ''; document.getElementById('food-custom-section').style.display = 'none'; window.openSheet('sheet-add-food'); });
+document.getElementById('btn-trigger-search')?.addEventListener('click', async () => { const query = document.getElementById('food-search').value.trim().toLowerCase(); const c = document.getElementById('food-results-list'); const loader = document.getElementById('food-loading'); if(!query) return; c.innerHTML = ''; loader.style.display = 'block'; try { const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15`)}`; const res = await fetch(proxyUrl); if (!res.ok) throw new Error('Proxy error'); const proxyData = await res.json(); const data = JSON.parse(proxyData.contents); loader.style.display = 'none'; if(!data.products || data.products.length === 0) throw new Error("Sin resultados"); renderizarResultadosBusqueda(data.products, c); } catch (error) { loader.style.display = 'none'; const resultadosLocales = fallbackDB.filter(p => p.product_name.toLowerCase().includes(query) || p.brands.toLowerCase().includes(query)); if(resultadosLocales.length > 0) { renderizarResultadosBusqueda(resultadosLocales, c); showToast('⚠️ Mostrando base local.'); } else { c.innerHTML = `<div style="font-size:12px; color:#ff3366; text-align:center; margin-top:10px;">❌ No encontrado.</div>`; } } });
+function renderizarResultadosBusqueda(productos, contenedor) { productos.forEach(p => { if(!p.nutriments || p.nutriments['energy-kcal_100g'] == null) return; const d = document.createElement('div'); d.className = 'food-search-item'; let brand = p.brands ? ` (${p.brands.split(',')[0]})` : ''; let nombre = `${p.product_name || 'Producto'}${brand}`; let cal100 = Math.round(p.nutriments['energy-kcal_100g']); let prot100 = Math.round(p.nutriments['proteins_100g'] || 0); let carb100 = Math.round(p.nutriments['carbohydrates_100g'] || 0); let gras100 = Math.round(p.nutriments['fat_100g'] || 0); d.innerHTML = `<div style="display:flex; flex-direction:column;"><span>${nombre}</span><span style="font-size:9px; color:var(--text-muted);">Por 100g: P:${prot100}g C:${carb100}g G:${gras100}g</span></div><span style="color:var(--primary); font-weight:800; display:flex; align-items:center;">${cal100} kcal</span>`; d.addEventListener('click', () => { currentSearchFoodBase = { cal: cal100, prot: prot100, carb: carb100, gras: gras100 }; document.getElementById('food-selected-name').innerText = nombre; document.getElementById('food-results-list').innerHTML = ''; document.getElementById('edit-qty').value = '100'; document.getElementById('edit-unit').value = '1'; recalcularMacros(); document.getElementById('food-custom-section').style.display = 'block'; }); contenedor.appendChild(d); }); }
+document.getElementById('edit-qty')?.addEventListener('input', recalcularMacros); document.getElementById('edit-unit')?.addEventListener('change', recalcularMacros);
+function recalcularMacros() { if(currentSearchFoodBase) { let q = parseFloat(document.getElementById('edit-qty').value) || 0; let m = parseFloat(document.getElementById('edit-unit').value) || 1; let factor = (q * m) / 100; document.getElementById('edit-cal').value = Math.round(currentSearchFoodBase.cal * factor); document.getElementById('edit-prot').value = Math.round(currentSearchFoodBase.prot * factor); document.getElementById('edit-carb').value = Math.round(currentSearchFoodBase.carb * factor); document.getElementById('edit-gras').value = Math.round(currentSearchFoodBase.gras * factor); } }
+document.getElementById('btn-confirm-food-final')?.addEventListener('click', async function() { if (this.disabled) return; this.disabled = true; let mt = document.getElementById('food-meal-time').value; let n = document.getElementById('food-selected-name').innerText || "Alimento"; let c = parseInt(document.getElementById('edit-cal').value)||0; let p = parseInt(document.getElementById('edit-prot').value)||0; let cb = parseInt(document.getElementById('edit-carb').value)||0; let g = parseInt(document.getElementById('edit-gras').value)||0; let qtyVal = document.getElementById('edit-qty').value; let unitSelect = document.getElementById('edit-unit'); let unitText = unitSelect.options[unitSelect.selectedIndex].text.split(' ')[0]; if(!c && !p) { showToast('⚠️ Ingresa cantidad.'); this.disabled = false; return; } let nombreFinalRegistro = `${n} (${qtyVal} ${unitText})`; await registrarComidaNube(c, p, cb, g, `[${mt}] ${nombreFinalRegistro}`); window.closeSheet(); showToast(`✅ Registrado.`); this.disabled = false; });
 
 // ============================================================================
-// --- ORÁCULO DE COMBATE Y MODO ENTRENAMIENTO EN VIVO ---
+// --- ORÁCULO DE COMBATE Y MODO ENTRENAMIENTO EN VIVO (CON FASES Y CALORÍAS) ---
 // ============================================================================
 let currentWorkoutRoutine = [];
 let workoutSwapTargetIndex = -1;
@@ -701,12 +262,17 @@ document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
   const focus = document.getElementById('train-focus')?.value || 'fullbody';
   currentWorkoutRoutine = [];
 
+  // 1. Agregar Calentamiento Opcional
+  const checkWarm = document.getElementById('check-warmup');
+  if(checkWarm && checkWarm.checked) {
+    currentWorkoutRoutine.push({ id: 'warmup', nombre: '🔥 Calentamiento Articular', grupo: 'cardio', musculoPrincipal: 'Todo el cuerpo', equipamiento: ['corporal'], tips: '5 a 10 min de movilidad y cardio ligero.', imagen: 'https://dummyimage.com/400x400/141a26/ffaa00&text=Calentamiento', loggedSets: [], isPhase: true });
+  }
+
+  // 2. Lógica de ejercicios principales
   const getRandomEx = (grupoReq) => {
     const valid = exercisesDB.filter(ex => {
       const matchGrupo = ex.grupo?.toLowerCase() === grupoReq.toLowerCase();
-      const matchEquip = Array.isArray(ex.equipamiento) 
-        ? ex.equipamiento.some(eq => eq.toLowerCase().includes(equip.toLowerCase()))
-        : true;
+      const matchEquip = Array.isArray(ex.equipamiento) ? ex.equipamiento.some(eq => eq.toLowerCase().includes(equip.toLowerCase())) : true;
       return matchGrupo && matchEquip;
     });
     if(valid.length === 0) {
@@ -725,15 +291,17 @@ document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
     let ex = getRandomEx(g);
     if(ex && !currentWorkoutRoutine.find(e => e.id === ex.id)) {
       ex.loggedSets = []; 
-      // Calculamos calorías aproximadas quemadas al generar (Entre 35 y 55 kcal)
-      ex.estimatedCals = Math.floor(Math.random() * 20) + 35;
       currentWorkoutRoutine.push(ex);
     }
   });
 
-  if(currentWorkoutRoutine.length === 0) {
-    showToast('⚠️ No hay ejercicios para este filtro en tu base de datos.'); return;
+  // 3. Agregar Enfriamiento Opcional
+  const checkCool = document.getElementById('check-cooldown');
+  if(checkCool && checkCool.checked) {
+    currentWorkoutRoutine.push({ id: 'cooldown', nombre: '❄️ Enfriamiento y Estiramiento', grupo: 'cardio', musculoPrincipal: 'Recuperación', equipamiento: ['corporal'], tips: '10 min de zona 2 (baja intensidad) y elongación estática.', imagen: 'https://dummyimage.com/400x400/141a26/00e5ff&text=Enfriamiento', loggedSets: [], isPhase: true });
   }
+
+  if(currentWorkoutRoutine.length === 0) { showToast('⚠️ No hay ejercicios en tu base de datos.'); return; }
 
   renderizarRutina(false);
   document.getElementById('workout-generator-card').style.display = 'none';
@@ -747,51 +315,48 @@ function renderizarRutina(isLiveMode) {
   container.innerHTML = '';
   
   currentWorkoutRoutine.forEach((ex, idx) => {
-    const displaySwap = isLiveMode ? 'none' : 'block';
+    const displaySwap = (isLiveMode || ex.isPhase) ? 'none' : 'block';
     const displayInputs = isLiveMode ? 'block' : 'none';
-    
     const fallbackNeon = `https://dummyimage.com/400x400/141a26/00e5ff&text=${encodeURIComponent(ex.nombre)}`;
     const imgSource = ex.imagen && ex.imagen.trim() !== "" ? ex.imagen : fallbackNeon;
-
     ex.loggedSets = ex.loggedSets || []; 
 
     let html = `
-      <div class="plan-meal-card workout-card" data-index="${idx}" data-name="${ex.nombre}" style="border: 1px solid rgba(0,229,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-        <div class="plan-meal-header">
-          <span class="plan-meal-title" style="font-size:14px;">${ex.nombre}</span>
-          <button class="btn-swap" style="display:${displaySwap};" onclick="window.abrirMenuReemplazoEj(${idx})">🔄 Cambiar</button>
+      <div class="plan-meal-card workout-card" data-index="${idx}" data-name="${ex.nombre}" style="border: 1px solid rgba(0,229,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom:15px; background: rgba(26,33,48,0.9);">
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <span style="font-size:15px; font-weight:900; color:#fff; text-transform:uppercase;">${ex.nombre}</span>
+          <button class="btn-swap" style="display:${displaySwap}; font-size:10px; padding:4px 8px; border-radius:6px; background:rgba(0,229,255,0.1); color:#00e5ff; border:1px solid #00e5ff;" onclick="window.abrirMenuReemplazoEj(${idx})">🔄 Cambiar</button>
         </div>
-        <div style="display:flex; gap:15px; align-items:center; margin-bottom: 12px;">
-          <img src="${imgSource}" onerror="this.onerror=null; this.src='${fallbackNeon}';" style="width:75px; height:75px; border-radius:12px; object-fit:cover; border:2px solid rgba(0,229,255,0.3);">
+        <div style="display:flex; gap:15px; align-items:center;">
+          <img src="${imgSource}" onerror="this.onerror=null; this.src='${fallbackNeon}';" style="width:75px; height:75px; border-radius:10px; object-fit:cover; border:2px solid rgba(0,229,255,0.4);">
           <div style="flex:1;">
-            <p style="font-size:12px; color:var(--primary); margin:0 0 5px 0; font-weight:800; text-transform:uppercase;">🎯 ${ex.musculoPrincipal || 'General'}</p>
-            <p style="font-size:12px; color:#ffaa00; margin:0 0 5px 0; font-weight:800;">🔥 ~${ex.estimatedCals} kcal aprox.</p>
-            <p style="font-size:11px; color:#a0aec0; margin:0; line-height:1.4;">💡 ${ex.tips || 'Mantén la técnica estricta.'}</p>
+            <p style="font-size:11px; color:var(--primary); margin:0 0 5px 0; font-weight:800; text-transform:uppercase;">🎯 ${ex.musculoPrincipal || 'General'}</p>
+            <p style="font-size:12px; color:#a0aec0; margin:0; line-height:1.4;">💡 ${ex.tips || 'Mantén la técnica estricta.'}</p>
           </div>
         </div>
     `;
 
     if (isLiveMode) {
-      let seriesHTML = ex.loggedSets.map((s, i) => `<li style="margin-bottom:6px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px;">Serie ${i+1}: <span style="color:var(--primary); font-weight:800;">${s.reps} reps x ${s.peso} kg</span></li>`).join('');
+      let seriesHTML = ex.loggedSets.map((s, i) => `<li style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; color:#fff;">Serie ${i+1}: <span style="color:var(--primary); font-weight:900;">${s.reps} reps ${!ex.isPhase ? `x ${s.peso} kg` : `min`}</span></li>`).join('');
 
       html += `
-        <div class="workout-inputs" style="display:${displayInputs}; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-top:10px;">
-          <div style="display:flex; gap:10px; margin-bottom:12px;">
-            <div style="flex:1;"><label style="font-size:10px; color:#a0aec0; font-weight:bold;">REPETICIONES</label><input type="number" id="reps-${idx}" class="iron-input-modern" placeholder="Ej: 10"></div>
-            <div style="flex:1;"><label style="font-size:10px; color:#a0aec0; font-weight:bold;">PESO (KG)</label><input type="number" id="peso-${idx}" class="iron-input-modern" placeholder="Ej: 50"></div>
-            <div style="flex:1;"><label style="font-size:10px; color:#a0aec0; font-weight:bold;">DESCANSO (S)</label><input type="number" id="descanso-${idx}" class="iron-input-modern" value="90"></div>
+        <div class="workout-inputs" style="display:${displayInputs}; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; margin-top:15px; border:1px solid rgba(255,255,255,0.05);">
+          <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <div style="flex:1;"><label style="font-size:10px; color:#a0aec0; font-weight:bold; display:block; margin-bottom:4px;">${ex.isPhase?'MINUTOS':'REPES'}</label><input type="number" id="reps-${idx}" class="iron-input-modern" placeholder="${ex.isPhase?'10':'10'}"></div>
+            ${!ex.isPhase ? `<div style="flex:1;"><label style="font-size:10px; color:#a0aec0; font-weight:bold; display:block; margin-bottom:4px;">PESO (KG)</label><input type="number" id="peso-${idx}" class="iron-input-modern" placeholder="50"></div>` : ''}
+            <div style="flex:1;"><label style="font-size:10px; color:#a0aec0; font-weight:bold; display:block; margin-bottom:4px;">DESCANSO (S)</label><input type="number" id="descanso-${idx}" class="iron-input-modern" value="90"></div>
           </div>
           
-          <button class="iron-btn-primary" onclick="window.registrarSerieIndividual(${idx})">✅ Registrar Serie</button>
+          <button class="iron-btn-primary" onclick="window.registrarSerieIndividual(${idx})">✅ Registrar ${ex.isPhase?'Fase':'Serie'}</button>
           
-          <ul id="lista-series-${idx}" style="list-style:none; padding:0; margin:15px 0 0 0; color:#fff;">
+          <ul id="lista-series-${idx}" style="list-style:none; padding:0; margin:15px 0 0 0;">
             ${seriesHTML}
           </ul>
 
-          <div id="timer-container-${idx}" style="display:none; text-align:center; background: #1a2130; padding:15px; border-radius:12px; border: 1px dashed #ffaa00; margin-top:15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
-            <span style="font-size:22px; font-weight:900; color:#ffaa00; display:block; margin-bottom:5px;">⏱️ <span id="time-left-${idx}">0</span>s</span>
-            <span style="font-size:11px; color:#a0aec0; display:block; margin-bottom:10px; text-transform:uppercase;">Recuperación Activa</span>
-            <button class="iron-btn-danger" onclick="window.terminarDescanso(${idx})">⏹️ Terminar Descanso</button>
+          <div id="timer-container-${idx}" style="display:none; text-align:center; background: #1a2130; padding:15px; border-radius:10px; border: 1px dashed #ffaa00; margin-top:15px;">
+            <span style="font-size:24px; font-weight:900; color:#ffaa00; display:block; margin-bottom:5px;">⏱️ <span id="time-left-${idx}">0</span>s</span>
+            <span style="font-size:11px; color:#a0aec0; display:block; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px;">Recuperación Activa</span>
+            <button class="iron-btn-danger" style="margin-top:0;" onclick="window.terminarDescanso(${idx})">⏹️ Terminar Descanso</button>
           </div>
         </div>
       `;
@@ -807,21 +372,19 @@ window.registrarSerieIndividual = function(idx) {
   const pesoInput = document.getElementById(`peso-${idx}`);
   const descansoInput = document.getElementById(`descanso-${idx}`);
 
+  const ex = currentWorkoutRoutine[idx];
   const reps = parseInt(repsInput.value);
-  const peso = parseFloat(pesoInput.value) || 0;
+  const peso = pesoInput ? (parseFloat(pesoInput.value) || 0) : 0;
   const descanso = parseInt(descansoInput.value) || 90;
 
-  if(!reps || reps <= 0) {
-    showToast('⚠️ Ingresa las repeticiones logradas.');
-    return;
-  }
+  if(!reps || reps <= 0) { showToast(`⚠️ Ingresa ${ex.isPhase?'los minutos':'las repeticiones'}.`); return; }
 
-  if(!currentWorkoutRoutine[idx].loggedSets) currentWorkoutRoutine[idx].loggedSets = [];
-  currentWorkoutRoutine[idx].loggedSets.push({ reps, peso });
+  if(!ex.loggedSets) ex.loggedSets = [];
+  ex.loggedSets.push({ reps, peso });
 
   const lista = document.getElementById(`lista-series-${idx}`);
-  const numSerie = currentWorkoutRoutine[idx].loggedSets.length;
-  lista.innerHTML += `<li style="margin-bottom:6px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px;">Serie ${numSerie}: <span style="color:var(--primary); font-weight:800;">${reps} reps x ${peso} kg</span></li>`;
+  const numSerie = ex.loggedSets.length;
+  lista.innerHTML += `<li style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; color:#fff;">Serie ${numSerie}: <span style="color:var(--primary); font-weight:900;">${reps} ${ex.isPhase?'min':'reps'} ${!ex.isPhase ? `x ${peso} kg` : ''}</span></li>`;
 
   repsInput.value = ''; 
   window.iniciarDescanso(idx, descanso);
@@ -829,512 +392,194 @@ window.registrarSerieIndividual = function(idx) {
 
 window.iniciarDescanso = function(idx, segundos) {
   if(activeTimers[idx]) clearInterval(activeTimers[idx].interval);
-
   const container = document.getElementById(`timer-container-${idx}`);
   const textSpan = document.getElementById(`time-left-${idx}`);
-
   container.style.display = 'block';
-  let timeLeft = segundos;
-  textSpan.innerText = timeLeft;
-
+  let timeLeft = segundos; textSpan.innerText = timeLeft;
   activeTimers[idx] = {
     interval: setInterval(() => {
       timeLeft--;
-      if(timeLeft <= 0) {
-        window.terminarDescanso(idx);
-        showToast('⏰ ¡Tiempo terminado! A la batalla de nuevo.');
-      } else {
-        textSpan.innerText = timeLeft;
-      }
+      if(timeLeft <= 0) { window.terminarDescanso(idx); showToast('⏰ ¡Tiempo terminado! A la batalla.'); } 
+      else { textSpan.innerText = timeLeft; }
     }, 1000)
   };
 };
-
-window.terminarDescanso = function(idx) {
-  if(activeTimers[idx]) {
-    clearInterval(activeTimers[idx].interval);
-    delete activeTimers[idx];
-  }
-  const container = document.getElementById(`timer-container-${idx}`);
-  if(container) container.style.display = 'none';
-};
+window.terminarDescanso = function(idx) { if(activeTimers[idx]) { clearInterval(activeTimers[idx].interval); delete activeTimers[idx]; } document.getElementById(`timer-container-${idx}`)?.style.setProperty('display', 'none'); };
 
 window.abrirMenuReemplazoEj = function(index) {
-  workoutSwapTargetIndex = index;
-  const currentEx = currentWorkoutRoutine[index];
+  workoutSwapTargetIndex = index; const currentEx = currentWorkoutRoutine[index];
   const equip = document.getElementById('train-equip')?.value || 'gimnasio';
-  
   const alternativas = exercisesDB.filter(e => e.grupo === currentEx.grupo && e.id !== currentEx.id);
-  const listContainer = document.getElementById('sheet-swap-ex-list');
-  if(!listContainer) return;
-  listContainer.innerHTML = '';
-  
-  if(alternativas.length === 0) {
-    listContainer.innerHTML = `<p style="font-size:12px; color:#ff3366;">No hay más alternativas de ${currentEx.grupo} para tu equipamiento.</p>`;
-  } else {
-    alternativas.forEach(alt => {
-      let objData = encodeURIComponent(JSON.stringify(alt));
-      listContainer.innerHTML += `
-        <div class="swap-option-card" onclick="window.confirmarReemplazoEj('${objData}')">
-          <span style="font-size:10px; color:var(--primary); font-weight:800; text-transform:uppercase;">${alt.musculoPrincipal}</span>
-          <b style="margin-top:4px;">${alt.nombre}</b>
-        </div>
-      `;
-    });
-  }
+  const listContainer = document.getElementById('sheet-swap-ex-list'); if(!listContainer) return; listContainer.innerHTML = '';
+  if(alternativas.length === 0) { listContainer.innerHTML = `<p style="font-size:12px; color:#ff3366;">No hay más alternativas.</p>`; } 
+  else { alternativas.forEach(alt => { let objData = encodeURIComponent(JSON.stringify(alt)); listContainer.innerHTML += `<div class="swap-option-card" onclick="window.confirmarReemplazoEj('${objData}')"><span style="font-size:10px; color:var(--primary); font-weight:800; text-transform:uppercase;">${alt.musculoPrincipal}</span><b style="margin-top:4px;">${alt.nombre}</b></div>`; }); }
   window.openSheet('sheet-swap-exercise');
 };
-
 window.confirmarReemplazoEj = function(encodedData) {
-  if(workoutSwapTargetIndex > -1) {
-    const newEx = JSON.parse(decodeURIComponent(encodedData));
-    newEx.loggedSets = []; 
-    newEx.estimatedCals = Math.floor(Math.random() * 20) + 35;
-    currentWorkoutRoutine[workoutSwapTargetIndex] = newEx;
-    renderizarRutina(false);
-    window.closeSheet();
-    showToast(`✅ Ejercicio reemplazado.`);
-  }
+  if(workoutSwapTargetIndex > -1) { const newEx = JSON.parse(decodeURIComponent(encodedData)); newEx.loggedSets = []; currentWorkoutRoutine[workoutSwapTargetIndex] = newEx; renderizarRutina(false); window.closeSheet(); showToast(`✅ Reemplazado.`); }
 };
 
 document.getElementById('btn-start-workout')?.addEventListener('click', () => {
   renderizarRutina(true);
-  document.getElementById('btn-start-workout').style.display = 'none';
-  document.getElementById('btn-finish-workout').style.display = 'block';
-  showToast('🔥 ¡A darlo todo, Guerrero!');
+  document.getElementById('btn-start-workout').style.display = 'none'; document.getElementById('btn-finish-workout').style.display = 'block'; showToast('🔥 ¡A darlo todo, Guerrero!');
 });
 
 document.getElementById('btn-cancel-workout')?.addEventListener('click', () => {
-  for (let idx in activeTimers) clearInterval(activeTimers[idx].interval); 
-  activeTimers = {};
-  
-  document.getElementById('workout-live-container').style.display = 'none';
-  document.getElementById('workout-generator-card').style.display = 'block';
-  document.getElementById('btn-start-workout').style.display = 'block';
-  document.getElementById('btn-finish-workout').style.display = 'none';
-  currentWorkoutRoutine = [];
+  for (let idx in activeTimers) clearInterval(activeTimers[idx].interval); activeTimers = {};
+  document.getElementById('workout-live-container').style.display = 'none'; document.getElementById('workout-generator-card').style.display = 'block';
+  document.getElementById('btn-start-workout').style.display = 'block'; document.getElementById('btn-finish-workout').style.display = 'none'; currentWorkoutRoutine = [];
 });
 
+// Guardado y Cálculo de Calorías
 document.getElementById('btn-finish-workout')?.addEventListener('click', async function() {
-  if (this.disabled) return; 
-  this.disabled = true; 
+  if (this.disabled) return; this.disabled = true; 
+  let validExercises = 0; let sessionCals = 0;
 
-  let validExercises = 0;
   for(let i = 0; i < currentWorkoutRoutine.length; i++) {
     const ex = currentWorkoutRoutine[i];
-    
     if(ex.loggedSets && ex.loggedSets.length > 0) {
       const totalSets = ex.loggedSets.length;
-      const detalles = ex.loggedSets.map((s, idx) => `S${idx+1}: ${s.reps}x${s.peso}kg`).join(' | ');
+      const detalles = ex.loggedSets.map((s, idx) => `S${idx+1}: ${s.reps}${ex.isPhase?'min':`x${s.peso}kg`}`).join(' | ');
       const weightHighestOrLast = ex.loggedSets[ex.loggedSets.length - 1].peso; 
+      
+      // Matemática calórica
+      if(ex.isPhase) {
+        // Cardio o Calentamiento: aprox 8 kcal por minuto
+        let totalMins = 0; ex.loggedSets.forEach(s => totalMins += s.reps);
+        sessionCals += (totalMins * 8);
+      } else {
+        // Ejercicio de fuerza: 15 kcal base por serie + esfuerzo (peso x repes x factor)
+        ex.loggedSets.forEach(s => {
+          sessionCals += 15 + (s.peso * s.reps * 0.03);
+        });
+      }
 
       await registrarEntrenoNube(ex.nombre, `${totalSets} series (${detalles})`, weightHighestOrLast, "N/A");
       validExercises++;
     }
   }
 
-  for (let idx in activeTimers) clearInterval(activeTimers[idx].interval);
-  activeTimers = {};
+  for (let idx in activeTimers) clearInterval(activeTimers[idx].interval); activeTimers = {};
 
   if(validExercises > 0) {
-    showToast(`✅ Entrenamiento finalizado. ${validExercises} ejercicios guardados.`);
+    sessionCals = Math.round(sessionCals);
+    totalQuemadas += sessionCals;
+    await guardarEstadoNube();
+    actualizarDashboard();
+    showToast(`✅ Entrenamiento finalizado. ${validExercises} ejercicios listos. 🔥 ~${sessionCals} kcal quemadas.`);
   } else {
-    showToast('⚠️ No registraste series. Entrenamiento descartado.');
+    showToast('⚠️ No registraste series. Descartado.');
   }
 
-  document.getElementById('workout-live-container').style.display = 'none';
-  document.getElementById('workout-generator-card').style.display = 'block';
-  document.getElementById('btn-start-workout').style.display = 'block';
-  document.getElementById('btn-finish-workout').style.display = 'none';
-  currentWorkoutRoutine = [];
-  this.disabled = false; 
+  document.getElementById('workout-live-container').style.display = 'none'; document.getElementById('workout-generator-card').style.display = 'block';
+  document.getElementById('btn-start-workout').style.display = 'block'; document.getElementById('btn-finish-workout').style.display = 'none';
+  currentWorkoutRoutine = []; this.disabled = false; 
 });
 
-// Guardado manual
-document.getElementById('btn-registrar-serie')?.addEventListener('click', () => { 
-  document.getElementById('work-name').value = ''; 
-  document.getElementById('work-sets').value = ''; 
-  document.getElementById('work-weight').value = ''; 
-  window.openSheet('sheet-workout'); 
-});
-
+document.getElementById('btn-registrar-serie')?.addEventListener('click', () => { document.getElementById('work-name').value = ''; document.getElementById('work-sets').value = ''; document.getElementById('work-weight').value = ''; window.openSheet('sheet-workout'); });
 document.getElementById('btn-confirm-workout')?.addEventListener('click', async function() { 
-  if (this.disabled) return; 
-  this.disabled = true;
-
-  const n = document.getElementById('work-name').value; 
-  const s = document.getElementById('work-sets').value; 
-  const w = document.getElementById('work-weight').value; 
-  const r = document.getElementById('work-rpe').value || '8'; 
-  
-  if(!n || !s) { 
-    showToast('⚠️ Completa los campos.'); 
-    this.disabled = false;
-    return; 
-  } 
-  
-  await registrarEntrenoNube(n, s, w || 0, r); 
-  window.closeSheet(); 
-  showToast('💪 Ejercicio guardado.'); 
-  this.disabled = false; 
+  if (this.disabled) return; this.disabled = true;
+  const n = document.getElementById('work-name').value; const s = document.getElementById('work-sets').value; const w = document.getElementById('work-weight').value; const r = document.getElementById('work-rpe').value || '8'; 
+  if(!n || !s) { showToast('⚠️ Completa los campos.'); this.disabled = false; return; } 
+  await registrarEntrenoNube(n, s, w || 0, r); window.closeSheet(); showToast('💪 Ejercicio guardado.'); this.disabled = false; 
 });
 
-// --- PERSISTENCIA, DASHBOARD E HISTORIAL DE JORNADAS ---
+// --- PERSISTENCIA, DASHBOARD E HISTORIAL DESPLEGABLE ---
 async function cargarRegistrosDelDia(uid) {
-  const hoyKey = getTodayKey(); 
-  const listaComidas = document.getElementById('lista-comidas');
-  if(listaComidas) { 
-    listaComidas.innerHTML = ''; 
-    const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "meals")); 
-    snapshot.forEach(docSnap => { 
-      const i = docSnap.data(); 
-      renderizarComidaEnUI(i.nombre, i.cal, i.prot, i.carb, i.gras, docSnap.id); 
-    }); 
-  }
+  const hoyKey = getTodayKey(); const listaComidas = document.getElementById('lista-comidas');
+  if(listaComidas) { listaComidas.innerHTML = ''; const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "meals")); snapshot.forEach(docSnap => { const i = docSnap.data(); renderizarComidaEnUI(i.nombre, i.cal, i.prot, i.carb, i.gras, docSnap.id); }); }
   const listaEntrenos = document.getElementById('lista-entrenos');
-  if(listaEntrenos) { 
-    listaEntrenos.innerHTML = ''; 
-    const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "workouts")); 
-    snapshot.forEach(docSnap => { 
-      const i = docSnap.data(); 
-      renderizarEntrenoEnUI(i.nombre, i.sets, i.weight, i.rpe, docSnap.id); 
-    }); 
-  }
+  if(listaEntrenos) { listaEntrenos.innerHTML = ''; const snapshot = await getDocs(collection(db, "users", uid, "days", hoyKey, "workouts")); snapshot.forEach(docSnap => { const i = docSnap.data(); renderizarEntrenoEnUI(i.nombre, i.sets, i.weight, i.rpe, docSnap.id); }); }
 }
 
-// Cargar Historial Global y Checkins
 async function cargarHistorialYCheckins(uid) {
-  const histContainer = document.getElementById('historial-container');
-  const chkContainer = document.getElementById('checkin-history-container');
-  
+  const histContainer = document.getElementById('historial-container'); const chkContainer = document.getElementById('checkin-history-container');
   if(chkContainer && db) {
     chkContainer.innerHTML = '<p style="text-align:center; font-size:12px; color:#a0aec0;">Cargando check-ins...</p>';
-    const q = query(collection(db, "users", uid, "checkins"), orderBy("timestamp", "desc"), limit(15));
-    const snaps = await getDocs(q);
-    let html = '';
-    snaps.forEach(d => {
-      let data = d.data();
-      html += `<div style="background:rgba(0,0,0,0.3); padding:12px; margin-bottom:10px; border-radius:8px; border-left:3px solid #ffaa00; display:flex; justify-content:space-between; align-items:center;">
-        <span style="color:#00e5ff; font-weight:800; font-size:12px;">📅 ${data.fecha}</span>
-        <span style="color:#fff; font-weight:900; font-size:14px;">⚖️ ${data.peso} kg</span>
-      </div>`;
-    });
+    const q = query(collection(db, "users", uid, "checkins"), orderBy("timestamp", "desc"), limit(15)); const snaps = await getDocs(q); let html = '';
+    snaps.forEach(d => { let data = d.data(); html += `<div style="background:rgba(0,0,0,0.3); padding:12px; margin-bottom:10px; border-radius:8px; border-left:3px solid #ffaa00; display:flex; justify-content:space-between; align-items:center;"><span style="color:#00e5ff; font-weight:800; font-size:12px;">📅 ${data.fecha}</span><span style="color:#fff; font-weight:900; font-size:14px;">⚖️ ${data.peso} kg</span></div>`; });
     chkContainer.innerHTML = html || '<p style="text-align:center; font-size:12px; color:#a0aec0;">No hay check-ins registrados.</p>';
   }
-
   if(histContainer && db) {
     histContainer.innerHTML = '<p style="text-align:center; font-size:12px; color:#a0aec0;">Cargando historial...</p>';
-    const q2 = query(collection(db, "users", uid, "history"), orderBy("timestamp", "desc"), limit(50));
-    const snaps2 = await getDocs(q2);
-    
-    let agrupado = {};
-    snaps2.forEach(d => {
-      let data = d.data();
-      if(!agrupado[data.date]) agrupado[data.date] = [];
-      agrupado[data.date].push(data);
-    });
-
+    const q2 = query(collection(db, "users", uid, "history"), orderBy("timestamp", "desc"), limit(60)); const snaps2 = await getDocs(q2);
+    let agrupado = {}; snaps2.forEach(d => { let data = d.data(); if(!agrupado[data.date]) agrupado[data.date] = []; agrupado[data.date].push(data); });
     let html2 = '';
     for(const [fecha, items] of Object.entries(agrupado)) {
-      let itemsHtml = items.map(i => `<div style="margin-top:10px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
-        <b style="color:${i.tipo === 'entreno' ? '#ff3366' : '#00e5ff'}; font-size:13px;">${i.tipo === 'entreno' ? '🏋️' : '🍏'} ${i.nombre}</b><br>
-        <span style="font-size:11px; color:#a0aec0; display:block; margin-top:4px;">${i.detalle}</span>
-      </div>`).join('');
-
-      html2 += `
-      <div class="history-day">
-        <div class="history-day-header" onclick="const content = this.nextElementSibling; content.style.display = content.style.display === 'block' ? 'none' : 'block';">
-          <span>📅 Jornada: ${fecha}</span> <span style="color:#fff;">▼</span>
-        </div>
-        <div class="history-day-content">
-          ${itemsHtml}
-        </div>
-      </div>`;
+      let itemsHtml = items.map(i => `<div style="margin-top:10px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);"><b style="color:${i.tipo === 'entreno' ? '#00e5ff' : '#ff3366'}; font-size:13px;">${i.tipo === 'entreno' ? '🏋️' : '🍏'} ${i.nombre}</b><br><span style="font-size:11px; color:#a0aec0; display:block; margin-top:4px;">${i.detalle}</span></div>`).join('');
+      html2 += `<div class="history-day"><div class="history-day-header" onclick="const content = this.nextElementSibling; content.style.display = content.style.display === 'block' ? 'none' : 'block';"><span>📅 Jornada: ${fecha}</span> <span style="color:#fff;">▼</span></div><div class="history-day-content">${itemsHtml}</div></div>`;
     }
     histContainer.innerHTML = html2 || '<p style="text-align:center; font-size:12px; color:#a0aec0;">Aún no hay historial de jornadas registradas.</p>';
   }
 }
 
-function renderizarComidaEnUI(nombre, cal, prot, carb, gras, docId = null) { 
-  const l = document.getElementById('lista-comidas'); 
-  if(!l) return; 
-  const li = document.createElement('li'); 
-  if(docId) li.setAttribute('data-id', docId); 
-  li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre}</span><button class="btn-delete-item" onclick="window.eliminarComidaNube('${docId}', ${cal}, ${prot}, ${carb}, ${gras}, this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🔥 ${cal} kcal &nbsp;|&nbsp; <span style="color:#ff3366;">P: ${prot}g</span> &nbsp;|&nbsp; <span style="color:#00e5ff;">C: ${carb}g</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">G: ${gras}g</span></span>`; 
-  l.appendChild(li); 
-}
-
-function renderizarEntrenoEnUI(nombre, sets, weight, rpe, docId = null) { 
-  const l = document.getElementById('lista-entrenos'); 
-  if(!l) return; 
-  const li = document.createElement('li'); 
-  if(docId) li.setAttribute('data-id', docId); 
-  li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre.toUpperCase()}</span><button class="btn-delete-item" onclick="window.eliminarEntrenoNube('${docId}', this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🏋️ ${sets} &nbsp;|&nbsp; <span style="color:#00e5ff;">Peso Máx: ${weight} kg</span></span>`; 
-  l.appendChild(li); 
-}
-
-window.eliminarComidaNube = async function(docId, cal, prot, carb, gras, btnElement) { 
-  if(!confirm("¿Eliminar?")) return; 
-  totalCalorias = Math.max(0, totalCalorias - cal); 
-  totalProt = Math.max(0, totalProt - prot); 
-  totalCarb = Math.max(0, totalCarb - carb); 
-  totalGrasa = Math.max(0, totalGrasa - gras); 
-  btnElement.closest('li')?.remove(); 
-  guardarEstadoNube(); 
-  actualizarDashboard(); 
-  if(currentUser && db && docId) await deleteDoc(doc(db, "users", currentUser.uid, "days", getTodayKey(), "meals", docId)); 
-};
-
-window.eliminarEntrenoNube = async function(docId, btnElement) { 
-  if(!confirm("¿Eliminar?")) return; 
-  btnElement.closest('li')?.remove(); 
-  if(currentUser && db && docId) await deleteDoc(doc(db, "users", currentUser.uid, "days", getTodayKey(), "workouts", docId)); 
-};
+function renderizarComidaEnUI(nombre, cal, prot, carb, gras, docId = null) { const l = document.getElementById('lista-comidas'); if(!l) return; const li = document.createElement('li'); if(docId) li.setAttribute('data-id', docId); li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre}</span><button class="btn-delete-item" onclick="window.eliminarComidaNube('${docId}', ${cal}, ${prot}, ${carb}, ${gras}, this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🔥 ${cal} kcal &nbsp;|&nbsp; <span style="color:#ff3366;">P: ${prot}g</span> &nbsp;|&nbsp; <span style="color:#00e5ff;">C: ${carb}g</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">G: ${gras}g</span></span>`; l.appendChild(li); }
+function renderizarEntrenoEnUI(nombre, sets, weight, rpe, docId = null) { const l = document.getElementById('lista-entrenos'); if(!l) return; const li = document.createElement('li'); if(docId) li.setAttribute('data-id', docId); li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre.toUpperCase()}</span><button class="btn-delete-item" onclick="window.eliminarEntrenoNube('${docId}', this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🏋️ ${sets} &nbsp;|&nbsp; <span style="color:#00e5ff;">Peso Máx: ${weight} kg</span></span>`; l.appendChild(li); }
+window.eliminarComidaNube = async function(docId, cal, prot, carb, gras, btnElement) { if(!confirm("¿Eliminar?")) return; totalCalorias = Math.max(0, totalCalorias - cal); totalProt = Math.max(0, totalProt - prot); totalCarb = Math.max(0, totalCarb - carb); totalGrasa = Math.max(0, totalGrasa - gras); btnElement.closest('li')?.remove(); guardarEstadoNube(); actualizarDashboard(); if(currentUser && db && docId) await deleteDoc(doc(db, "users", currentUser.uid, "days", getTodayKey(), "meals", docId)); };
+window.eliminarEntrenoNube = async function(docId, btnElement) { if(!confirm("¿Eliminar?")) return; btnElement.closest('li')?.remove(); if(currentUser && db && docId) await deleteDoc(doc(db, "users", currentUser.uid, "days", getTodayKey(), "workouts", docId)); };
 
 async function registrarComidaNube(cal, prot, carb, gras, nombreDisplay) { 
-  totalCalorias += cal; totalProt += prot; totalCarb += carb; totalGrasa += gras; 
-  guardarEstadoNube(); actualizarDashboard(); 
-  let docId = null; 
-  if(currentUser && db) { 
-    const d = await addDoc(collection(db, "users", currentUser.uid, "days", getTodayKey(), "meals"), { nombre: nombreDisplay, cal, prot, carb, gras, timestamp: Date.now() }); 
-    docId = d.id; 
-    // Guardar en historial global
-    await addDoc(collection(db, "users", currentUser.uid, "history"), { tipo: 'comida', nombre: nombreDisplay, detalle: `🔥 ${cal} kcal | P:${prot}g C:${carb}g G:${gras}g`, date: getTodayKey(), timestamp: Date.now() });
-  } 
-  renderizarComidaEnUI(nombreDisplay, cal, prot, carb, gras, docId); 
-  document.querySelector('[data-target="page-dashboard"]')?.click(); 
-  if(currentUser) cargarHistorialYCheckins(currentUser.uid);
+  totalCalorias += cal; totalProt += prot; totalCarb += carb; totalGrasa += gras; guardarEstadoNube(); actualizarDashboard(); let docId = null; 
+  if(currentUser && db) { const d = await addDoc(collection(db, "users", currentUser.uid, "days", getTodayKey(), "meals"), { nombre: nombreDisplay, cal, prot, carb, gras, timestamp: Date.now() }); docId = d.id; await addDoc(collection(db, "users", currentUser.uid, "history"), { tipo: 'comida', nombre: nombreDisplay, detalle: `🔥 ${cal} kcal | P:${prot}g C:${carb}g G:${gras}g`, date: getTodayKey(), timestamp: Date.now() }); } 
+  renderizarComidaEnUI(nombreDisplay, cal, prot, carb, gras, docId); document.querySelector('[data-target="page-dashboard"]')?.click(); if(currentUser) cargarHistorialYCheckins(currentUser.uid);
 }
-
 async function registrarEntrenoNube(nombre, sets, weight, rpe) { 
-  let docId = null; 
-  if(currentUser && db) { 
-    const d = await addDoc(collection(db, "users", currentUser.uid, "days", getTodayKey(), "workouts"), { nombre, sets, weight, rpe, timestamp: Date.now() }); 
-    docId = d.id; 
-    // Guardar en historial global
-    await addDoc(collection(db, "users", currentUser.uid, "history"), { tipo: 'entreno', nombre: nombre.toUpperCase(), detalle: `${sets}`, date: getTodayKey(), timestamp: Date.now() });
-  } 
-  renderizarEntrenoEnUI(nombre, sets, weight, rpe, docId); 
-  if(currentUser) cargarHistorialYCheckins(currentUser.uid);
+  let docId = null; if(currentUser && db) { const d = await addDoc(collection(db, "users", currentUser.uid, "days", getTodayKey(), "workouts"), { nombre, sets, weight, rpe, timestamp: Date.now() }); docId = d.id; await addDoc(collection(db, "users", currentUser.uid, "history"), { tipo: 'entreno', nombre: nombre.toUpperCase(), detalle: `${sets}`, date: getTodayKey(), timestamp: Date.now() }); } 
+  renderizarEntrenoEnUI(nombre, sets, weight, rpe, docId); if(currentUser) cargarHistorialYCheckins(currentUser.uid);
 }
 
-function iniciarSakuraBackground() { 
-  const c = document.getElementById('sakura-bg'); 
-  if(!c) return; 
-  c.innerHTML = ''; 
-  for(let i=0; i<15; i++) { 
-    const p = document.createElement('div'); p.className = 'sakura-petal'; 
-    const s = Math.random() * 8 + 4; p.style.width = `${s}px`; p.style.height = `${s*1.4}px`; 
-    p.style.left = `${Math.random()*100}vw`; p.style.animationDuration = `${Math.random()*10+8}s`; 
-    p.style.animationDelay = `${Math.random()*5}s`; c.appendChild(p); 
-  } 
-}
+function iniciarSakuraBackground() { const c = document.getElementById('sakura-bg'); if(!c) return; c.innerHTML = ''; for(let i=0; i<15; i++) { const p = document.createElement('div'); p.className = 'sakura-petal'; const s = Math.random() * 8 + 4; p.style.width = `${s}px`; p.style.height = `${s*1.4}px`; p.style.left = `${Math.random()*100}vw`; p.style.animationDuration = `${Math.random()*10+8}s`; p.style.animationDelay = `${Math.random()*5}s`; c.appendChild(p); } }
+function verificarCambioDeDia() { const hoy = new Date().toDateString(); const ult = localStorage.getItem('ic_ultima_fecha'); if (!ult) localStorage.setItem('ic_ultima_fecha', hoy); else if (ult !== hoy) { totalCalorias = 0; totalProt = 0; totalCarb = 0; totalGrasa = 0; totalAgua = 0; totalQuemadas = 0; userStreak++; localStorage.setItem('ic_ultima_fecha', hoy); guardarEstadoNube(); showToast('🌙 Nuevo día. ¡Racha incrementada!'); } const st = document.getElementById('header-streak'); if(st) st.innerText = `🔥 Racha: ${userStreak} días`; }
+window.reiniciarDiaActual = function() { if(confirm("¿Reiniciar balance?")) { totalCalorias = 0; totalProt = 0; totalCarb = 0; totalGrasa = 0; totalAgua = 0; totalQuemadas = 0; guardarEstadoNube(); actualizarDashboard(); actualizarAguaUI(); const lc = document.getElementById('lista-comidas'); if(lc) lc.innerHTML = ''; showToast('🔄 Restablecido.'); } };
+window.borrarTodoHistorial = function() { if(confirm("¿Restablecer historial archivado?")) { localStorage.removeItem('ic_historial_pasado'); localStorage.removeItem('ic_checkins'); const hc = document.getElementById('historial-container'); if(hc) hc.innerHTML = ''; const chc = document.getElementById('checkin-history-container'); if(chc) chc.innerHTML = ''; showToast('🧹 Borrado.'); } };
 
-function verificarCambioDeDia() { 
-  const hoy = new Date().toDateString(); 
-  const ult = localStorage.getItem('ic_ultima_fecha'); 
-  if (!ult) localStorage.setItem('ic_ultima_fecha', hoy); 
-  else if (ult !== hoy) { 
-    totalCalorias = 0; totalProt = 0; totalCarb = 0; totalGrasa = 0; totalAgua = 0; userStreak++; 
-    localStorage.setItem('ic_ultima_fecha', hoy); 
-    guardarEstadoNube(); showToast('🌙 Nuevo día. ¡Racha incrementada!'); 
-  } 
-  const st = document.getElementById('header-streak'); if(st) st.innerText = `🔥 Racha: ${userStreak} días`; 
-}
+function actualizarAguaUI() { const metaAgua = 3000; let pct = Math.min(100, Math.round((totalAgua/metaAgua)*100)); const wb = document.getElementById('water-fill-bar'); if(wb) wb.style.height = `${pct}%`; const wt = document.getElementById('water-text-val'); if(wt) wt.innerText = `${totalAgua} / ${metaAgua} ml`; guardarEstadoNube(); }
+window.agregarAgua = ml => { totalAgua += ml; actualizarAguaUI(); showToast(`💧 +${ml} ml añadidos.`); }; window.resetAgua = () => { totalAgua = 0; actualizarAguaUI(); showToast(`🔄 Hidratación reiniciada.`); };
 
-window.reiniciarDiaActual = function() { 
-  if(confirm("¿Reiniciar balance?")) { 
-    totalCalorias = 0; totalProt = 0; totalCarb = 0; totalGrasa = 0; totalAgua = 0; 
-    guardarEstadoNube(); actualizarDashboard(); actualizarAguaUI(); 
-    const lc = document.getElementById('lista-comidas'); if(lc) lc.innerHTML = ''; 
-    showToast('🔄 Restablecido.'); 
-  } 
-};
+document.getElementById('btn-send-chat')?.addEventListener('click', enviarMensajeShogun); document.getElementById('chat-input-text')?.addEventListener('keypress', e => { if(e.key === 'Enter') enviarMensajeShogun(); });
+function enviarMensajeShogun() { const inp = document.getElementById('chat-input-text'); const txt = inp?.value.trim(); if(!txt) return; const box = document.getElementById('chat-messages'); if(!box) return; box.innerHTML += `<div class="chat-msg user">${txt}</div>`; inp.value = ''; box.scrollTop = box.scrollHeight; setTimeout(() => { box.innerHTML += `<div class="chat-msg ai">"La disciplina vence a la motivación. Céntrate en tus macros y el hierro hará el resto."</div>`; box.scrollTop = box.scrollHeight; }, 800); }
 
-window.borrarTodoHistorial = function() { 
-  if(confirm("¿Restablecer historial archivado?")) { 
-    localStorage.removeItem('ic_historial_pasado'); localStorage.removeItem('ic_checkins'); 
-    const hc = document.getElementById('historial-container'); if(hc) hc.innerHTML = ''; 
-    const chc = document.getElementById('checkin-history-container'); if(chc) chc.innerHTML = ''; 
-    showToast('🧹 Borrado.'); 
-  } 
-};
-
-function actualizarAguaUI() { 
-  const metaAgua = 3000; 
-  let pct = Math.min(100, Math.round((totalAgua/metaAgua)*100)); 
-  const wb = document.getElementById('water-fill-bar'); if(wb) wb.style.height = `${pct}%`; 
-  const wt = document.getElementById('water-text-val'); if(wt) wt.innerText = `${totalAgua} / ${metaAgua} ml`; 
-  guardarEstadoNube(); 
-}
-window.agregarAgua = ml => { totalAgua += ml; actualizarAguaUI(); showToast(`💧 +${ml} ml añadidos.`); }; 
-window.resetAgua = () => { totalAgua = 0; actualizarAguaUI(); showToast(`🔄 Hidratación reiniciada.`); };
-
-// --- CHAT SHOGUN ---
-document.getElementById('btn-send-chat')?.addEventListener('click', enviarMensajeShogun); 
-document.getElementById('chat-input-text')?.addEventListener('keypress', e => { if(e.key === 'Enter') enviarMensajeShogun(); });
-
-function enviarMensajeShogun() { 
-  const inp = document.getElementById('chat-input-text'); 
-  const txt = inp?.value.trim(); 
-  if(!txt) return; 
-  const box = document.getElementById('chat-messages'); 
-  if(!box) return;
-  box.innerHTML += `<div class="chat-msg user">${txt}</div>`; 
-  inp.value = ''; box.scrollTop = box.scrollHeight; 
-  setTimeout(() => { 
-    box.innerHTML += `<div class="chat-msg ai">"La disciplina vence a la motivación. Céntrate en tus macros y el hierro hará el resto."</div>`; 
-    box.scrollTop = box.scrollHeight; 
-  }, 800); 
-}
-
-// --- BOTTOM SHEETS Y TABS ---
 const overlay = document.getElementById('sheet-overlay'); let activeSheet = null;
-window.openSheet = function(sheetId) { 
-  activeSheet = document.getElementById(sheetId); 
-  if(overlay) overlay.style.display = 'block'; 
-  if(activeSheet) { activeSheet.classList.add('open'); setTimeout(() => activeSheet.style.bottom = '0', 10); } 
-};
-window.closeSheet = function() { 
-  if(activeSheet) { 
-    activeSheet.style.bottom = '-100%'; 
-    setTimeout(() => { activeSheet.classList.remove('open'); if(overlay) overlay.style.display = 'none'; }, 300); 
-  } 
-};
+window.openSheet = function(sheetId) { activeSheet = document.getElementById(sheetId); if(overlay) overlay.style.display = 'block'; if(activeSheet) { activeSheet.classList.add('open'); setTimeout(() => activeSheet.style.bottom = '0', 10); } };
+window.closeSheet = function() { if(activeSheet) { activeSheet.style.bottom = '-100%'; setTimeout(() => { activeSheet.classList.remove('open'); if(overlay) overlay.style.display = 'none'; }, 300); } };
 document.querySelectorAll('.custom-select').forEach(sel => { sel.addEventListener('click', () => { window.activeSelect = sel; window.openSheet(sel.id.replace('select-', 'sheet-')); }); });
-document.querySelectorAll('.sheet-option').forEach(opt => { 
-  opt.addEventListener('click', function() { 
-    if(this.parentElement.id !== 'sheet-actividad') { 
-      this.parentElement.querySelectorAll('.sheet-option').forEach(o => o.classList.remove('active')); 
-      this.classList.add('active'); 
-      if(window.activeSelect) { window.activeSelect.innerText = this.innerText; window.activeSelect.setAttribute('data-val', this.getAttribute('data-val')); }
-      window.closeSheet(); 
-    } else { window.closeSheet(); }
-  }); 
-});
+document.querySelectorAll('.sheet-option').forEach(opt => { opt.addEventListener('click', function() { if(this.parentElement.id !== 'sheet-actividad') { this.parentElement.querySelectorAll('.sheet-option').forEach(o => o.classList.remove('active')); this.classList.add('active'); if(window.activeSelect) { window.activeSelect.innerText = this.innerText; window.activeSelect.setAttribute('data-val', this.getAttribute('data-val')); } window.closeSheet(); } else { window.closeSheet(); } }); });
 if(overlay) overlay.addEventListener('click', window.closeSheet);
 const navItems = document.querySelectorAll('.nav-item'); const pages = document.querySelectorAll('.page');
-navItems.forEach(btn => { 
-  btn.addEventListener('click', () => { 
-    navItems.forEach(nav => nav.classList.remove('active')); pages.forEach(page => page.classList.remove('active')); 
-    btn.classList.add('active'); 
-    const tgt = document.getElementById(btn.getAttribute('data-target')); if(tgt) tgt.classList.add('active'); 
-  }); 
-});
-function setupTabs(btnClass, subTabClass) { 
-  const btns = document.querySelectorAll(`.${btnClass}`); const tabs = document.querySelectorAll(`.${subTabClass}`); 
-  btns.forEach(btn => { 
-    btn.addEventListener('click', () => { 
-      btns.forEach(t => t.classList.remove('active')); tabs.forEach(s => s.style.display = 'none'); 
-      btn.classList.add('active'); 
-      const targetTab = btn.getAttribute('data-tab'); const elem = document.getElementById(targetTab);
-      if(elem) elem.style.display = 'block'; 
-      if(targetTab === 'tab-leaderboard') cargarLeaderboard(); 
-    }); 
-  }); 
-}
-setupTabs('tab-btn-diet', 'sub-tab-diet'); setupTabs('tab-btn-train', 'sub-tab-train');
+navItems.forEach(btn => { btn.addEventListener('click', () => { navItems.forEach(nav => nav.classList.remove('active')); pages.forEach(page => page.classList.remove('active')); btn.classList.add('active'); const tgt = document.getElementById(btn.getAttribute('data-target')); if(tgt) tgt.classList.add('active'); }); });
+function setupTabs(btnClass, subTabClass) { const btns = document.querySelectorAll(`.${btnClass}`); const tabs = document.querySelectorAll(`.${subTabClass}`); btns.forEach(btn => { btn.addEventListener('click', () => { btns.forEach(t => t.classList.remove('active')); tabs.forEach(s => s.style.display = 'none'); btn.classList.add('active'); const targetTab = btn.getAttribute('data-tab'); const elem = document.getElementById(targetTab); if(elem) elem.style.display = 'block'; if(targetTab === 'tab-leaderboard') cargarLeaderboard(); }); }); } setupTabs('tab-btn-diet', 'sub-tab-diet'); setupTabs('tab-btn-train', 'sub-tab-train');
 
-// --- LEADERBOARD Y RANGOS ---
-const rangos = [ 
-  { nombre: "Ashigaru", minRatio: 0, color: "#6b7c93", msg: "Primer paso." }, 
-  { nombre: "Rōnin", minRatio: 1.5, color: "#ffaa00", msg: "Camino propio." }, 
-  { nombre: "Samurái", minRatio: 2.5, color: "#ff3366", msg: "Honor y disciplina." }, 
-  { nombre: "Daimyō", minRatio: 3.5, color: "#9933ff", msg: "Élite del hierro." }, 
-  { nombre: "IRON SHŌGUN", minRatio: 4.5, color: "#00e5ff", msg: "Comandante Supremo." } 
-];
-document.getElementById('btn-calcular-rango')?.addEventListener('click', async () => { 
-  const bench = parseFloat(document.getElementById('rm-bench')?.value) || 0; 
-  const squat = parseFloat(document.getElementById('rm-squat')?.value) || 0; 
-  const deadlift = parseFloat(document.getElementById('rm-deadlift')?.value) || 0; 
-  if(bench === 0 && squat === 0 && deadlift === 0) { showToast('⚠️ Ingresa marcas.'); return; } 
-  const total = bench + squat + deadlift; 
-  const ratio = parseFloat((total / userProfile.peso).toFixed(2)); 
-  let rango = rangos[0], prog = 0; 
-  for(let i=0; i<rangos.length; i++) { 
-    if(ratio >= rangos[i].minRatio) { 
-      rango = rangos[i]; 
-      prog = i < rangos.length - 1 ? ((ratio - rangos[i].minRatio) / (rangos[i+1].minRatio - rangos[i].minRatio)) * 100 : 100; 
-    } 
-  } 
-  const rt = document.getElementById('rango-titulo'); if(rt) { rt.innerText = rango.nombre; rt.style.color = rango.color; }
-  const rm = document.getElementById('rango-multi'); if(rm) rm.innerText = `${ratio}x`; 
-  const rtot = document.getElementById('rango-total'); if(rtot) rtot.innerText = total; 
-  const rp = document.getElementById('rango-progreso'); if(rp) { rp.style.width = `${prog}%`; rp.style.backgroundColor = rango.color; }
-  const hr = document.getElementById('header-rank'); if(hr) hr.innerHTML = `Rango: <span style="color: ${rango.color};">${rango.nombre.toUpperCase()}</span>`; 
-  currentRankName = rango.nombre; actualizarUIHeader(); actualizarUIPerfil(); 
-  if(currentUser && db) { 
-    try { 
-      await setDoc(doc(db, "leaderboard", currentUser.uid), { userId: currentUser.uid, nombre: userProfile.nickname, foto: currentUser.photoURL || "", multiplicador: ratio, totalKg: total, pesoCorporal: userProfile.peso, rango: rango.nombre, colorRango: rango.color, updatedAt: Date.now() }, { merge: true }); 
-      showToast(`⚔️ ¡Ranking Actualizado!`); await guardarEstadoNube(); 
-    } catch(e) { console.error(e); } 
-  } 
-});
-async function cargarLeaderboard() { 
-  const container = document.getElementById('leaderboard-list'); if(!container || !db) return; 
-  container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">Cargando guerreros...</p>`; 
-  try { 
-    const q = query(collection(db, "leaderboard"), orderBy("multiplicador", "desc"), limit(20)); const snapshot = await getDocs(q); 
-    if(snapshot.empty) { container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">El dojo está vacío.</p>`; return; } 
-    let html = "", pos = 1; 
-    snapshot.forEach(docSnap => { 
-      const d = docSnap.data(); const topClass = pos===1?"top-1":pos===2?"top-2":pos===3?"top-3":""; const medal = pos===1?"🥇":pos===2?"🥈":pos===3?"🥉":`#${pos}`; 
-      html += `<div class="leaderboard-item ${topClass}"><div class="lb-rank-num">${medal}</div><div class="lb-user-info"><img class="lb-avatar" src="${generarAvatarPorRango(d.nombre, d.rango)}"><div><span class="lb-name">${d.nombre}</span><span class="lb-badge" style="color: ${d.colorRango};">${d.rango}</span></div></div><div class="lb-score"><span class="lb-multiplier">${d.multiplicador}x</span><span class="lb-kg">${d.totalKg} kg</span></div></div>`; 
-      pos++; 
-    }); 
-    container.innerHTML = html; 
-  } catch(e) { container.innerHTML = `<p style="font-size: 12px; color: #ff3366; text-align: center;">Error al cargar.</p>`; } 
-}
-document.getElementById('btn-refresh-leaderboard')?.addEventListener('click', cargarLeaderboard);
+const rangos = [ { nombre: "Ashigaru", minRatio: 0, color: "#6b7c93", msg: "Primer paso." }, { nombre: "Rōnin", minRatio: 1.5, color: "#ffaa00", msg: "Camino propio." }, { nombre: "Samurái", minRatio: 2.5, color: "#ff3366", msg: "Honor y disciplina." }, { nombre: "Daimyō", minRatio: 3.5, color: "#9933ff", msg: "Élite del hierro." }, { nombre: "IRON SHŌGUN", minRatio: 4.5, color: "#00e5ff", msg: "Comandante Supremo." } ];
+document.getElementById('btn-calcular-rango')?.addEventListener('click', async () => { const bench = parseFloat(document.getElementById('rm-bench')?.value) || 0; const squat = parseFloat(document.getElementById('rm-squat')?.value) || 0; const deadlift = parseFloat(document.getElementById('rm-deadlift')?.value) || 0; if(bench === 0 && squat === 0 && deadlift === 0) { showToast('⚠️ Ingresa marcas.'); return; } const total = bench + squat + deadlift; const ratio = parseFloat((total / userProfile.peso).toFixed(2)); let rango = rangos[0], prog = 0; for(let i=0; i<rangos.length; i++) { if(ratio >= rangos[i].minRatio) { rango = rangos[i]; prog = i < rangos.length - 1 ? ((ratio - rangos[i].minRatio) / (rangos[i+1].minRatio - rangos[i].minRatio)) * 100 : 100; } } const rt = document.getElementById('rango-titulo'); if(rt) { rt.innerText = rango.nombre; rt.style.color = rango.color; } const rm = document.getElementById('rango-multi'); if(rm) rm.innerText = `${ratio}x`; const rtot = document.getElementById('rango-total'); if(rtot) rtot.innerText = total; const rp = document.getElementById('rango-progreso'); if(rp) { rp.style.width = `${prog}%`; rp.style.backgroundColor = rango.color; } const hr = document.getElementById('header-rank'); if(hr) hr.innerHTML = `<span style="color: ${rango.color};">${rango.nombre.toUpperCase()}</span>`; currentRankName = rango.nombre; actualizarUIHeader(); actualizarUIPerfil(); if(currentUser && db) { try { await setDoc(doc(db, "leaderboard", currentUser.uid), { userId: currentUser.uid, nombre: userProfile.nickname, foto: currentUser.photoURL || "", multiplicador: ratio, totalKg: total, pesoCorporal: userProfile.peso, rango: rango.nombre, colorRango: rango.color, updatedAt: Date.now() }, { merge: true }); showToast(`⚔️ ¡Ranking Actualizado!`); await guardarEstadoNube(); } catch(e) { console.error(e); } } });
+async function cargarLeaderboard() { const container = document.getElementById('leaderboard-list'); if(!container || !db) return; container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">Cargando guerreros...</p>`; try { const q = query(collection(db, "leaderboard"), orderBy("multiplicador", "desc"), limit(20)); const snapshot = await getDocs(q); if(snapshot.empty) { container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">El dojo está vacío.</p>`; return; } let html = "", pos = 1; snapshot.forEach(docSnap => { const d = docSnap.data(); const topClass = pos===1?"top-1":pos===2?"top-2":pos===3?"top-3":""; const medal = pos===1?"🥇":pos===2?"🥈":pos===3?"🥉":`#${pos}`; html += `<div class="leaderboard-item ${topClass}"><div class="lb-rank-num">${medal}</div><div class="lb-user-info"><img class="lb-avatar" src="${generarAvatarPorRango(d.nombre, d.rango)}"><div><span class="lb-name">${d.nombre}</span><span class="lb-badge" style="color: ${d.colorRango};">${d.rango}</span></div></div><div class="lb-score"><span class="lb-multiplier">${d.multiplicador}x</span><span class="lb-kg">${d.totalKg} kg</span></div></div>`; pos++; }); container.innerHTML = html; } catch(e) { container.innerHTML = `<p style="font-size: 12px; color: #ff3366; text-align: center;">Error al cargar.</p>`; } } document.getElementById('btn-refresh-leaderboard')?.addEventListener('click', cargarLeaderboard);
 
-let macroChart = null; const ctxDonut = document.getElementById('macroChart'); 
-if(ctxDonut) { macroChart = new Chart(ctxDonut.getContext('2d'), { type: 'doughnut', data: { labels: ['Prot', 'Carb', 'Gras'], datasets: [{ data: [0.1, 0.1, 0.1], backgroundColor: ['#ff3366', '#00e5ff', '#ffaa00'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '82%', plugins: { legend: { display: false } } } }); }
-let progressChart = null; const ctxLine = document.getElementById('progressChart'); 
-if(ctxLine) { progressChart = new Chart(ctxLine.getContext('2d'), { type: 'line', data: { labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'], datasets: [{ label: 'Proyección (kg)', data: [75, 75, 75, 75], borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.1)', borderWidth: 3, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } } }); }
+let macroChart = null; const ctxDonut = document.getElementById('macroChart'); if(ctxDonut) { macroChart = new Chart(ctxDonut.getContext('2d'), { type: 'doughnut', data: { labels: ['Prot', 'Carb', 'Gras'], datasets: [{ data: [0.1, 0.1, 0.1], backgroundColor: ['#ff3366', '#00e5ff', '#ffaa00'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '82%', plugins: { legend: { display: false } } } }); }
+let progressChart = null; const ctxLine = document.getElementById('progressChart'); if(ctxLine) { progressChart = new Chart(ctxLine.getContext('2d'), { type: 'line', data: { labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'], datasets: [{ label: 'Proyección (kg)', data: [75, 75, 75, 75], borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.1)', borderWidth: 3, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } } }); }
 function actualizarGraficoProyeccion(pesoActual, variacionObj) { if(!progressChart) return; let vSemana = variacionObj / 1000; progressChart.data.datasets[0].data = [pesoActual, pesoActual + vSemana, pesoActual + (vSemana * 2), pesoActual + (vSemana * 3)]; progressChart.update(); }
 
-// --- DASHBOARD EMBELLECIDO ---
+// --- DASHBOARD EMBELLECIDO Y DINÁMICO ---
 function actualizarDashboard() { 
-  // Rediseño Inyectado de Calorías
-  const calT = document.getElementById('calorias-total'); 
-  if(calT) calT.innerHTML = `<span style="font-size:26px; font-weight:900; color:#00e5ff; text-shadow: 0 0 10px rgba(0,229,255,0.4);">${totalCalorias}</span><span style="font-size:13px; color:#a0aec0; font-weight:normal;"> / ${metaCalorias} kcal</span>`; 
-  
-  // Rediseño de Macros
+  const calT = document.getElementById('calorias-total'); if(calT) calT.innerHTML = `<span style="font-size:26px; font-weight:900; color:#00e5ff; text-shadow: 0 0 10px rgba(0,229,255,0.4);">${totalCalorias}</span><span style="font-size:13px; color:#a0aec0; font-weight:normal;"> / ${metaCalorias} kcal</span>`; 
   const prT = document.getElementById('prot-total'); if(prT) prT.innerHTML = `<span style="color:#ff3366; font-size:16px; font-weight:800;">${totalProt}g</span> <span style="font-size:11px; color:#a0aec0;">/ ${metaProt}g</span>`; 
   const cbT = document.getElementById('carb-total'); if(cbT) cbT.innerHTML = `<span style="color:#00e5ff; font-size:16px; font-weight:800;">${totalCarb}g</span> <span style="font-size:11px; color:#a0aec0;">/ ${metaCarb}g</span>`; 
   const grT = document.getElementById('gras-total'); if(grT) grT.innerHTML = `<span style="color:#ffaa00; font-size:16px; font-weight:800;">${totalGrasa}g</span> <span style="font-size:11px; color:#a0aec0;">/ ${metaGrasa}g</span>`; 
   
   const ec = document.getElementById('en-consumidas'); if(ec) ec.innerText = `${totalCalorias} kcal`; 
-  const en = document.getElementById('en-netas'); if(en) en.innerText = `${Math.max(0, totalCalorias - 450)} kcal`; 
+  const eq = document.getElementById('en-quemadas'); if(eq) eq.innerText = `${totalQuemadas} kcal`;
+  const en = document.getElementById('en-netas'); if(en) en.innerText = `${Math.max(0, totalCalorias - totalQuemadas)} kcal`; 
   if(macroChart && (totalProt > 0 || totalCarb > 0 || totalGrasa > 0)) { macroChart.data.datasets[0].data = [totalProt, totalCarb, totalGrasa]; macroChart.update(); } 
 }
 
 document.getElementById('btn-checkin')?.addEventListener('click', () => window.openSheet('sheet-checkin'));
-
 document.getElementById('btn-confirm-checkin')?.addEventListener('click', async function() { 
-  if (this.disabled) return; 
-  this.disabled = true;
-  
-  const pesoInp = document.getElementById('checkin-peso');
-  const pesoVal = pesoInp ? parseFloat(pesoInp.value) : 0;
-  
-  if(!pesoVal) { 
-    showToast('⚠️ Por favor ingresa tu peso.'); 
-    this.disabled = false; return; 
-  }
-  
+  if (this.disabled) return; this.disabled = true;
+  const pesoInp = document.getElementById('checkin-peso'); const pesoVal = pesoInp ? parseFloat(pesoInp.value) : 0;
+  if(!pesoVal) { showToast('⚠️ Por favor ingresa tu peso.'); this.disabled = false; return; }
   if(currentUser && db) {
     await addDoc(collection(db, "users", currentUser.uid, "checkins"), { peso: pesoVal, fecha: getTodayKey(), timestamp: Date.now() });
-    userProfile.peso = pesoVal; // Actualiza el perfil con el nuevo peso
-    await guardarEstadoNube();
-    actualizarUIPerfil();
-    cargarHistorialYCheckins(currentUser.uid); // Recarga la lista para que aparezca
+    userProfile.peso = pesoVal; await guardarEstadoNube(); actualizarUIPerfil(); cargarHistorialYCheckins(currentUser.uid); 
   }
-  
-  window.closeSheet(); 
-  if(pesoInp) pesoInp.value = '';
-  showToast('📈 Check-in guardado en el historial.'); 
-  this.disabled = false;
+  window.closeSheet(); if(pesoInp) pesoInp.value = ''; showToast('📈 Check-in guardado.'); this.disabled = false;
 });
 
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(console.log); }); }
