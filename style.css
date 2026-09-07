@@ -119,15 +119,6 @@ main { padding: 15px; }
 #lista-comidas, #lista-entrenos { padding: 0; margin: 0; }
 #lista-comidas li, #lista-entrenos li { background: #1a2130; margin-bottom: 10px; padding: 15px; border-radius: 10px; list-style: none; border-left: 4px solid var(--primary); font-size: 13px; font-weight: 600;}
 
-/* ESTILOS DEL PLAN DEL ORÁCULO */
-.plan-meal-card { background: #141a26; border: 1px solid rgba(0,229,255,0.1); border-radius: 12px; padding: 15px; margin-bottom: 12px; text-align: left; position: relative;}
-.plan-meal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;}
-.plan-meal-title { font-size: 14px; font-weight: 800; color: var(--primary); text-transform: uppercase;}
-.plan-meal-cals { font-size: 12px; color: #fff; font-weight: 700; background: rgba(0,229,255,0.15); padding: 3px 8px; border-radius: 6px;}
-.plan-meal-desc { font-size: 13px; line-height: 1.5; color: #e2e8f0; margin-bottom: 10px;}
-.btn-swap { background: transparent; border: 1px solid #ffaa00; color: #ffaa00; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; float: right; margin-top: -5px;}
-.btn-swap:active { background: rgba(255,170,0,0.1); }
-
 .food-search-item { padding: 10px; background: #1a2130; margin-bottom: 5px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; }
 .food-search-item:hover { background: rgba(0,229,255,0.1); color: var(--primary); }
 
@@ -154,25 +145,28 @@ label { display: flex; justify-content: space-between; margin-top: 15px; color: 
 .nav-item.active { color: var(--primary); }
 .nav-item.active .icon { filter: grayscale(0%); opacity: 1; filter: drop-shadow(0 0 5px var(--primary-glow)); transform: translateY(-2px); }
 
-/* ETIQUETAS DE ALERGIAS (CHIPS) */
+/* --- ACTUALIZACIONES DEL ORÁCULO PREMIUM Y ALERGIAS --- */
+
 .allergy-chip {
-  background: rgba(255, 51, 102, 0.15);
-  border: 1px solid #ff3366;
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 11px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  background: rgba(255, 51, 102, 0.15); border: 1px solid #ff3366; color: #fff; padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 8px;
 }
-.allergy-chip-close {
-  cursor: pointer;
-  color: #ff3366;
-  font-weight: 900;
-  font-size: 14px;
-}
-.allergy-chip-close:hover {
-  color: #fff;
-}
+.allergy-chip-close { cursor: pointer; color: #ff3366; font-weight: 900; font-size: 14px; }
+.allergy-chip-close:hover { color: #fff; }
+
+.clinical-filters { display: grid; grid-template-columns: 1fr; gap: 12px; background: #0b0f17; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); margin-top: 8px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
+.clinical-filters label { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 12px; margin: 0; text-transform: none; font-weight: 600; cursor: pointer; letter-spacing: 0; }
+.clinical-filters input[type="checkbox"] { width: 18px; height: 18px; accent-color: #00e5ff; }
+
+.day-scroll-container { display: flex; overflow-x: auto; gap: 10px; padding: 5px 0 15px 0; scrollbar-width: none; }
+.day-scroll-container::-webkit-scrollbar { display: none; }
+.day-chip { flex-shrink: 0; background: #1a2130; border: 1px solid rgba(0,229,255,0.2); color: var(--text-muted); border-radius: 20px; padding: 10px 18px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-family: inherit;}
+.day-chip.active { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary-glow); border-color: var(--primary); transform: translateY(-2px);}
+
+.plan-meal-card { background: linear-gradient(145deg, #141a26 0%, #0b0f17 100%); border: 1px solid rgba(0,229,255,0.15); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05); position: relative; transition: transform 0.2s; }
+.plan-meal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;}
+.plan-meal-title { font-size: 14px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;}
+.plan-meal-cals { font-size: 14px; color: #fff; font-weight: 800; background: rgba(0,229,255,0.1); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(0,229,255,0.2); display: inline-block;}
+.plan-meal-desc { font-size: 13px; line-height: 1.6; color: #a0aec0; margin-bottom: 15px;}
+.plan-meal-desc b { color: #fff; font-size: 14px; display: block; margin-bottom: 5px;}
+.btn-swap { background: transparent; border: 1px solid #ffaa00; color: #ffaa00; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; float: right; margin-top: -5px;}
+.btn-swap:active { background: rgba(255,170,0,0.1); }
