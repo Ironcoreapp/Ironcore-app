@@ -138,76 +138,198 @@ function actualizarUIPerfil() {
   if(currentUser && currentUser.photoURL) document.getElementById('profile-card-avatar').src = currentUser.photoURL;
 }
 
+// --- EL ORÁCULO NUTRICIONAL (MOTOR CLÍNICO DE ALTA PRECISIÓN) ---
 
-// --- EL ORÁCULO NUTRICIONAL (MOTOR CLÍNICO GIGANTE) ---
+// Base de Datos Estructurada con Gramajes Reales
 const oracleDB = [
-  // ==========================================
   // 🌅 DESAYUNOS (Base: ~400 kcal)
-  // ==========================================
-  { id: 1, tipo: 'desayuno', dietas: ['normal', 'lowcarb', 'vegetariano'], name: 'Huevos Revueltos con Palta', calBase: 400, prot: 24, carb: 15, gras: 28, desc: '3 huevos revueltos, media palta hass y 1 rebanada de pan integral tostado.' },
-  { id: 2, tipo: 'desayuno', dietas: ['normal', 'vegetariano'], name: 'Avena Proteica Shōgun', calBase: 400, prot: 30, carb: 50, gras: 8, desc: '60g de avena tradicional, 1 scoop de proteína Whey, 150ml de leche descremada y arándanos.' },
-  { id: 3, tipo: 'desayuno', dietas: ['vegano', 'lowcarb'], name: 'Tofu Scramble', calBase: 400, prot: 25, carb: 12, gras: 26, desc: '150g de tofu firme revuelto con cúrcuma, espinaca, tomate y aceite de oliva.' },
-  { id: 4, tipo: 'desayuno', dietas: ['keto', 'lowcarb'], name: 'Huevos con Tocino Crujiente', calBase: 400, prot: 26, carb: 2, gras: 32, desc: '3 huevos fritos en mantequilla, 2 tiras de tocino y café negro sin azúcar.' },
-  { id: 5, tipo: 'desayuno', dietas: ['normal', 'vegetariano'], name: 'Pancakes Proteicos', calBase: 400, prot: 35, carb: 40, gras: 10, desc: 'Panqueques hechos con avena, claras de huevo, 1/2 plátano y 1 scoop de proteína.' },
-  { id: 6, tipo: 'desayuno', dietas: ['keto', 'vegetariano', 'lowcarb'], name: 'Omelette de Queso y Espinaca', calBase: 400, prot: 28, carb: 4, gras: 30, desc: 'Omelette de 3 huevos con 40g de queso gauda, espinaca fresca y champiñones.' },
-  { id: 7, tipo: 'desayuno', dietas: ['vegano', 'keto', 'lowcarb'], name: 'Pudding de Chía y Coco', calBase: 400, prot: 15, carb: 10, gras: 32, desc: 'Semillas de chía hidratadas en leche de coco entera, con almendras y esencia de vainilla.' },
-  { id: 8, tipo: 'desayuno', dietas: ['normal'], name: 'Arepa con Pollo Mechado', calBase: 400, prot: 28, carb: 45, gras: 10, desc: 'Una arepa mediana asada rellena con pechuga de pollo desmenuzada y rodajas de tomate.' },
-  { id: 9, tipo: 'desayuno', dietas: ['normal', 'vegetariano'], name: 'Yogur Griego Power', calBase: 400, prot: 25, carb: 45, gras: 12, desc: '200g de yogur griego natural, granola sin azúcar, nueces y 1 cucharada de miel.' },
-  { id: 10, tipo: 'desayuno', dietas: ['vegano'], name: 'Batido Masa Muscular Plant-Based', calBase: 400, prot: 25, carb: 55, gras: 10, desc: 'Batido de proteína de soya/arveja, leche de almendras, 1 plátano y avena.' },
-  { id: 11, tipo: 'desayuno', dietas: ['keto'], name: 'Pan Keto con Salmón Ahumado', calBase: 400, prot: 25, carb: 5, gras: 31, desc: '2 rebanadas de pan de harina de almendras, queso crema, y 50g de salmón ahumado.' },
-  { id: 12, tipo: 'desayuno', dietas: ['normal', 'lowcarb'], name: 'Omelette de Pavo', calBase: 400, prot: 38, carb: 10, gras: 22, desc: '3 claras, 1 huevo entero, 50g de pechuga de pavo picada y una tostada integral.' },
-
-  // ==========================================
+  { id: 1, tipo: 'desayuno', dietas: ['normal', 'lowcarb', 'vegetariano'], name: 'Huevos Revueltos con Palta', calBase: 400, prot: 24, carb: 15, gras: 28, 
+    ingredientes: [ { nombre: 'Huevos enteros', baseQty: 3, unidad: 'unidades' }, { nombre: 'Palta Hass', baseQty: 50, unidad: 'g' }, { nombre: 'Pan integral', baseQty: 1, unidad: 'rebanadas' }, { nombre: 'Aceite de oliva', baseQty: 5, unidad: 'ml' } ] },
+  { id: 2, tipo: 'desayuno', dietas: ['normal', 'vegetariano'], name: 'Avena Proteica', calBase: 400, prot: 30, carb: 50, gras: 8, 
+    ingredientes: [ { nombre: 'Avena tradicional', baseQty: 60, unidad: 'g' }, { nombre: 'Proteína Whey (Suero)', baseQty: 1, unidad: 'scoop' }, { nombre: 'Leche descremada', baseQty: 150, unidad: 'ml' }, { nombre: 'Arándanos', baseQty: 50, unidad: 'g' } ] },
+  { id: 3, tipo: 'desayuno', dietas: ['vegano', 'lowcarb'], name: 'Tofu Scramble', calBase: 400, prot: 25, carb: 12, gras: 26, 
+    ingredientes: [ { nombre: 'Tofu firme', baseQty: 150, unidad: 'g' }, { nombre: 'Espinaca fresca', baseQty: 50, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 10, unidad: 'ml' }, { nombre: 'Pan de masa madre', baseQty: 1, unidad: 'rebanadas' } ] },
+  { id: 4, tipo: 'desayuno', dietas: ['keto', 'lowcarb'], name: 'Huevos con Tocino Crujiente', calBase: 400, prot: 26, carb: 2, gras: 32, 
+    ingredientes: [ { nombre: 'Huevos enteros', baseQty: 3, unidad: 'unidades' }, { nombre: 'Tocino ahumado', baseQty: 30, unidad: 'g' }, { nombre: 'Mantequilla', baseQty: 10, unidad: 'g' } ] },
+  
   // 🍽️ ALMUERZOS (Base: ~600 kcal)
-  // ==========================================
-  { id: 13, tipo: 'almuerzo', dietas: ['normal'], name: 'Pollo y Arroz del Guerrero', calBase: 600, prot: 55, carb: 70, gras: 10, desc: '200g de pechuga de pollo a la plancha, 150g de arroz blanco cocido y brócoli al vapor.' },
-  { id: 14, tipo: 'almuerzo', dietas: ['normal', 'lowcarb'], name: 'Salmón Salvaje con Espárragos', calBase: 600, prot: 45, carb: 15, gras: 40, desc: '200g de filete de salmón al horno, espárragos asados y ensalada verde con aceite de oliva.' },
-  { id: 15, tipo: 'almuerzo', dietas: ['vegano', 'vegetariano'], name: 'Guiso de Lentejas Power', calBase: 600, prot: 35, carb: 90, gras: 12, desc: 'Plato hondo de guiso de lentejas caseras, servido con 100g de quinoa y zanahoria rallada.' },
-  { id: 16, tipo: 'almuerzo', dietas: ['keto', 'lowcarb'], name: 'Cerdo Asado con Palta', calBase: 600, prot: 45, carb: 8, gras: 45, desc: '200g de chuleta de cerdo asada, una palta mediana entera y mix de hojas verdes.' },
-  { id: 17, tipo: 'almuerzo', dietas: ['normal'], name: 'Posta Rosada con Puré', calBase: 600, prot: 50, carb: 60, gras: 15, desc: '180g de posta rosada a la plancha, acompañado de puré de papas casero y ensalada chilena.' },
-  { id: 18, tipo: 'almuerzo', dietas: ['keto'], name: 'Hamburguesa IronCore (Sin Pan)', calBase: 600, prot: 48, carb: 5, gras: 42, desc: '2 hamburguesas de carne molida (10% grasa), queso derretido, tocino, envueltas en lechuga.' },
-  { id: 19, tipo: 'almuerzo', dietas: ['vegano'], name: 'Tofu Teriyaki con Fideos de Arroz', calBase: 600, prot: 30, carb: 80, gras: 15, desc: '200g de tofu firme salteado en salsa teriyaki baja en sodio, fideos de arroz y pimentón.' },
-  { id: 20, tipo: 'almuerzo', dietas: ['normal', 'lowcarb'], name: 'Pollo al Curry con Coliflor', calBase: 600, prot: 50, carb: 20, gras: 35, desc: 'Trozos de pechuga cocinados en leche de coco y curry, servidos sobre "arroz" de coliflor.' },
-  { id: 21, tipo: 'almuerzo', dietas: ['normal'], name: 'Fideos Integrales con Pavo Molido', calBase: 600, prot: 45, carb: 75, gras: 12, desc: '100g de pasta integral cocida, salsa de tomate natural y 150g de carne de pavo molida magra.' },
-  { id: 22, tipo: 'almuerzo', dietas: ['vegano', 'vegetariano'], name: 'Bowl de Garbanzos y Camote', calBase: 600, prot: 22, carb: 95, gras: 14, desc: 'Garbanzos cocidos, dados de camote al horno, espinaca y aderezo de tahini (pasta de sésamo).' },
-  { id: 23, tipo: 'almuerzo', dietas: ['keto'], name: 'Pollo Relleno Keto', calBase: 600, prot: 55, carb: 6, gras: 38, desc: 'Pechuga rellena con espinaca y queso crema, envuelta en jamón serrano o prosciutto, al horno.' },
-  { id: 24, tipo: 'almuerzo', dietas: ['normal', 'lowcarb'], name: 'Ceviche de Atún', calBase: 600, prot: 45, carb: 25, gras: 35, desc: '2 latas de atún al agua, cebolla morada, cilantro, limón, acompañado de palta y galletas de arroz.' },
-  { id: 25, tipo: 'almuerzo', dietas: ['vegetariano'], name: 'Tortilla de Verduras y Queso', calBase: 600, prot: 35, carb: 30, gras: 35, desc: 'Tortilla gruesa de 4 huevos, zapallo italiano, zanahoria y trozos de queso fresco.' },
+  { id: 5, tipo: 'almuerzo', dietas: ['normal'], name: 'Pollo y Arroz del Guerrero', calBase: 600, prot: 55, carb: 70, gras: 10, 
+    ingredientes: [ { nombre: 'Pechuga de pollo magra', baseQty: 200, unidad: 'g' }, { nombre: 'Arroz blanco crudo', baseQty: 80, unidad: 'g' }, { nombre: 'Brócoli', baseQty: 100, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 5, unidad: 'ml' } ] },
+  { id: 6, tipo: 'almuerzo', dietas: ['normal', 'lowcarb'], name: 'Salmón Salvaje con Espárragos', calBase: 600, prot: 45, carb: 15, gras: 40, 
+    ingredientes: [ { nombre: 'Filete de salmón', baseQty: 200, unidad: 'g' }, { nombre: 'Espárragos frescos', baseQty: 150, unidad: 'g' }, { nombre: 'Mix de hojas verdes', baseQty: 100, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 15, unidad: 'ml' } ] },
+  { id: 7, tipo: 'almuerzo', dietas: ['vegano', 'vegetariano'], name: 'Guiso de Lentejas y Quinoa', calBase: 600, prot: 35, carb: 90, gras: 12, 
+    ingredientes: [ { nombre: 'Lentejas crudas', baseQty: 80, unidad: 'g' }, { nombre: 'Quinoa cruda', baseQty: 50, unidad: 'g' }, { nombre: 'Zanahoria', baseQty: 50, unidad: 'g' }, { nombre: 'Semillas de zapallo', baseQty: 15, unidad: 'g' } ] },
+  { id: 8, tipo: 'almuerzo', dietas: ['keto', 'lowcarb'], name: 'Cerdo Asado con Palta', calBase: 600, prot: 45, carb: 8, gras: 45, 
+    ingredientes: [ { nombre: 'Chuleta de cerdo magra', baseQty: 200, unidad: 'g' }, { nombre: 'Palta Hass', baseQty: 100, unidad: 'g' }, { nombre: 'Mix de lechugas', baseQty: 100, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 10, unidad: 'ml' } ] },
 
-  // ==========================================
   // 🌙 CENAS (Base: ~500 kcal)
-  // ==========================================
-  { id: 26, tipo: 'cena', dietas: ['normal'], name: 'Lomo de Atún y Papas', calBase: 500, prot: 45, carb: 55, gras: 10, desc: 'Lomo de atún fresco a la plancha, acompañado de papas cocidas y tomate en rodajas.' },
-  { id: 27, tipo: 'cena', dietas: ['normal', 'lowcarb'], name: 'Filete Magro y Ensalada Verde', calBase: 500, prot: 50, carb: 10, gras: 28, desc: '180g de carne magra (filete o lomo liso) a la parrilla, mix verde y cucharada de aceite de oliva.' },
-  { id: 28, tipo: 'cena', dietas: ['vegano', 'vegetariano'], name: 'Hamburguesa de Lentejas Casera', calBase: 500, prot: 25, carb: 65, gras: 16, desc: '2 hamburguesas caseras de lentejas al horno, acompañadas de verduras salteadas.' },
-  { id: 29, tipo: 'cena', dietas: ['keto', 'lowcarb'], name: 'Fajitas de Pollo en Lechuga', calBase: 500, prot: 45, carb: 8, gras: 32, desc: 'Tiras de pollo salteadas con pimentón, palta, crema ácida, servidas en hojas de lechuga.' },
-  { id: 30, tipo: 'cena', dietas: ['normal', 'vegetariano'], name: 'Huevos Duros y Arroz', calBase: 500, prot: 25, carb: 60, gras: 18, desc: '3 huevos duros enteros, 100g de arroz blanco y ensalada de tomate.' },
-  { id: 31, tipo: 'cena', dietas: ['vegano'], name: 'Seitán a la Plancha', calBase: 500, prot: 40, carb: 45, gras: 15, desc: '150g de carne vegetal (seitán) dorada al sartén, con quinoa y brócoli.' },
-  { id: 32, tipo: 'cena', dietas: ['keto'], name: 'Pescado Blanco en Mantequilla', calBase: 500, prot: 40, carb: 4, gras: 35, desc: 'Merluza o reineta frita en mantequilla o ghee, con champiñones al ajillo.' },
-  { id: 33, tipo: 'cena', dietas: ['normal', 'lowcarb'], name: 'Ensalada César con Pollo', calBase: 500, prot: 45, carb: 15, gras: 28, desc: 'Pechuga asada picada, lechuga romana, crutones integrales y aderezo César ligero.' },
-  { id: 34, tipo: 'cena', dietas: ['normal'], name: 'Tacos de Carne Magra', calBase: 500, prot: 35, carb: 50, gras: 18, desc: '2 tortillas de maíz o trigo, carne molida magra, pico de gallo y un poco de palta.' },
-  { id: 35, tipo: 'cena', dietas: ['vegetariano', 'lowcarb'], name: 'Ensalada Caprese con Huevo', calBase: 500, prot: 25, carb: 10, gras: 38, desc: 'Tomates cherry, queso mozzarella fresco, hojas de albahaca, aceite de oliva y 2 huevos duros.' },
-  { id: 36, tipo: 'cena', dietas: ['vegano'], name: 'Crema de Zapallo y Proteína', calBase: 500, prot: 22, carb: 60, gras: 18, desc: 'Sopa crema de calabaza/zapallo natural, acompañada de trozos de tofu crocante y semillas.' },
-  { id: 37, tipo: 'cena', dietas: ['keto'], name: 'Pizza Keto en Sartén', calBase: 500, prot: 35, carb: 8, gras: 35, desc: 'Base hecha de queso mozzarella fundido, salsa de tomate natural, peperoni y orégano.' },
+  { id: 9, tipo: 'cena', dietas: ['normal'], name: 'Lomo de Atún y Papas', calBase: 500, prot: 45, carb: 55, gras: 10, 
+    ingredientes: [ { nombre: 'Lomo de atún fresco', baseQty: 180, unidad: 'g' }, { nombre: 'Papa natural cruda', baseQty: 250, unidad: 'g' }, { nombre: 'Tomate', baseQty: 100, unidad: 'g' } ] },
+  { id: 10, tipo: 'cena', dietas: ['normal', 'lowcarb'], name: 'Filete Magro y Ensalada Verde', calBase: 500, prot: 50, carb: 10, gras: 28, 
+    ingredientes: [ { nombre: 'Posta rosada o filete magro', baseQty: 180, unidad: 'g' }, { nombre: 'Espinaca y lechuga', baseQty: 150, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 15, unidad: 'ml' } ] },
+  { id: 11, tipo: 'cena', dietas: ['keto'], name: 'Omelette Relleno de Queso', calBase: 500, prot: 35, carb: 4, gras: 39, 
+    ingredientes: [ { nombre: 'Huevos enteros', baseQty: 3, unidad: 'unidades' }, { nombre: 'Queso mantecoso/gauda', baseQty: 60, unidad: 'g' }, { nombre: 'Mantequilla', baseQty: 10, unidad: 'g' } ] },
 
-  // ==========================================
-  // 🍎 SNACKS Y PRE/POST ENTRENAMIENTO (Base: ~300 kcal)
-  // ==========================================
-  { id: 38, tipo: 'snack', dietas: ['normal', 'vegetariano', 'lowcarb'], name: 'Batido IronCore y Almendras', calBase: 300, prot: 30, carb: 10, gras: 15, desc: '1.5 scoops de Proteína Whey en agua fría, más un puñado generoso de almendras naturales.' },
-  { id: 39, tipo: 'snack', dietas: ['normal', 'vegetariano'], name: 'Yogur Griego y Plátano', calBase: 300, prot: 20, carb: 45, gras: 4, desc: '1 pote de yogur griego natural sin azúcar y un plátano mediano en rodajas.' },
-  { id: 40, tipo: 'snack', dietas: ['vegano'], name: 'Batido Vegetal y Maní', calBase: 300, prot: 25, carb: 20, gras: 13, desc: 'Batido de proteína de soya, leche de almendras y 1 cucharada de mantequilla de maní 100%.' },
-  { id: 41, tipo: 'snack', dietas: ['keto', 'lowcarb', 'vegetariano'], name: 'Mix de Nueces y Queso', calBase: 300, prot: 15, carb: 5, gras: 25, desc: 'Puñado de nueces mariposa y trozos de queso mantecoso o gauda.' },
-  { id: 42, tipo: 'snack', dietas: ['normal', 'vegano'], name: 'Galletas de Arroz y Palta', calBase: 300, prot: 5, carb: 40, gras: 14, desc: '3 galletas de arroz inflado con palta molida y una pizca de sal.' },
-  { id: 43, tipo: 'snack', dietas: ['keto'], name: 'Rollitos de Jamón y Queso', calBase: 300, prot: 22, carb: 2, gras: 22, desc: 'Láminas de jamón de pavo enrolladas con queso crema y aceitunas.' },
-  { id: 44, tipo: 'snack', dietas: ['normal', 'vegetariano'], name: 'Avena Nocturna (Overnight Oats)', calBase: 300, prot: 12, carb: 45, gras: 8, desc: 'Avena reposada en leche descremada desde la noche anterior, con cacao y stevia.' },
-  { id: 45, tipo: 'snack', dietas: ['vegano', 'lowcarb'], name: 'Hummus con Apio', calBase: 300, prot: 10, carb: 25, gras: 18, desc: 'Bastones de apio fresco o zanahoria, untados en hummus (pasta de garbanzo y sésamo).' },
-  { id: 46, tipo: 'snack', dietas: ['normal', 'vegetariano'], name: 'Quesillo y Fruta', calBase: 300, prot: 18, carb: 35, gras: 10, desc: 'Una porción de quesillo fresco con 1 manzana verde.' },
-  { id: 47, tipo: 'snack', dietas: ['keto', 'vegetariano'], name: 'Batido de Proteína y Aceite de Coco', calBase: 300, prot: 25, carb: 3, gras: 20, desc: '1 scoop de Whey Protein Isolate en agua, con 1 cucharada de aceite de coco MCT.' },
-  { id: 48, tipo: 'snack', dietas: ['normal', 'vegano'], name: 'Pan con Mantequilla de Maní', calBase: 300, prot: 10, carb: 35, gras: 14, desc: '1 rebanada de pan de molde integral tostado con mantequilla de maní natural.' },
-  { id: 49, tipo: 'snack', dietas: ['normal', 'lowcarb', 'vegetariano'], name: 'Huevos Duros de Rápida Acción', calBase: 300, prot: 18, carb: 2, gras: 15, desc: '2 huevos duros hervidos enteros y 1 clara extra, con un toque de pimienta.' },
-  { id: 50, tipo: 'snack', dietas: ['vegano', 'keto'], name: 'Aceitunas y Nueces', calBase: 300, prot: 6, carb: 8, gras: 28, desc: 'Un pocillo con aceitunas sevillanas y un puñado de nueces pecanas.' }
+  // 🍎 SNACKS (Base: ~300 kcal)
+  { id: 12, tipo: 'snack', dietas: ['normal', 'vegetariano', 'lowcarb'], name: 'Batido Proteico y Almendras', calBase: 300, prot: 30, carb: 10, gras: 15, 
+    ingredientes: [ { nombre: 'Proteína Whey (Suero)', baseQty: 1.5, unidad: 'scoops' }, { nombre: 'Almendras naturales', baseQty: 20, unidad: 'g' } ] },
+  { id: 13, tipo: 'snack', dietas: ['normal', 'vegetariano'], name: 'Yogur Griego y Plátano', calBase: 300, prot: 20, carb: 45, gras: 4, 
+    ingredientes: [ { nombre: 'Yogur griego sin azúcar', baseQty: 200, unidad: 'g' }, { nombre: 'Plátano mediano', baseQty: 1, unidad: 'unidades' } ] },
+  { id: 14, tipo: 'snack', dietas: ['vegano'], name: 'Batido Vegetal y Maní', calBase: 300, prot: 25, carb: 20, gras: 13, 
+    ingredientes: [ { nombre: 'Proteína Vegetal (Soya/Arveja)', baseQty: 1, unidad: 'scoop' }, { nombre: 'Leche de almendras', baseQty: 200, unidad: 'ml' }, { nombre: 'Mantequilla de maní', baseQty: 15, unidad: 'g' } ] },
+  { id: 15, tipo: 'snack', dietas: ['keto', 'lowcarb'], name: 'Mix de Nueces y Queso', calBase: 300, prot: 15, carb: 5, gras: 25, 
+    ingredientes: [ { nombre: 'Nueces mariposa', baseQty: 20, unidad: 'g' }, { nombre: 'Queso fresco/mantecoso', baseQty: 40, unidad: 'g' } ] }
 ];
 
+
+let weeklyPlan = []; // Guarda los 7 días
+let currentDietType = 'normal';
+let currentAllergies = [];
+let selectedDayIndex = 0;
+
+document.getElementById('btn-generar-plan')?.addEventListener('click', () => {
+  currentDietType = document.getElementById('oracle-diet-type').value;
+  let rawAlergias = document.getElementById('oracle-allergies').value.toLowerCase();
+  currentAllergies = rawAlergias.split(',').map(a => a.trim()).filter(a => a !== "");
+  
+  generarPlanSemanal();
+  
+  document.getElementById('oracle-form-card').style.display = 'none';
+  document.getElementById('plan-resultado').style.display = 'block';
+  showToast('🔮 La semana ha sido calculada al milímetro.');
+});
+
+document.getElementById('oracle-day-selector')?.addEventListener('change', (e) => {
+  selectedDayIndex = parseInt(e.target.value);
+  renderizarDiaSeleccionado();
+});
+
+function generarPlanSemanal() {
+  weeklyPlan = [];
+  const distribution = [
+    { tipo: 'desayuno', cals: metaCalorias * 0.25 },
+    { tipo: 'almuerzo', cals: metaCalorias * 0.35 },
+    { tipo: 'cena', cals: metaCalorias * 0.30 },
+    { tipo: 'snack', cals: metaCalorias * 0.10 }
+  ];
+
+  // Generar 7 días distintos
+  for(let i=0; i<7; i++) {
+    let dayMeals = distribution.map(slot => obtenerComidaAleatoria(slot.tipo, slot.cals, []));
+    weeklyPlan.push(dayMeals);
+  }
+  
+  selectedDayIndex = 0;
+  document.getElementById('oracle-day-selector').value = "0";
+  renderizarDiaSeleccionado();
+}
+
+function obtenerComidaAleatoria(tipo, targetCals, excludesId) {
+  // Filtros Clínicos
+  let candidatos = oracleDB.filter(m => {
+    if(m.tipo !== tipo) return false;
+    if(!m.dietas.includes(currentDietType)) return false;
+    if(excludesId.includes(m.id)) return false;
+    
+    // Alergias (Busca en nombre e ingredientes)
+    let jsonStr = JSON.stringify(m).toLowerCase();
+    for(let a of currentAllergies) {
+      if(jsonStr.includes(a)) return false;
+    }
+    return true;
+  });
+
+  if(candidatos.length === 0) candidatos = oracleDB.filter(m => m.tipo === tipo); 
+  const selected = candidatos[Math.floor(Math.random() * candidatos.length)];
+  
+  // Cálculo de Porciones Matemáticas
+  const factor = targetCals / selected.calBase;
+  
+  let ingredientesAdaptados = selected.ingredientes.map(ing => {
+    let qtyCalculada = ing.baseQty * factor;
+    // Redondear lógicamente: si son unidades a 1 decimal, gramos a enteros.
+    qtyCalculada = ing.unidad === 'unidades' || ing.unidad === 'scoops' || ing.unidad === 'rebanadas' 
+                   ? parseFloat(qtyCalculada.toFixed(1)) 
+                   : Math.round(qtyCalculada);
+                   
+    return { nombre: ing.nombre, cantidad: qtyCalculada, unidad: ing.unidad };
+  });
+
+  return {
+    id: selected.id, tipo: selected.tipo, name: selected.name,
+    cals: Math.round(selected.calBase * factor), prot: Math.round(selected.prot * factor),
+    carb: Math.round(selected.carb * factor), gras: Math.round(selected.gras * factor),
+    ingredientes: ingredientesAdaptados
+  };
+}
+
+function renderizarDiaSeleccionado() {
+  const container = document.getElementById('comidas-plan');
+  if(!container) return;
+  container.innerHTML = '';
+  
+  const dayMeals = weeklyPlan[selectedDayIndex];
+  
+  dayMeals.forEach((meal, idx) => {
+    // Convertir ingredientes en una lista visual legible
+    let ingredientesHTML = meal.ingredientes.map(i => `• ${i.cantidad} ${i.unidad} de ${i.nombre}`).join('<br>');
+
+    let html = `
+      <div class="plan-meal-card">
+        <div class="plan-meal-header">
+          <span class="plan-meal-title">${meal.tipo}</span>
+          <button class="btn-swap" onclick="swapMealPlan(${idx})">🔄 Modificar</button>
+        </div>
+        <p class="plan-meal-desc"><b style="color:#fff;">${meal.name}</b><br><span style="color:#a0aec0; font-size:11px;">${ingredientesHTML}</span></p>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <span class="plan-meal-cals">🔥 ${meal.cals} kcal</span>
+          <span style="font-size:10px; color:var(--text-muted); font-weight:800;">P: ${meal.prot}g | C: ${meal.carb}g | G: ${meal.gras}g</span>
+        </div>
+      </div>
+    `;
+    container.innerHTML += html;
+  });
+}
+
+window.swapMealPlan = function(mealIndex) {
+  const oldMeal = weeklyPlan[selectedDayIndex][mealIndex];
+  const newMeal = obtenerComidaAleatoria(oldMeal.tipo, oldMeal.cals, [oldMeal.id]);
+  weeklyPlan[selectedDayIndex][mealIndex] = newMeal;
+  renderizarDiaSeleccionado();
+  showToast(`🔄 Opción modificada calculando macros...`);
+};
+
+window.generarListaCompras = function() {
+  const ul = document.getElementById('lista-compras-ui');
+  if(!ul) return;
+  
+  // Consolidar todos los ingredientes de los 7 días
+  let listaConsolidada = {};
+  
+  weeklyPlan.forEach(dia => {
+    dia.forEach(comida => {
+      comida.ingredientes.forEach(ing => {
+        let key = `${ing.nombre} (${ing.unidad})`;
+        listaConsolidada[key] = (listaConsolidada[key] || 0) + ing.cantidad;
+      });
+    });
+  });
+
+  ul.innerHTML = '';
+  for (let key in listaConsolidada) {
+    let rawQty = listaConsolidada[key];
+    let qtyDisplay = key.includes('unidades') || key.includes('scoops') || key.includes('rebanadas') ? rawQty.toFixed(1) : Math.round(rawQty);
+    
+    // Extraer nombre y unidad para mostrar bonito
+    let match = key.match(/(.*) \((.*)\)/);
+    let nombreLimpio = match ? match[1] : key;
+    let unidadLimpia = match ? match[2] : '';
+
+    ul.innerHTML += `<li><input type="checkbox" style="accent-color:var(--primary); width:18px; height:18px;"> <span style="flex:1;">${nombreLimpio}</span> <b style="color:var(--primary); font-size:12px;">${qtyDisplay} ${unidadLimpia}</b></li>`;
+  }
+  
+  openSheet('sheet-compras');
+};
 let currentPlan = []; // Guarda el plan actual en memoria
 let currentDietType = 'normal';
 let currentAllergies = [];
