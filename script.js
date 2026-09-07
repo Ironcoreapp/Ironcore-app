@@ -1,8 +1,7 @@
 // ============================================================================
-// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM, DASHBOARD GRID Y MODALES ---
+// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM, DASHBOARD GRID Y SOCIAL ---
 // ============================================================================
 const customCSS = `
-  /* Header Superior */
   header, .top-header, #main-header {
     display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important;
     padding: 10px 20px !important; background: rgba(20, 26, 38, 0.98) !important; border-bottom: 1px solid rgba(0,229,255,0.2) !important;
@@ -14,14 +13,8 @@ const customCSS = `
   .user-badges-row { display: flex; gap: 8px; flex-direction: row; margin-top: 3px; justify-content: flex-end; }
   .user-badge-mini { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); padding: 3px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; }
 
-  /* Dashboard Tipo Panel Estadístico (Inspiración Analytics) */
-  #dashboard-tab .stats-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px;
-  }
-  .stat-panel {
-    background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: center;
-  }
+  #dashboard-tab .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
+  .stat-panel { background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: center; }
   .stat-panel-full { grid-column: span 2; }
   .stat-title { font-size: 10px; color: #9ca3af; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
   .stat-value { font-size: 24px; font-weight: 900; color: #fff; }
@@ -29,13 +22,11 @@ const customCSS = `
   .stat-value.warning { color: #ffaa00; }
   .stat-value.danger { color: #ff3366; }
 
-  /* Botones Premium */
   .iron-btn-primary { width: 100%; padding: 14px; margin-top: 12px; background: linear-gradient(135deg, #00e5ff 0%, #007acc 100%); color: #fff; font-size: 14px; font-weight: 900; border: none; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,229,255,0.4); text-transform: uppercase; cursor: pointer; letter-spacing: 1px; transition: all 0.2s ease; }
   .iron-btn-primary:active { transform: scale(0.98); }
   .iron-btn-warning { width: 100%; padding: 14px; background: linear-gradient(135deg, #ffaa00 0%, #e65c00 100%); color: #fff; font-size: 14px; font-weight: 900; border: none; border-radius: 10px; box-shadow: 0 4px 15px rgba(255,170,0,0.4); text-transform: uppercase; cursor: pointer; transition: all 0.2s ease; }
   .iron-btn-danger { width: 100%; padding: 12px; margin-top: 15px; background: rgba(255, 51, 102, 0.1); color: #ff3366; border: 1px solid #ff3366; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease; }
   
-  /* Inputs y Buscador Autocomplete */
   .iron-input-modern { width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,229,255,0.5); border-radius: 8px; color: #fff; font-weight: bold; font-size: 14px; box-sizing: border-box; transition: border 0.3s; }
   .iron-input-modern:focus { outline: none; border-color: #00e5ff; box-shadow: 0 0 8px rgba(0,229,255,0.5); }
   .search-results-box { max-height: 200px; overflow-y: auto; background: #1a2130; border: 1px solid #00e5ff; border-radius: 8px; margin-top: 5px; position: absolute; width: calc(100% - 40px); z-index: 100; display: none; }
@@ -43,22 +34,22 @@ const customCSS = `
   .search-item:hover { background: rgba(0,229,255,0.1); }
   .search-item-muscle { font-size: 10px; color: #ffaa00; font-weight: 800; text-transform: uppercase; }
 
-  /* Historial Desplegable */
   .history-day { background: #111827; margin-bottom: 12px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
   .history-day-header { padding: 15px; background: linear-gradient(90deg, rgba(0,229,255,0.1) 0%, transparent 100%); font-weight: 800; color: #00e5ff; display: flex; justify-content: space-between; cursor: pointer; font-size: 14px; }
   .history-day-content { padding: 15px; display: none; background: rgba(0,0,0,0.3); }
 
-  /* Modal de Bienvenida Motivacional */
   .iron-welcome-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 15, 25, 0.85); z-index: 9999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; backdrop-filter: blur(8px); }
   .iron-welcome-overlay.active { opacity: 1; pointer-events: auto; }
   .iron-welcome-modal { background: linear-gradient(145deg, #111827, #1a2130); padding: 35px 25px; border-radius: 15px; border: 1px solid #00e5ff; box-shadow: 0 10px 40px rgba(0, 229, 255, 0.15); text-align: center; max-width: 90%; width: 380px; transform: translateY(30px); transition: transform 0.4s ease; }
   .iron-welcome-overlay.active .iron-welcome-modal { transform: translateY(0); }
   .iron-welcome-title { font-size: 18px; font-weight: 900; color: #fff; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
   .iron-welcome-quote { font-size: 14px; color: #9ca3af; font-style: italic; margin-bottom: 25px; line-height: 1.6; }
+  
+  .macro-progress-container { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 6px; overflow: hidden; }
+  .macro-progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease-out; }
 `;
 const styleEl = document.createElement('style'); styleEl.innerHTML = customCSS; document.head.appendChild(styleEl);
 
-// Limpieza DOM inmediata: Borrar el texto viejo y acomodar los badges
 document.addEventListener('DOMContentLoaded', () => {
   const allElements = document.querySelectorAll('span, p, div, h1, h2, h3, h4, h5, h6');
   allElements.forEach(el => {
@@ -70,9 +61,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const parent = rankElem.parentElement; parent.classList.add('user-badges-row');
     rankElem.classList.add('user-badge-mini'); streakElem.classList.add('user-badge-mini');
   }
+
+  const genBtn = document.getElementById('btn-generar-rutina');
+  if(genBtn && !document.getElementById('check-warmup')) {
+    const fasesDiv = document.createElement('div');
+    fasesDiv.innerHTML = `
+      <div style="display:flex; justify-content:space-between; margin-bottom:15px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+        <label style="color:#ffaa00; font-size:12px; font-weight:800; display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="check-warmup" checked style="accent-color:#ffaa00; width:16px; height:16px;"> 🔥 Calentamiento
+        </label>
+        <label style="color:#00e5ff; font-size:12px; font-weight:800; display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="check-cooldown" checked style="accent-color:#00e5ff; width:16px; height:16px;"> ❄️ Enfriamiento
+        </label>
+      </div>
+    `;
+    genBtn.parentNode.insertBefore(fasesDiv, genBtn);
+  }
 });
 
-// --- IMPORTACIÓN MODULAR DE FIREBASE ---
+// --- IMPORTACIÓN FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -100,12 +107,17 @@ let userProfile = { perfilCompleto: false, nickname: "", genero: "M", edad: 25, 
 function getTodayKey() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 function showToast(msg) { const toast = document.getElementById('toast-notif'); if(!toast) return; toast.innerHTML = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3500); }
 
-// --- BASE DE CONOCIMIENTOS ---
-const ironCoreTips = [ "⚡ La creatina (5g) funciona por acumulación.", "🥩 Consume entre 1.8g y 2.2g de proteína por kilo.", "💧 Toma 1 litro por cada 25kg de peso corporal.", "💤 El músculo crece mientras duermes.", "🔥 Prioriza alimentos voluminosos en déficit." ];
+// --- TIPS Y MODAL MOTIVACIONAL ---
+const ironCoreTips = [
+  "⚡ La creatina (5g) funciona por acumulación. Tómatela a diario.",
+  "🥩 Hipertrofia: Consume entre 1.8g y 2.2g de proteína por kilo.",
+  "💧 Hidratación: Toma 1 litro por cada 25kg de peso corporal.",
+  "💤 El músculo crece mientras duermes. Busca 7-8 horas de descanso.",
+  "🔥 En déficit, prioriza alimentos voluminosos para engañar la saciedad."
+];
 function setDailyTip() { const dt = document.getElementById('daily-tip'); if(dt) dt.innerText = ironCoreTips[Math.floor(Math.random() * ironCoreTips.length)]; }
 if(document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', setDailyTip); } else { setDailyTip(); }
 
-// --- MENSAJES MOTIVACIONALES ---
 const oraculoQuotes = [
   "La disciplina es el puente entre tus metas y tus logros.", "El hierro no miente. Te da exactamente lo que le pones.", "Cada repetición es un paso más hacia tu mejor versión.", 
   "Controla tu cuerpo en el espacio. La gravedad es solo otra resistencia a vencer.", "El dolor de hoy es la victoria del mañana.", "La constancia siempre vence a la intensidad esporádica.", 
@@ -137,6 +149,7 @@ document.getElementById('btn-google-login')?.addEventListener('click', async () 
   try { await signInWithPopup(auth, provider); showToast('⚔️ ¡Acceso autorizado!'); } catch(error) { await signInWithRedirect(auth, provider); }
 });
 document.getElementById('btn-logout')?.addEventListener('click', () => { sessionStorage.removeItem('ironcore_welcome_shown'); signOut(auth); });
+document.getElementById('btn-logout-profile')?.addEventListener('click', () => { sessionStorage.removeItem('ironcore_welcome_shown'); signOut(auth); });
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
@@ -155,6 +168,7 @@ function generarAvatarPorRango(nickname, rango) {
   return `https://api.dicebear.com/7.x/bottts/svg?seed=${nickname}-${rango}&backgroundColor=${bg}`;
 }
 
+// --- ONBOARDING Y FIREBASE ---
 const obScreen = document.getElementById('onboarding-screen'); const obTrack = document.getElementById('ob-track'); const obBar = document.getElementById('ob-bar'); let currentObStep = 0;
 window.abrirOnboarding = function(isEdit = false) { 
   if(!obScreen) return; obScreen.style.display = 'flex'; currentObStep = 0; if(obTrack) obTrack.style.transform = `translateX(0%)`; if(obBar) obBar.style.width = '33.33%'; 
@@ -164,6 +178,7 @@ window.abrirOnboarding = function(isEdit = false) {
     window.seleccionarGenero(userProfile.genero); 
     const ed = document.getElementById('ob-edad'); if(ed) ed.value = userProfile.edad; 
     const pe = document.getElementById('ob-peso'); if(pe) pe.value = userProfile.peso; 
+    const al = document.getElementById('ob-altura'); if(al) al.value = userProfile.altura;
   } else { const t = document.getElementById('ob-title'); if(t) t.innerText = "Ritual de Iniciación"; } 
 };
 window.moverOnboarding = function(dir) { 
@@ -174,18 +189,16 @@ window.moverOnboarding = function(dir) {
 window.seleccionarGenero = function(gen) { userProfile.genero = gen; document.querySelectorAll('.ob-gender-btn').forEach(b => { if(b.getAttribute('data-gen') === gen) b.classList.add('active'); else b.classList.remove('active'); }); };
 window.seleccionarMetaOb = function(elem) { document.querySelectorAll('.ob-goal-card').forEach(c => c.classList.remove('active')); elem.classList.add('active'); userProfile.metaObj = parseInt(elem.getAttribute('data-val')); };
 
-// FINALIZAR ONBOARDING CON VALIDACIÓN DE NICKNAME (SOCIAL)
 window.finalizarOnboarding = async function() {
   const nickInput = document.getElementById('ob-nickname'); 
   const desiredNick = nickInput?.value.trim().toLowerCase() || "guerrero";
   
-  // Validar si el nombre existe en otro usuario (Para futuras conexiones sociales)
   if (currentUser && db) {
     const q = query(collection(db, "users"), where("nickname_lower", "==", desiredNick));
     const snap = await getDocs(q);
     if (!snap.empty && snap.docs[0].id !== currentUser.uid) {
-      showToast("⚠️ Ese apodo ya está en uso. Elige otro para el sistema social.");
-      return; // Bloquea el avance
+      showToast("⚠️ Ese apodo ya está en uso. Elige otro.");
+      return;
     }
   }
 
@@ -233,9 +246,19 @@ function actualizarUIHeader() {
   const wb = document.getElementById('user-welcome-box'); if(wb) wb.style.display = 'flex'; 
 }
 
+// CORRECCIÓN COMPLETA DE PERFIL (ASIGNA ALTURA, EDAD Y GÉNERO)
 function actualizarUIPerfil() { 
   const cn = document.getElementById('profile-card-name'); if(cn) cn.innerText = userProfile.nickname.toUpperCase(); 
   const vp = document.getElementById('profile-val-peso'); if(vp) vp.innerText = `${userProfile.peso} kg`; 
+  const va = document.getElementById('profile-val-altura'); if(va) va.innerText = `${userProfile.altura} cm`; 
+  const ve = document.getElementById('profile-val-edad'); if(ve) ve.innerText = `${userProfile.edad} años`; 
+  const vg = document.getElementById('profile-val-genero'); if(vg) vg.innerText = userProfile.genero === 'M' ? 'Hombre' : 'Mujer'; 
+  
+  let labelMeta = "Mantenimiento"; 
+  if(userProfile.metaObj === -500) labelMeta = "Déficit Agresivo"; 
+  if(userProfile.metaObj === -300) labelMeta = "Definición"; 
+  if(userProfile.metaObj === 300) labelMeta = "Volumen"; 
+  const cg = document.getElementById('profile-card-goal'); if(cg) cg.innerText = `Meta: ${labelMeta}`; 
   const ca = document.getElementById('profile-card-avatar'); if(ca) ca.src = generarAvatarPorRango(userProfile.nickname, currentRankName); 
 }
 
@@ -246,31 +269,31 @@ async function inicializarBases() {
 }
 inicializarBases();
 
-// --- INYECCIÓN Y CREACIÓN DEL GRÁFICO DE PERFIL (CORREGIDO) ---
+// --- INYECCIÓN Y CREACIÓN DEL GRÁFICO DE PERFIL SEGURO ---
 let profileChartInstance = null;
 function dibujarGraficoPerfil(historialPesos) {
-  const canvasContainer = document.getElementById('profile-chart-container');
-  if(!canvasContainer) {
-    const tabProfile = document.getElementById('page-profile');
-    if(tabProfile) {
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = `
-        <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-top: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-          <h4 style="font-size: 12px; color: #9ca3af; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px;">📊 Evolución de Masa Corporal</h4>
-          <div style="height: 200px; width: 100%;"><canvas id="profile-chart-container"></canvas></div>
-        </div>
-      `;
-      // Lo añadimos al final de la pestaña de forma segura
-      tabProfile.appendChild(wrapper); 
-    }
+  const tabProfile = document.getElementById('page-profile');
+  if(!tabProfile) return;
+
+  let canvasWrapper = document.getElementById('wrapper-profile-chart');
+  if(!canvasWrapper) {
+    canvasWrapper = document.createElement('div');
+    canvasWrapper.id = 'wrapper-profile-chart';
+    canvasWrapper.innerHTML = `
+      <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-top: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        <h4 style="font-size: 12px; color: #9ca3af; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px;">📊 Evolución de Masa Corporal</h4>
+        <div style="height: 200px; width: 100%;"><canvas id="profile-chart-canvas"></canvas></div>
+      </div>
+    `;
+    tabProfile.appendChild(canvasWrapper);
   }
 
-  const ctx = document.getElementById('profile-chart-container');
+  const ctx = document.getElementById('profile-chart-canvas');
   if(!ctx) return;
 
   if(profileChartInstance) profileChartInstance.destroy();
 
-  const labels = historialPesos.map(item => item.fecha.split('-').slice(1).join('/')); // Mes/Día
+  const labels = historialPesos.map(item => item.fecha.split('-').slice(1).join('/')); 
   const data = historialPesos.map(item => item.peso);
 
   profileChartInstance = new Chart(ctx.getContext('2d'), {
@@ -286,6 +309,124 @@ function dibujarGraficoPerfil(historialPesos) {
       }]
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+  });
+}
+
+// --- LEADERBOARD COMPLETO (RESTAURADO) ---
+const rangos = [ 
+  { nombre: "Ashigaru", minRatio: 0, color: "#6b7c93" }, 
+  { nombre: "Rōnin", minRatio: 1.5, color: "#ffaa00" }, 
+  { nombre: "Samurái", minRatio: 2.5, color: "#ff3366" }, 
+  { nombre: "Daimyō", minRatio: 3.5, color: "#9933ff" }, 
+  { nombre: "IRON SHŌGUN", minRatio: 4.5, color: "#00e5ff" } 
+];
+
+document.getElementById('btn-calcular-rango')?.addEventListener('click', async () => { 
+  const bench = parseFloat(document.getElementById('rm-bench')?.value) || 0; 
+  const squat = parseFloat(document.getElementById('rm-squat')?.value) || 0; 
+  const deadlift = parseFloat(document.getElementById('rm-deadlift')?.value) || 0; 
+  if(bench === 0 && squat === 0 && deadlift === 0) { showToast('⚠️ Ingresa marcas.'); return; } 
+  const total = bench + squat + deadlift; 
+  const ratio = parseFloat((total / userProfile.peso).toFixed(2)); 
+  let rango = rangos[0], prog = 0; 
+  for(let i=0; i<rangos.length; i++) { 
+    if(ratio >= rangos[i].minRatio) { 
+      rango = rangos[i]; 
+      prog = i < rangos.length - 1 ? ((ratio - rangos[i].minRatio) / (rangos[i+1].minRatio - rangos[i].minRatio)) * 100 : 100; 
+    } 
+  } 
+  const rt = document.getElementById('rango-titulo'); if(rt) { rt.innerText = rango.nombre; rt.style.color = rango.color; }
+  const rm = document.getElementById('rango-multi'); if(rm) rm.innerText = `${ratio}x`; 
+  const rtot = document.getElementById('rango-total'); if(rtot) rtot.innerText = total; 
+  const rp = document.getElementById('rango-progreso'); if(rp) { rp.style.width = `${prog}%`; rp.style.backgroundColor = rango.color; }
+  const hr = document.getElementById('header-rank'); if(hr) hr.innerHTML = `<span style="color: ${rango.color};">${rango.nombre.toUpperCase()}</span>`; 
+  currentRankName = rango.nombre; 
+  actualizarUIHeader(); actualizarUIPerfil(); 
+  if(currentUser && db) { 
+    try { 
+      await setDoc(doc(db, "leaderboard", currentUser.uid), { 
+        userId: currentUser.uid, nombre: userProfile.nickname, foto: currentUser.photoURL || "", 
+        multiplicador: ratio, totalKg: total, pesoCorporal: userProfile.peso, rango: rango.nombre, 
+        colorRango: rango.color, updatedAt: Date.now() 
+      }, { merge: true }); 
+      showToast(`⚔️ ¡Ranking Actualizado!`); 
+      await guardarEstadoNube(); 
+      cargarLeaderboard();
+    } catch(e) { console.error(e); } 
+  } 
+});
+
+async function cargarLeaderboard() { 
+  const container = document.getElementById('leaderboard-list'); 
+  if(!container || !db) return; 
+  container.innerHTML = `<p style="font-size: 12px; color: #9ca3af; text-align: center;">Cargando guerreros...</p>`; 
+  try { 
+    const q = query(collection(db, "leaderboard"), orderBy("multiplicador", "desc"), limit(20)); 
+    const snapshot = await getDocs(q); 
+    if(snapshot.empty) { 
+      container.innerHTML = `<p style="font-size: 12px; color: #9ca3af; text-align: center;">El dojo está vacío.</p>`; 
+      return; 
+    } 
+    let html = "", pos = 1; 
+    snapshot.forEach(docSnap => { 
+      const d = docSnap.data(); 
+      const topClass = pos===1?"top-1":pos===2?"top-2":pos===3?"top-3":""; 
+      const medal = pos===1?"🥇":pos===2?"🥈":pos===3?"🥉":`#${pos}`; 
+      html += `<div class="leaderboard-item ${topClass}"><div class="lb-rank-num">${medal}</div><div class="lb-user-info"><img class="lb-avatar" src="${generarAvatarPorRango(d.nombre, d.rango)}"><div><span class="lb-name">${d.nombre}</span><span class="lb-badge" style="color: ${d.colorRango};">${d.rango}</span></div></div><div class="lb-score"><span class="lb-multiplier">${d.multiplicador}x</span><span class="lb-kg">${d.totalKg} kg</span></div></div>`; 
+      pos++; 
+    }); 
+    container.innerHTML = html; 
+  } catch(e) { 
+    container.innerHTML = `<p style="font-size: 12px; color: #ff3366; text-align: center;">Error al cargar.</p>`; 
+  } 
+}
+document.getElementById('btn-refresh-leaderboard')?.addEventListener('click', cargarLeaderboard);
+
+// --- MÓDULO SOCIAL: AGREGAR Y CONSULTAR AMIGOS ---
+function inyectarModuloSocial() {
+  const tabProfile = document.getElementById('page-profile');
+  if(!tabProfile || document.getElementById('social-friends-card')) return;
+
+  const socialCard = document.createElement('div');
+  socialCard.id = 'social-friends-card';
+  socialCard.innerHTML = `
+    <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+      <h4 style="font-size: 12px; color: #00e5ff; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 12px;">👥 Cofradía de Amigos (Social)</h4>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="input-search-friend" class="iron-input-modern" placeholder="Apodo exacto del amigo..." style="font-size:12px; padding:8px 12px;">
+        <button id="btn-search-friend" class="iron-btn-primary" style="width:auto; margin-top:0; padding:8px 15px; font-size:12px;">Buscar</button>
+      </div>
+      <div id="friend-search-result" style="margin-top:12px;"></div>
+    </div>
+  `;
+  tabProfile.appendChild(socialCard);
+
+  document.getElementById('btn-search-friend')?.addEventListener('click', async () => {
+    const val = document.getElementById('input-search-friend').value.trim().toLowerCase();
+    const resBox = document.getElementById('friend-search-result');
+    if(!val) return;
+    resBox.innerHTML = '<p style="font-size:11px; color:#9ca3af;">Rastreando guerrero...</p>';
+
+    try {
+      const q = query(collection(db, "users"), where("nickname_lower", "==", val));
+      const snap = await getDocs(q);
+      if(snap.empty) {
+        resBox.innerHTML = '<p style="font-size:11px; color:#ff3366;">❌ No se encontró ningún guerrero con ese apodo.</p>';
+        return;
+      }
+      const friendData = snap.docs[0].data();
+      resBox.innerHTML = `
+        <div style="background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.2); padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <b style="color:#fff; font-size:14px;">${friendData.nickname}</b><br>
+            <span style="font-size:10px; color:#ffaa00; font-weight:800;">Rango: ${friendData.currentRankName || 'Ashigaru'}</span>
+          </div>
+          <button class="iron-btn-warning" style="width:auto; padding:6px 12px; font-size:11px;" onclick="showToast('🤝 Solicitud enviada a ${friendData.nickname}')">+ Conectar</button>
+        </div>
+      `;
+    } catch(err) {
+      resBox.innerHTML = '<p style="font-size:11px; color:#ff3366;">Error de conexión.</p>';
+    }
   });
 }
 
@@ -404,17 +545,16 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async f
   document.getElementById('btn-start-workout').style.display = 'block'; document.getElementById('btn-finish-workout').style.display = 'none'; currentWorkoutRoutine = []; this.disabled = false; 
 });
 
-// --- NUEVO: BUSCADOR INTELIGENTE PARA SERIES MANUALES ---
+// --- BUSCADOR INTELIGENTE PARA SERIES MANUALES ---
 window.abrirBuscadorManual = function() {
   const container = document.getElementById('sheet-workout');
   if(!container) return;
   
-  // Sobrescribimos el contenido del modal manual para que tenga el buscador y lógica de serie única
   container.innerHTML = `
     <div style="padding: 20px;">
       <h3 style="color:#00e5ff; font-weight:900; text-transform:uppercase; margin-bottom:15px; text-align:center;">Agregar Ejercicio Manual</h3>
       <div style="position:relative;">
-        <input type="text" id="search-manual-ex" class="iron-input-modern" placeholder="🔍 Buscar por nombre o músculo (Ej: Press, Pecho)..." autocomplete="off">
+        <input type="text" id="search-manual-ex" class="iron-input-modern" placeholder="🔍 Buscar por nombre o músculo..." autocomplete="off">
         <div id="search-manual-results" class="search-results-box"></div>
       </div>
       
@@ -426,7 +566,7 @@ window.abrirBuscadorManual = function() {
             <div style="flex:1;"><label style="font-size:10px; color:#9ca3af; font-weight:bold;">PESO (KG)</label><input type="number" id="manual-peso" class="iron-input-modern"></div>
             <div style="flex:1;"><label style="font-size:10px; color:#9ca3af; font-weight:bold;">DESC (S)</label><input type="number" id="manual-descanso" class="iron-input-modern" value="90"></div>
           </div>
-          <button class="iron-btn-primary" id="btn-add-manual-set">✅ Registrar y Continuar</button>
+          <button class="iron-btn-primary" id="btn-add-manual-set">✅ Registrar Serie</button>
           
           <ul id="manual-sets-list" style="list-style:none; padding:0; margin:15px 0 0 0;"></ul>
           
@@ -435,25 +575,24 @@ window.abrirBuscadorManual = function() {
             <button class="iron-btn-danger" onclick="document.getElementById('manual-timer').style.display='none'; clearInterval(window.manualInterval);">⏹️ Terminar</button>
           </div>
           
-          <button class="iron-btn-warning" id="btn-save-manual-workout" style="margin-top:20px; display:none;">💾 GUARDAR EJERCICIO FINALIZADO</button>
+          <button class="iron-btn-warning" id="btn-save-manual-workout" style="margin-top:20px; display:none;">💾 GUARDAR EN BITÁCORA</button>
         </div>
       </div>
     </div>
   `;
   window.openSheet('sheet-workout');
   
-  // Lógica del buscador
   const searchInput = document.getElementById('search-manual-ex');
   const resultsBox = document.getElementById('search-manual-results');
   let selectedExercise = null;
   let manualSets = [];
 
   searchInput.addEventListener('input', function() {
-    const query = this.value.toLowerCase();
+    const queryVal = this.value.toLowerCase();
     resultsBox.innerHTML = '';
-    if(query.length < 2) { resultsBox.style.display = 'none'; return; }
+    if(queryVal.length < 2) { resultsBox.style.display = 'none'; return; }
     
-    const matches = exercisesDB.filter(ex => ex.nombre.toLowerCase().includes(query) || (ex.musculoPrincipal && ex.musculoPrincipal.toLowerCase().includes(query)));
+    const matches = exercisesDB.filter(ex => ex.nombre.toLowerCase().includes(queryVal) || (ex.musculoPrincipal && ex.musculoPrincipal.toLowerCase().includes(queryVal)));
     if(matches.length > 0) {
       resultsBox.style.display = 'block';
       matches.slice(0, 10).forEach(match => {
@@ -479,7 +618,6 @@ window.abrirBuscadorManual = function() {
     document.getElementById('manual-sets-list').innerHTML += `<li style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; color:#fff;">Serie ${manualSets.length}: <span style="color:#00e5ff; font-weight:900;">${r} reps x ${p} kg</span></li>`;
     document.getElementById('manual-rep').value = ''; document.getElementById('btn-save-manual-workout').style.display = 'block';
     
-    // Timer
     const d = parseInt(document.getElementById('manual-descanso').value) || 90;
     document.getElementById('manual-timer').style.display = 'block';
     let timeLeft = d; document.getElementById('manual-time-left').innerText = timeLeft;
@@ -501,32 +639,26 @@ window.abrirBuscadorManual = function() {
     totalQuemadas += cals; await guardarEstadoNube(); actualizarDashboard();
     
     if(window.manualInterval) clearInterval(window.manualInterval);
-    window.closeSheet(); showToast(`✅ Ejercicio Manual Guardado. 🔥 ~${cals} kcal.`);
+    window.closeSheet(); showToast(`✅ Ejercicio Guardado. 🔥 ~${cals} kcal.`);
     this.disabled = false;
   });
 };
 
-// Reemplazamos el listener del botón original para que abra la nueva UI inteligente
 document.getElementById('btn-registrar-serie')?.addEventListener('click', window.abrirBuscadorManual);
 
-
-// --- DASHBOARD EMBELLECIDO (PANEL ESTADÍSTICO GRID) ---
+// --- DASHBOARD GRID ---
 function actualizarDashboard() { 
   const dashboardContainer = document.getElementById('dashboard-tab');
   if(!dashboardContainer) return;
 
-  // Si no hemos inyectado el grid, lo hacemos. (Evitamos la estructura plana anterior)
   let gridBox = document.getElementById('iron-stats-grid');
   if(!gridBox) {
-    // Ocultar elementos viejos si existen para evitar duplicados
     const oldTotals = document.querySelectorAll('.cal-card, .macro-card-container');
     oldTotals.forEach(el => el.style.display = 'none');
 
     gridBox = document.createElement('div');
     gridBox.id = 'iron-stats-grid';
     gridBox.className = 'stats-grid';
-    
-    // Insertamos el nuevo grid debajo del saludo
     dashboardContainer.insertBefore(gridBox, document.getElementById('lista-comidas')?.parentElement || dashboardContainer.children[1]);
   }
 
@@ -606,6 +738,7 @@ async function cargarHistorialYCheckins(uid) {
     }
     histContainer.innerHTML = html2 || '<p style="text-align:center; font-size:12px; color:#9ca3af;">Aún no hay historial de jornadas registradas.</p>';
   }
+  inyectarModuloSocial();
 }
 
 function renderizarComidaEnUI(nombre, cal, prot, carb, gras, docId = null) { const l = document.getElementById('lista-comidas'); if(!l) return; const li = document.createElement('li'); if(docId) li.setAttribute('data-id', docId); li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre}</span><button class="btn-delete-item" onclick="window.eliminarComidaNube('${docId}', ${cal}, ${prot}, ${carb}, ${gras}, this)">🗑️</button><br><span style="color: #9ca3af; font-size: 11px; margin-top:5px; display:block;">🔥 ${cal} kcal &nbsp;|&nbsp; <span style="color:#ff3366;">P: ${prot}g</span> &nbsp;|&nbsp; <span style="color:#00e5ff;">C: ${carb}g</span> &nbsp;|&nbsp; <span style="color:#ffaa00;">G: ${gras}g</span></span>`; l.appendChild(li); }
@@ -638,9 +771,23 @@ window.closeSheet = function() { if(activeSheet) { activeSheet.style.bottom = '-
 document.querySelectorAll('.custom-select').forEach(sel => { sel.addEventListener('click', () => { window.activeSelect = sel; window.openSheet(sel.id.replace('select-', 'sheet-')); }); });
 document.querySelectorAll('.sheet-option').forEach(opt => { opt.addEventListener('click', function() { if(this.parentElement.id !== 'sheet-actividad') { this.parentElement.querySelectorAll('.sheet-option').forEach(o => o.classList.remove('active')); this.classList.add('active'); if(window.activeSelect) { window.activeSelect.innerText = this.innerText; window.activeSelect.setAttribute('data-val', this.getAttribute('data-val')); } window.closeSheet(); } else { window.closeSheet(); } }); });
 if(overlay) overlay.addEventListener('click', window.closeSheet);
+
 const navItems = document.querySelectorAll('.nav-item'); const pages = document.querySelectorAll('.page');
 navItems.forEach(btn => { btn.addEventListener('click', () => { navItems.forEach(nav => nav.classList.remove('active')); pages.forEach(page => page.classList.remove('active')); btn.classList.add('active'); const tgt = document.getElementById(btn.getAttribute('data-target')); if(tgt) tgt.classList.add('active'); }); });
-function setupTabs(btnClass, subTabClass) { const btns = document.querySelectorAll(`.${btnClass}`); const tabs = document.querySelectorAll(`.${subTabClass}`); btns.forEach(btn => { btn.addEventListener('click', () => { btns.forEach(t => t.classList.remove('active')); tabs.forEach(s => s.style.display = 'none'); btn.classList.add('active'); const targetTab = btn.getAttribute('data-tab'); const elem = document.getElementById(targetTab); if(elem) elem.style.display = 'block'; if(targetTab === 'tab-leaderboard') cargarLeaderboard(); }); }); } setupTabs('tab-btn-diet', 'sub-tab-diet'); setupTabs('tab-btn-train', 'sub-tab-train');
+
+function setupTabs(btnClass, subTabClass) { 
+  const btns = document.querySelectorAll(`.${btnClass}`); const tabs = document.querySelectorAll(`.${subTabClass}`); 
+  btns.forEach(btn => { 
+    btn.addEventListener('click', () => { 
+      btns.forEach(t => t.classList.remove('active')); tabs.forEach(s => s.style.display = 'none'); 
+      btn.classList.add('active'); 
+      const targetTab = btn.getAttribute('data-tab'); const elem = document.getElementById(targetTab); 
+      if(elem) elem.style.display = 'block'; 
+      if(targetTab === 'tab-leaderboard') cargarLeaderboard(); 
+    }); 
+  }); 
+} 
+setupTabs('tab-btn-diet', 'sub-tab-diet'); setupTabs('tab-btn-train', 'sub-tab-train');
 
 document.getElementById('btn-checkin')?.addEventListener('click', () => window.openSheet('sheet-checkin'));
 document.getElementById('btn-confirm-checkin')?.addEventListener('click', async function() { 
