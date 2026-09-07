@@ -34,10 +34,8 @@ const ironCoreTips = [
   "💤 El descanso es vital: duerme 8 horas para reparar tu Sistema Nervioso Central.",
   "🔥 En déficit agresivo, prioriza alimentos voluminosos como verduras para engañar la saciedad."
 ];
-window.addEventListener('DOMContentLoaded', () => { 
-  const dt = document.getElementById('daily-tip');
-  if(dt) dt.innerText = ironCoreTips[Math.floor(Math.random() * ironCoreTips.length)]; 
-});
+const dt = document.getElementById('daily-tip');
+if(dt) dt.innerText = ironCoreTips[Math.floor(Math.random() * ironCoreTips.length)]; 
 
 // --- AUTENTICACIÓN GOOGLE ---
 const authScreen = document.getElementById('auth-screen');
@@ -121,7 +119,6 @@ window.seleccionarMetaOb = function(elem) {
   userProfile.metaObj = parseInt(elem.getAttribute('data-val')); 
 };
 
-// Cierre Seguro del Onboarding (Corrección de Bug)
 window.finalizarOnboarding = async function() {
   const nickInput = document.getElementById('ob-nickname');
   const edadInput = document.getElementById('ob-edad');
@@ -254,7 +251,8 @@ async function inicializarBases() {
     showToast("⚠️ Error al cargar el catálogo de ejercicios en español.");
   }
 }
-window.addEventListener('DOMContentLoaded', inicializarBases);
+// Ejecución Inmediata
+inicializarBases();
 
 // --- ORÁCULO DE NUTRICIÓN ---
 let weeklyPlan = []; let selectedDayIndex = 0; let activeAllergies = [];
