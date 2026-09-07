@@ -29,12 +29,12 @@ let userProfile = {
 function getTodayKey() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 function showToast(msg) { const toast = document.getElementById('toast-notif'); if(!toast) return; toast.innerHTML = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3500); }
 
-// --- TIPS DEL COACH (REEMPLAZA "CARGANDO...") ---
+// --- TIPS DEL COACH ---
 const ironCoreTips = [
   "⚡ La creatina (5g) funciona por acumulación. Tómala a cualquier hora, idealmente con carbohidratos.",
   "🥩 Hipertrofia: Consume entre 1.8g y 2.2g de proteína por cada kilo de tu peso corporal.",
   "💧 La hidratación lubrica tus articulaciones. Intenta tomar 1 litro por cada 25kg de peso.",
-  "💤 Tanto en el hierro como compitiendo en nivel Contender con NiceTry Alpha, el descanso es vital: duerme 8 horas para reparar tu SNC.",
+  "💤 El descanso es vital: duerme 8 horas para reparar tu Sistema Nervioso Central tras entrenar pesado.",
   "🔥 Si estás en déficit agresivo, prioriza alimentos voluminosos como verduras verdes para engañar la saciedad."
 ];
 function cargarTipDiario() {
@@ -73,14 +73,12 @@ onAuthStateChanged(auth, async (user) => {
 
 // --- GENERADOR DE AVATARES DINÁMICOS "IRON SHOGUN" ---
 function generarAvatarPorRango(nickname, rango) {
-  // Utilizamos la API de DiceBear para crear un avatar Cyberpunk/Bot basado en el rango
   let seed = `${nickname}-${rango}`;
   let bg = "1a2130"; 
   if(rango === "Rōnin") bg = "ffaa00";
   if(rango === "Samurái") bg = "ff3366";
   if(rango === "Daimyō") bg = "9933ff";
   if(rango === "IRON SHŌGUN") bg = "00e5ff";
-  
   return `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}&backgroundColor=${bg}`;
 }
 
@@ -167,7 +165,6 @@ let dynamicDays = [];
 
 async function inicializarOraculo() {
   try {
-    // Parche para móviles: Agregamos timestamp para romper la memoria caché del celular
     const noCacheUrl = 'alimentos.json?v=' + new Date().getTime();
     const respuesta = await fetch(noCacheUrl);
     if (!respuesta.ok) throw new Error('No se pudo cargar la base de datos nutricional.');
@@ -205,7 +202,7 @@ function renderAllergyChips() {
 window.removeAllergy = function(index) { activeAllergies.splice(index, 1); renderAllergyChips(); };
 
 function actualizarLabelMetaIA() {
-  let label = "Mantenimiento"; if(userProfile.metaObj < 0) label = "Déficit Agresivo (Prioridad: Volumen/Saciedad)"; if(userProfile.metaObj > 0) label = "Volumen (Prioridad: Densidad)";
+  let label = "Mantenimiento"; if(userProfile.metaObj < 0) label = "Déficit Agresivo (Prioridad: Volumen)"; if(userProfile.metaObj > 0) label = "Volumen (Prioridad: Densidad)";
   const metaLabel = document.getElementById('oracle-target-goal'); if(metaLabel) metaLabel.innerText = label;
   const calsLabel = document.getElementById('oracle-target-cals'); if(calsLabel) calsLabel.innerText = metaCalorias;
 }
@@ -277,7 +274,6 @@ function calcularMacrosPorcion(comidaBase, targetCals) {
     qtyCalculada = ing.unidad === 'unidades' || ing.unidad === 'scoops' || ing.unidad === 'rebanadas' || ing.unidad === 'porción' ? parseFloat(qtyCalculada.toFixed(1)) : Math.round(qtyCalculada);
     return { nombre: ing.nombre, cantidad: qtyCalculada, unidad: ing.unidad };
   });
-
   return { id: comidaBase.id, tipo: comidaBase.tipo, name: comidaBase.name, cals: Math.round(comidaBase.calBase * factor), prot: Math.round(comidaBase.prot * factor), carb: Math.round(comidaBase.carb * factor), gras: Math.round(comidaBase.gras * factor), ingredientes: ingredientesAdaptados };
 }
 
@@ -312,27 +308,23 @@ function renderizarDiaSeleccionado() {
   });
 }
 
-// --- MENÚ DE REEMPLAZO INTERACTIVO ---
+// --- MENÚ DE REEMPLAZO INTERACTIVO (SIN LÍMITE) ---
 let swapTargetIndex = -1;
 window.abrirMenuReemplazo = function(mealIndex) {
   swapTargetIndex = mealIndex;
   const oldMeal = weeklyPlan[selectedDayIndex][mealIndex];
   const targetCals = oldMeal.cals;
   
-  // Buscar opciones de la misma categoría que cumplan los filtros
   let candidatos = filtrarBaseDatos(oldMeal.tipo, [oldMeal.id]);
-  
   const listContainer = document.getElementById('sheet-swap-list');
   listContainer.innerHTML = '';
   
   if(candidatos.length === 0) {
     listContainer.innerHTML = `<p style="font-size:12px; color:#ff3366;">No hay más opciones para tus filtros actuales.</p>`;
   } else {
-    // Mostramos un máximo de 5 opciones para no saturar la pantalla del celular
-    const maxOpciones = Math.min(5, candidatos.length);
-    for(let i=0; i<maxOpciones; i++) {
+    // ELIMINADO EL LÍMITE DE 5. Ahora muestra todas las opciones posibles.
+    for(let i=0; i<candidatos.length; i++) {
       let opcionEscalada = calcularMacrosPorcion(candidatos[i], targetCals);
-      // Guardar el objeto en JSON para pasarlo a la función
       let objData = encodeURIComponent(JSON.stringify(opcionEscalada));
       
       listContainer.innerHTML += `
@@ -343,7 +335,6 @@ window.abrirMenuReemplazo = function(mealIndex) {
       `;
     }
   }
-  
   window.openSheet('sheet-swap-meal');
 };
 
@@ -369,7 +360,40 @@ window.generarListaCompras = function() {
   window.openSheet('sheet-compras');
 };
 
-// --- BASE DE DATOS GLOBAL (OPEN FOOD FACTS API) ---
+// --- NUEVA FUNCIÓN: REGISTRAR COMIDA PLANEADA HOY ---
+document.getElementById('btn-add-planned')?.addEventListener('click', () => {
+  if(!weeklyPlan || weeklyPlan.length === 0) {
+    showToast('⚠️ Primero debes generar un Plan Semanal en el Oráculo.');
+    return;
+  }
+  const listContainer = document.getElementById('sheet-planned-list');
+  listContainer.innerHTML = '';
+  
+  // El índice 0 siempre corresponde a "Hoy" según la generación del algoritmo
+  const todaysPlan = weeklyPlan[0]; 
+  
+  todaysPlan.forEach(meal => {
+    let objData = encodeURIComponent(JSON.stringify(meal));
+    listContainer.innerHTML += `
+      <div class="swap-option-card" onclick="window.registrarComidaPlaneada('${objData}')">
+        <span style="font-size:10px; color:var(--primary); font-weight:800; text-transform:uppercase;">${meal.tipo}</span>
+        <b style="margin-top:2px;">${meal.name}</b>
+        <span>🔥 ${meal.cals} kcal | P: ${meal.prot}g | C: ${meal.carb}g | G: ${meal.gras}g</span>
+      </div>
+    `;
+  });
+  window.openSheet('sheet-planned-meals');
+});
+
+window.registrarComidaPlaneada = async function(encodedData) {
+  const meal = JSON.parse(decodeURIComponent(encodedData));
+  let nombreFinal = `[${meal.tipo.charAt(0).toUpperCase() + meal.tipo.slice(1)}] ${meal.name}`;
+  await registrarComidaNube(meal.cals, meal.prot, meal.carb, meal.gras, nombreFinal);
+  window.closeSheet();
+  showToast(`✅ Registrado al instante.`);
+};
+
+// --- BASE DE DATOS GLOBAL (OPEN FOOD FACTS API CON PROXY) ---
 let currentSearchFoodBase = null;
 
 const fallbackDB = [
