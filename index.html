@@ -14,7 +14,6 @@
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
-  <!-- PANTALLA DE LOGIN -->
   <div id="auth-screen" class="auth-screen">
     <div class="card card-main" style="max-width: 320px; width: 100%; text-align: center;">
       <img src="logo.png" alt="IronCore Nutrition" class="logo-img" style="max-width: 180px; margin: 0 auto 15px;">
@@ -26,7 +25,6 @@
     </div>
   </div>
 
-  <!-- PANTALLA DE ONBOARDING -->
   <div id="onboarding-screen" class="onboarding-overlay" style="display: none;">
     <div class="ob-card">
       <div class="ob-header">
@@ -80,7 +78,6 @@
   <div class="sakura-container" id="sakura-bg"></div>
   <div id="toast-notif" class="toast">Notificación</div>
 
-  <!-- HEADER -->
   <header>
     <img src="logo.png" alt="IronCore Nutrition" class="logo-img-header">
     <p>⚡ IRONCORE // PRE-ALFA TESTNET</p>
@@ -94,16 +91,13 @@
   </header>
 
   <main>
-    <!-- 📊 DASHBOARD -->
     <section id="page-dashboard" class="page active">
       <div class="coach-tip"><span class="tip-icon">💡</span><p id="daily-tip">Iniciando base de conocimientos...</p></div>
       <div id="iron-dash-ui-advanced"></div>
-      
       <div class="log" style="margin-top: 25px;"><h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;">Consumo de Hoy</h3><ul id="lista-comidas"></ul></div>
       <div class="log" style="margin-top: 25px;"><h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;">Entrenamiento de Hoy</h3><ul id="lista-entrenos"></ul></div>
     </section>
 
-    <!-- 🍎 DIETA & ORÁCULO CLÍNICO -->
     <section id="page-diet" class="page">
       <h2 class="page-title">Nutrición Inteligente</h2>
       <div class="tab-container">
@@ -115,7 +109,7 @@
         <div class="actions">
           <button id="btn-add-planned" class="btn btn-primary" style="background: linear-gradient(90deg, #ffaa00 0%, #ff5500 100%); color:#000;">📅 Comer lo Planeado Hoy</button>
           <div style="display:flex; gap:10px;">
-            <button id="btn-abrir-manual" class="btn btn-secondary" style="flex:1; padding: 12px; font-size: 11px;">🔍 Buscar Manual</button>
+            <button id="btn-abrir-manual" class="btn btn-secondary" style="flex:1; padding: 12px; font-size: 11px;" onclick="window.abrirBuscadorComida()">🔍 Buscar Manual</button>
             <button id="btn-foto" class="btn btn-secondary" style="flex:1; padding: 12px; font-size: 11px;">📸 Escáner</button>
           </div>
         </div>
@@ -124,7 +118,7 @@
       <div id="tab-plan" class="sub-tab-diet" style="display: none;">
         <div class="card" style="text-align: left;" id="oracle-form-card">
           <h3 style="color: #00e5ff; margin-top:0;">Motor Clínico Avanzado</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">Estructura tus 7 días ajustados a <b id="oracle-target-cals" style="color:#fff;">0</b> kcal/día.</p>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">Estructura tus 7 días ajustados a tus macros.</p>
           <label>Preferencia Dietética:</label>
           <select id="oracle-diet-type" class="neon-input">
             <option value="normal">Normal (Omnívoro)</option>
@@ -190,7 +184,8 @@
             <label style="color:#00e5ff;"><input type="checkbox" id="check-cooldown" checked> ❄️ Enfriar</label>
           </div>
           <button id="btn-generar-rutina" class="btn btn-primary" style="width: 100%; margin-top: 25px;">Generar Rutina ⚔️</button>
-          <button id="btn-registrar-serie" class="btn btn-secondary" style="width: 100%; margin-top: 15px; font-size:11px;">+ Agregar Serie Manual</button>
+          
+          <button id="btn-registrar-serie" class="btn btn-secondary" style="width: 100%; margin-top: 15px; font-size:11px;" onclick="window.abrirBuscadorManual()">+ Agregar Serie Manual</button>
           <button id="btn-registrar-cardio" class="btn btn-secondary" style="width: 100%; margin-top: 10px; font-size:11px; border-color:#00e5ff; color:#00e5ff; box-shadow:0 0 10px rgba(0,229,255,0.2);" onclick="window.abrirBuscadorCardio()">🏃‍♂️ Agregar Sesión de Cardio</button>
         </div>
 
@@ -327,45 +322,7 @@
   </div>
 
   <div id="sheet-add-food" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
-    <h3>Base Global</h3>
-    <label style="margin-top:0;">Tiempo de Comida:</label>
-    <select id="food-meal-time" class="neon-input" style="margin-top:5px;">
-      <option value="Desayuno">☀️ Desayuno</option>
-      <option value="Almuerzo" selected>🍽️ Almuerzo</option>
-      <option value="Cena">🌙 Cena</option>
-    </select>
-    <div style="display:flex; gap:10px;">
-      <input type="text" id="food-search" class="neon-input" placeholder="🔍 Buscar producto...">
-      <button id="btn-trigger-search" class="btn btn-primary" style="margin-top:5px; padding: 0 20px;">Ir</button>
-    </div>
-    <button class="btn btn-secondary" style="width:100%; margin-top:10px; font-size:11px; color:#ffaa00; border-color:#ffaa00;" onclick="window.prepararAlimentoManual()">✏️ Crear Alimento Personalizado</button>
-    
-    <div id="food-loading" style="display:none; text-align:center; font-size:12px; color:var(--primary); margin-top:15px;">Buscando... ⏳</div>
-    <div id="food-results-list" style="margin-top: 15px; max-height: 200px; overflow-y: auto; text-align: left;"></div>
-    
-    <div id="food-custom-section" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; display:none;">
-      <h4 style="color: var(--primary); margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase;">Ajustar Porción o Crear</h4>
-      <div id="food-selected-name-container"><p id="food-selected-name" style="font-size:12px; font-weight:800; color:#fff; margin-bottom:10px;">--</p></div>
-      <label style="margin-top:0;">Cantidad consumida:</label>
-      <div style="display: flex; gap: 10px; margin-top: 5px;">
-        <input type="number" id="edit-qty" class="neon-input" value="100" style="flex: 1; margin-top: 0;">
-        <select id="edit-unit" class="neon-input" style="flex: 1; margin-top: 0; padding: 12px;">
-          <option value="1" selected>Gramos / ml</option>
-          <option value="15">Cucharada (15g)</option>
-          <option value="5">Cucharadita (5g)</option>
-          <option value="240">Taza (240ml)</option>
-          <option value="30">Scoop (30g)</option>
-          <option value="100">Unidad (Generico)</option>
-        </select>
-      </div>
-      <div class="macros-grid" style="margin-top: 15px;">
-        <div><label style="font-size:9px;">Kcal</label><input type="number" id="edit-cal" class="neon-input" readonly></div>
-        <div><label style="font-size:9px;">Prot (g)</label><input type="number" id="edit-prot" class="neon-input" readonly></div>
-        <div><label style="font-size:9px;">Carb (g)</label><input type="number" id="edit-carb" class="neon-input" readonly></div>
-        <div><label style="font-size:9px;">Gras (g)</label><input type="number" id="edit-gras" class="neon-input" readonly></div>
-      </div>
-      <button id="btn-confirm-food-final" class="btn btn-primary" style="width: 100%; margin-top: 18px;">Confirmar y Registrar</button>
-    </div>
+    <div id="sheet-add-food-dynamic"></div>
   </div>
 
   <div id="sheet-checkin" class="bottom-sheet">
