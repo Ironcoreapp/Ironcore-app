@@ -8,10 +8,10 @@
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- LIBRERÍA DEL LECTOR DE CÓDIGOS DE BARRA -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
+  <!-- PANTALLA DE LOGIN -->
   <div id="auth-screen" class="auth-screen">
     <div class="card card-main" style="max-width: 320px; width: 100%;">
       <img src="logo.png" alt="IronCore Nutrition" class="logo-img" style="max-width: 150px; margin: 0 auto 15px;">
@@ -23,6 +23,7 @@
     </div>
   </div>
 
+  <!-- PANTALLA DE ONBOARDING -->
   <div id="onboarding-screen" class="onboarding-overlay" style="display: none;">
     <div class="ob-card">
       <div class="ob-header">
@@ -90,6 +91,7 @@
   </header>
 
   <main>
+    <!-- 📊 DASHBOARD -->
     <section id="page-dashboard" class="page active">
       <div class="coach-tip"><span class="tip-icon">💡</span><p id="daily-tip">Iniciando base de conocimientos...</p></div>
       <button id="btn-checkin" class="btn btn-accent" style="width: 100%; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 10px;"><span>📝</span> Registrar Check-in Diario</button>
@@ -117,6 +119,7 @@
       </div>
     </section>
 
+    <!-- 🍎 DIETA & ORÁCULO CLÍNICO -->
     <section id="page-diet" class="page">
       <h2 class="page-title">Nutrición Inteligente</h2>
       <div class="tab-container">
@@ -126,9 +129,7 @@
 
       <div id="tab-registro" class="sub-tab-diet active">
         <div class="actions">
-          <!-- NUEVO BOTÓN: Registrar Comida Planeada -->
           <button id="btn-add-planned" class="btn btn-primary" style="background: linear-gradient(90deg, #ffaa00 0%, #ff5500 100%); color:#000;">📅 Comer lo Planeado Hoy</button>
-          
           <div style="display:flex; gap:10px;">
             <button id="btn-abrir-manual" class="btn btn-secondary" style="flex:1; padding: 12px; font-size: 11px;">🔍 Buscar Manual</button>
             <button id="btn-foto" class="btn btn-secondary" style="flex:1; padding: 12px; font-size: 11px;">📸 Escáner</button>
@@ -140,8 +141,7 @@
       <div id="tab-plan" class="sub-tab-diet" style="display: none;">
         <div class="card" style="text-align: left; background: linear-gradient(145deg, #141a26 0%, #0b0f17 100%); border: 1px solid rgba(0,229,255,0.2);" id="oracle-form-card">
           <h3 style="color: #00e5ff; margin-top:0;">Motor Clínico Avanzado</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">Estructura tus 7 días ajustados a <b id="oracle-target-cals" style="color:#fff;">0</b> kcal/día. Meta: <span id="oracle-target-goal" style="color:var(--primary); font-weight:800;">Mantenimiento</span>.</p>
-          
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">Estructura tus 7 días ajustados a <b id="oracle-target-cals" style="color:#fff;">0</b> kcal/día.</p>
           <label>Preferencia Dietética:</label>
           <select id="oracle-diet-type" class="neon-input" style="margin-top:5px; background: #0b0f17;">
             <option value="normal">Normal (Omnívoro)</option>
@@ -150,20 +150,17 @@
             <option value="vegano">Vegana (Plant-based)</option>
             <option value="vegetariano">Vegetariana (Huevos/Lácteos)</option>
           </select>
-
           <label style="margin-top:15px;">Restricciones Médicas Estrictas:</label>
           <div class="clinical-filters">
             <label><input type="checkbox" id="oracle-celiac"> Sin Gluten (Celíaco)</label>
             <label><input type="checkbox" id="oracle-lactose"> Sin Lactosa</label>
             <label><input type="checkbox" id="oracle-sibo"> Apto SIBO (Bajo FODMAPs)</label>
           </div>
-
           <label style="margin-top:15px;">Otras Alergias (Opcional):</label>
           <div style="position: relative;">
             <input type="text" id="oracle-allergies-input" class="neon-input" placeholder="Ej: maní (Presiona Enter)" style="margin-top:5px; background: #0b0f17;">
           </div>
           <div id="allergy-tags-container" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;"></div>
-          
           <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 25px; box-shadow: 0 10px 20px rgba(0,229,255,0.3); font-size: 14px;">Generar Plan Semanal 🔮</button>
         </div>
         
@@ -175,39 +172,63 @@
             </div>
             <button class="btn-clear-history" onclick="document.getElementById('plan-resultado').style.display='none'; document.getElementById('oracle-form-card').style.display='block';">Volver</button>
           </div>
-          
           <div class="day-scroll-container" id="day-selector-container"></div>
           <div id="comidas-plan" style="margin-top:20px;"></div>
-          
           <button class="btn btn-primary" style="width:100%; margin-top:15px; background: linear-gradient(90deg, #00e5ff 0%, #0055ff 100%); color:#fff; box-shadow: 0 5px 15px rgba(0,229,255,0.3);" onclick="window.generarListaCompras()">🛒 Generar Lista de Compras Total</button>
         </div>
       </div>
     </section>
 
+    <!-- 💪 SISTEMA DE COMBATE (ENTRENAMIENTO) -->
     <section id="page-training" class="page">
       <h2 class="page-title">Sistema de Combate</h2>
       <div class="tab-container">
-        <button class="tab-btn-train active" data-tab="tab-rutina">Bitácora</button>
+        <button class="tab-btn-train active" data-tab="tab-rutina">Oráculo de Combate</button>
         <button class="tab-btn-train" data-tab="tab-rango">Tu Rango</button>
         <button class="tab-btn-train" data-tab="tab-leaderboard">🏆 Ranking</button>
       </div>
 
       <div id="tab-rutina" class="sub-tab-train active">
-        <div class="card" style="text-align: left;">
-          <h3 style="color: #00e5ff; margin-top:0;">Foco Semanal y Biblioteca</h3>
-          <div class="focus-grid" id="focus-selector">
-            <div class="focus-card active" data-focus="piernas">🦵 Piernas</div>
-            <div class="focus-card" data-focus="superior">🦍 Tren Superior</div>
-            <div class="focus-card" data-focus="calistenia">🤸 Calistenia/Core</div>
-            <div class="focus-card" data-focus="balance">⚖️ Balanceado</div>
+        
+        <!-- FORMULARIO GENERADOR DE RUTINAS -->
+        <div class="card" id="workout-generator-card" style="text-align: left; background: linear-gradient(145deg, #141a26 0%, #0b0f17 100%); border: 1px solid rgba(0,229,255,0.2);">
+          <h3 style="color: #00e5ff; margin-top:0;">Planificación Táctica</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">La IA adaptará los ejercicios según tu equipamiento.</p>
+          
+          <label>Equipamiento Disponible:</label>
+          <select id="train-equip" class="neon-input" style="margin-top:5px; background: #0b0f17;">
+            <option value="gimnasio">Gimnasio Completo</option>
+            <option value="mancuernas">Solo Mancuernas / Casero</option>
+            <option value="corporal">Peso Corporal (Calistenia)</option>
+          </select>
+
+          <label style="margin-top:15px;">Foco del Día:</label>
+          <select id="train-focus" class="neon-input" style="margin-top:5px; background: #0b0f17;">
+            <option value="fullbody">Cuerpo Completo (FullBody)</option>
+            <option value="superior">Tren Superior (Pecho/Espalda/Brazos)</option>
+            <option value="piernas">Tren Inferior (Piernas/Glúteo)</option>
+          </select>
+          
+          <button id="btn-generar-rutina" class="btn btn-primary" style="width: 100%; margin-top: 25px; box-shadow: 0 10px 20px rgba(0,229,255,0.3); font-size: 14px;">Generar Rutina ⚔️</button>
+          
+          <!-- HISTORIAL DE HOY (Accesible desde aquí si no generas plan) -->
+          <div class="log" style="margin-top: 25px;"><h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;">Bitácora de Hoy</h3><ul id="lista-entrenos"></ul></div>
+          <button id="btn-registrar-serie" class="btn btn-secondary" style="width: 100%; margin-top: 15px; font-size:11px;">+ Agregar Serie Manual</button>
+        </div>
+
+        <!-- MODO ENTRENAMIENTO EN VIVO -->
+        <div id="workout-live-container" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 15px;">
+            <h3 style="color: #fff; margin: 0; font-size: 16px;">Modo Foco Activado</h3>
+            <button id="btn-cancel-workout" class="btn-clear-history">Descartar</button>
           </div>
-          <div id="coach-recommendation" class="routine-suggestion"></div>
+          
+          <div id="rutina-generada-lista"></div>
+          
+          <button id="btn-start-workout" class="btn btn-primary" style="width:100%; margin-top:20px; font-size:16px;">🔥 COMENZAR ENTRENAMIENTO</button>
+          <button id="btn-finish-workout" class="btn btn-primary" style="width:100%; margin-top:20px; font-size:16px; background: linear-gradient(90deg, #ff3366 0%, #ff0044 100%); display:none; box-shadow: 0 5px 15px rgba(255,51,102,0.4);">Terminar y Guardar 💾</button>
         </div>
-        <div class="card" style="text-align: left;">
-          <h3 style="color: #00e5ff; margin-top:0;">Cuaderno de Bitácora</h3>
-          <button id="btn-registrar-serie" class="btn btn-primary" style="width: 100%; margin-bottom: 15px;">+ Registrar Ejercicio</button>
-          <div class="log"><h3 style="font-size: 12px; color: var(--text-muted);">Series de Hoy</h3><ul id="lista-entrenos"></ul></div>
-        </div>
+
       </div>
 
       <div id="tab-rango" class="sub-tab-train" style="display: none;">
@@ -240,6 +261,7 @@
       </div>
     </section>
 
+    <!-- 📜 HISTORIAL -->
     <section id="page-history" class="page">
       <h2 class="page-title">Bitácora & Check-ins</h2>
       <div class="card" style="text-align: left;">
@@ -255,6 +277,7 @@
       </div>
     </section>
 
+    <!-- ⚡ SHŌGUN AI -->
     <section id="page-ai" class="page">
       <h2 class="page-title">Santuario del Shōgun AI</h2>
       <div class="card ai-card-container">
@@ -275,6 +298,7 @@
       </div>
     </section>
 
+    <!-- ⚙️ PERFIL -->
     <section id="page-profile" class="page">
       <h2 class="page-title">Credencial de Guerrero</h2>
       <div class="card card-main" style="text-align: center; position: relative;">
@@ -305,7 +329,14 @@
     <button class="btn btn-secondary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cancelar</button>
   </div>
 
-  <!-- NUEVO MODAL: AÑADIR COMIDA PLANEADA -->
+  <!-- NUEVO MODAL: REEMPLAZO DE EJERCICIO -->
+  <div id="sheet-swap-exercise" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
+    <h3>🔄 Alternativas</h3>
+    <p style="font-size: 11px; color: var(--text-muted); text-align:center; margin-bottom:15px;">Opciones para el mismo grupo muscular y equipamiento.</p>
+    <div id="sheet-swap-ex-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    <button class="btn btn-secondary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cancelar</button>
+  </div>
+
   <div id="sheet-planned-meals" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
     <h3>📅 Plan de Hoy</h3>
     <p style="font-size: 11px; color: var(--text-muted); text-align:center; margin-bottom:15px;">Registra instantáneamente lo que el Oráculo diseñó para ti hoy.</p>
@@ -381,13 +412,13 @@
   </div>
 
   <div id="sheet-workout" class="bottom-sheet">
-    <h3>Bitácora de Ejercicio</h3>
+    <h3>Agregar Serie Manual</h3>
     <label style="margin-top:0;">Nombre del Ejercicio:</label>
-    <input type="text" id="work-name" class="neon-input" placeholder="Ej: Sentadilla Libre">
+    <input type="text" id="work-name" class="neon-input" placeholder="Ej: Curl de Bíceps">
     <label>Series x Repeticiones:</label>
     <input type="text" id="work-sets" class="neon-input" placeholder="Ej: 4 x 8-10">
     <label>Peso Utilizado (kg):</label>
-    <input type="number" id="work-weight" class="neon-input" placeholder="Ej: 120">
+    <input type="number" id="work-weight" class="neon-input" placeholder="Ej: 20">
     <label>Intensidad / RPE (Esfuerzo 1 al 10):</label>
     <input type="number" id="work-rpe" class="neon-input" placeholder="Ej: 8.5">
     <button id="btn-confirm-workout" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Guardar Serie</button>
