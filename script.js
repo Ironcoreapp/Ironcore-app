@@ -1,5 +1,5 @@
 // ============================================================================
-// --- MOTOR PRINCIPAL DE IRONCORE (PRE-ALFA TESTNET) ---
+// --- MOTOR PRINCIPAL DE IRONCORE (PRE-ALFA TESTNET - UNIFICADO Y DEPURADO) ---
 // ============================================================================
 const customCSS = `
   header, .top-header, #main-header {
@@ -58,9 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Navegación inferior sincronizada
-  const socialNavBtn = document.getElementById('nav-social-tab') || document.querySelector('[data-target="page-social"]');
-  const socialPage = document.getElementById('page-social');
-  
   document.querySelectorAll('.nav-item').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -69,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const tgt = document.getElementById(btn.getAttribute('data-target'));
       if(tgt) { tgt.classList.add('active'); tgt.style.display = 'block'; }
       if(btn.getAttribute('data-target') === 'page-social') {
-        cargarModuloSocialCompleto();
+        window.cargarModuloSocialCompleto();
       }
     });
   });
@@ -288,7 +285,7 @@ async function inicializarBases() {
 }
 inicializarBases();
 
-// --- ORÁCULO DE NUTRICIÓN (PLAN SEMANAL) ---
+// --- ORÁCULO DE NUTRICIÓN (PLAN SEMANAL Y COMPRAS) ---
 let weeklyPlan = []; let selectedDayIndex = 0; let activeAllergies = [];
 const allergyInput = document.getElementById('oracle-allergies-input'); const allergyContainer = document.getElementById('allergy-tags-container');
 if(allergyInput) { 
@@ -421,94 +418,207 @@ function renderizarDiaSeleccionado() {
   }); 
 }
 
-let profileChartInstance = null;
-function dibujarGraficoPerfil(historialPesos) {
-  const tabProfile = document.getElementById('page-profile');
-  if(!tabProfile) return;
-  let canvasWrapper = document.getElementById('wrapper-profile-chart');
-  if(!canvasWrapper) {
-    canvasWrapper = document.createElement('div');
-    canvasWrapper.id = 'wrapper-profile-chart';
-    canvasWrapper.innerHTML = `
-      <div style="background: #111827; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-        <h4 style="font-size: 12px; color: #9ca3af; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px;">📊 Evolución de Masa Corporal</h4>
-        <div style="height: 200px; width: 100%;"><canvas id="profile-chart-canvas"></canvas></div>
-      </div>
-    `;
-    tabProfile.appendChild(canvasWrapper);
+// --- RESTAURACIÓN DE FUNCIONES FALTANTES (COMPRAS, ESCÁNER, REEMPLAZO) ---
+window.generarListaCompras = function() {
+  const ul = document.getElementById('lista-compras-ui');
+  if(!ul) return;
+  let listaConsolidada = {};
+  weeklyPlan.forEach(dia => {
+    dia.forEach(comida => {
+      comida.ingredientes.forEach(ing => {
+        let key = `${ing.nombre} (${ing.unidad})`;
+        listaConsolidada[key] = (listaConsolidada[key] || 0) + ing.cantidad;
+      });
+    });
+  });
+  ul.innerHTML = '';
+  for (let key in listaConsolidada) {
+    let rawQty = listaConsolidada[key];
+    let qtyDisplay = key.includes('unidades') || key.includes('scoops') ? rawQty.toFixed(1) : Math.round(rawQty);
+    let match = key.match(/(.*) \((.*)\)/);
+    let nombreLimpio = match ? match[1] : key;
+    let unidadLimpia = match ? match[2] : '';
+    ul.innerHTML += `<li><input type="checkbox" style="accent-color:var(--primary); width:18px; height:18px;"> <span style="flex:1;">${nombreLimpio}</span> <b style="color:var(--primary); font-size:12px;">${qtyDisplay} ${unidadLimpia}</b></li>`;
   }
-  const ctx = document.getElementById('profile-chart-canvas');
-  if(!ctx) return;
-  if(profileChartInstance) profileChartInstance.destroy();
-  const labels = historialPesos.map(item => item.fecha.split('-').slice(1).join('/')); 
-  const data = historialPesos.map(item => item.peso);
-  profileChartInstance = new Chart(ctx.getContext('2d'), {
-    type: 'line',
-    data: {
-      labels: labels.reverse(),
-      datasets: [{ label: 'Peso (kg)', data: data.reverse(), borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointBackgroundColor: '#ffaa00', pointRadius: 4 }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+  window.openSheet('sheet-compras');
+};
+
+document.getElementById('btn-add-planned')?.addEventListener('click', () => {
+  if(!weeklyPlan || weeklyPlan.length === 0) { showToast('⚠️ Primero genera un Plan Semanal.'); return; }
+  const listContainer = document.getElementById('sheet-planned-list');
+  if(!listContainer) return;
+  listContainer.innerHTML = '';
+  const todaysPlan = weeklyPlan[0];
+  todaysPlan.forEach(meal => {
+    let objData = encodeURIComponent(JSON.stringify(meal));
+    listContainer.innerHTML += `<div class="swap-option-card" onclick="window.registrarComidaPlaneada('${objData}')" style="background:#1a2130; padding:12px; border-radius:8px; cursor:pointer; margin-bottom:8px;"><span style="font-size:10px; color:var(--primary); font-weight:800; text-transform:uppercase;">${meal.tipo}</span><b style="display:block; color:#fff; margin-top:4px;">${meal.name}</b><span>🔥 ${meal.cals} kcal | P: ${meal.prot}g | C: ${meal.carb}g | G: ${meal.gras}g</span></div>`;
+  });
+  window.openSheet('sheet-planned-meals');
+});
+
+window.registrarComidaPlaneada = async function(encodedData) {
+  const meal = JSON.parse(decodeURIComponent(encodedData));
+  let nombreFinal = `[${meal.tipo.charAt(0).toUpperCase() + meal.tipo.slice(1)}] ${meal.name}`;
+  await registrarComidaNube(meal.cals, meal.prot, meal.carb, meal.gras, nombreFinal);
+  window.closeSheet();
+  showToast(`✅ Registrado al instante.`);
+};
+
+// Escáner QR / Barras
+let html5QrCode = null;
+document.getElementById('btn-foto')?.addEventListener('click', () => { 
+  window.openSheet('sheet-scanner'); 
+  if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader"); 
+  const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+  html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure).catch(err => { console.error("Error cámara:", err); showToast("⚠️ No se pudo iniciar la cámara."); });
+});
+window.closeScanner = function() { 
+  if (html5QrCode && html5QrCode.isScanning) { html5QrCode.stop().then(() => { html5QrCode.clear(); }).catch(e => console.error(e)); } 
+  window.closeSheet(); 
+};
+async function onScanSuccess(decodedText) {
+  if (html5QrCode && html5QrCode.isScanning) { await html5QrCode.stop(); }
+  window.closeScanner();
+  showToast(`🔍 Buscando ${decodedText}...`);
+  try {
+    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${decodedText}.json`);
+    const data = await res.json();
+    if (data.status === 1) {
+      const p = data.product;
+      if(!p.nutriments || !p.nutriments['energy-kcal_100g']) { showToast('⚠️ Sin info nutricional.'); return; }
+      let brand = p.brands ? ` (${p.brands.split(',')[0]})` : '';
+      let nombre = `${p.product_name || 'Producto'}${brand}`;
+      let cal100 = Math.round(p.nutriments['energy-kcal_100g']);
+      let prot100 = Math.round(p.nutriments['proteins_100g'] || 0);
+      let carb100 = Math.round(p.nutriments['carbohydrates_100g'] || 0);
+      let gras100 = Math.round(p.nutriments['fat_100g'] || 0);
+      currentSearchFoodBase = { cal: cal100, prot: prot100, carb: carb100, gras: gras100 };
+      document.getElementById('food-selected-name').innerText = nombre;
+      document.getElementById('food-results-list').innerHTML = '';
+      document.getElementById('edit-qty').value = '100';
+      document.getElementById('edit-unit').value = '1';
+      recalcularMacros();
+      document.getElementById('food-custom-section').style.display = 'block';
+      window.openSheet('sheet-add-food');
+    } else { showToast('❌ Producto no encontrado.'); }
+  } catch (err) { showToast('⚠️ Error de conexión con OpenFoodFacts.'); }
+}
+function onScanFailure(error) {}
+
+let currentSearchFoodBase = null;
+const fallbackDB = [ 
+  { product_name: "Yogurt Protein Natural", brands: "Soprole", nutriments: { 'energy-kcal_100g': 55, 'proteins_100g': 8, 'carbohydrates_100g': 5, 'fat_100g': 0 } }, 
+  { product_name: "Avena Tradicional", brands: "Quaker", nutriments: { 'energy-kcal_100g': 370, 'proteins_100g': 13, 'carbohydrates_100g': 60, 'fat_100g': 7 } }, 
+  { product_name: "Pechuga de Pollo", brands: "SuperPollo", nutriments: { 'energy-kcal_100g': 110, 'proteins_100g': 23, 'carbohydrates_100g': 0, 'fat_100g': 1.5 } } 
+];
+
+document.getElementById('btn-abrir-manual')?.addEventListener('click', () => {
+  document.getElementById('food-search').value = '';
+  document.getElementById('food-results-list').innerHTML = '';
+  document.getElementById('food-custom-section').style.display = 'none';
+  window.openSheet('sheet-add-food');
+});
+
+document.getElementById('btn-trigger-search')?.addEventListener('click', async () => {
+  const query = document.getElementById('food-search').value.trim().toLowerCase();
+  const c = document.getElementById('food-results-list');
+  const loader = document.getElementById('food-loading');
+  if(!query) return;
+  c.innerHTML = ''; loader.style.display = 'block';
+  try {
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15`)}`;
+    const res = await fetch(proxyUrl);
+    if (!res.ok) throw new Error('Proxy error');
+    const proxyData = await res.json();
+    const data = JSON.parse(proxyData.contents);
+    loader.style.display = 'none';
+    if(!data.products || data.products.length === 0) throw new Error("Sin resultados");
+    renderizarResultadosBusqueda(data.products, c);
+  } catch (error) {
+    loader.style.display = 'none';
+    const resultadosLocales = fallbackDB.filter(p => p.product_name.toLowerCase().includes(query) || p.brands.toLowerCase().includes(query));
+    if(resultadosLocales.length > 0) {
+      renderizarResultadosBusqueda(resultadosLocales, c);
+      showToast('⚠️ Mostrando base local.');
+    } else {
+      c.innerHTML = `<div style="font-size:12px; color:#ff3366; text-align:center; margin-top:10px;">❌ No encontrado.</div>`;
+    }
+  }
+});
+
+function renderizarResultadosBusqueda(productos, contenedor) {
+  productos.forEach(p => {
+    if(!p.nutriments || p.nutriments['energy-kcal_100g'] == null) return;
+    const d = document.createElement('div');
+    d.className = 'food-search-item';
+    d.style.cssText = "padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; display:flex; justify-content:space-between; align-items:center;";
+    let brand = p.brands ? ` (${p.brands.split(',')[0]})` : '';
+    let nombre = `${p.product_name || 'Producto'}${brand}`;
+    let cal100 = Math.round(p.nutriments['energy-kcal_100g']);
+    let prot100 = Math.round(p.nutriments['proteins_100g'] || 0);
+    let carb100 = Math.round(p.nutriments['carbohydrates_100g'] || 0);
+    let gras100 = Math.round(p.nutriments['fat_100g'] || 0);
+    d.innerHTML = `<div style="display:flex; flex-direction:column;"><span>${nombre}</span><span style="font-size:9px; color:var(--text-muted);">P:${prot100}g C:${carb100}g G:${gras100}g</span></div><span style="color:var(--primary); font-weight:800;">${cal100} kcal</span>`;
+    d.addEventListener('click', () => {
+      currentSearchFoodBase = { cal: cal100, prot: prot100, carb: carb100, gras: gras100 };
+      document.getElementById('food-selected-name').innerText = nombre;
+      document.getElementById('food-results-list').innerHTML = '';
+      document.getElementById('edit-qty').value = '100';
+      document.getElementById('edit-unit').value = '1';
+      recalcularMacros();
+      document.getElementById('food-custom-section').style.display = 'block';
+    });
+    contenedor.appendChild(d);
   });
 }
 
-const rangos = [ 
-  { nombre: "Ashigaru", minRatio: 0, color: "#6b7c93" }, 
-  { nombre: "Rōnin", minRatio: 1.5, color: "#ffaa00" }, 
-  { nombre: "Samurái", minRatio: 2.5, color: "#ff3366" }, 
-  { nombre: "Daimyō", minRatio: 3.5, color: "#9933ff" }, 
-  { nombre: "IRON SHŌGUN", minRatio: 4.5, color: "#00e5ff" } 
-];
+document.getElementById('edit-qty')?.addEventListener('input', recalcularMacros);
+document.getElementById('edit-unit')?.addEventListener('change', recalcularMacros);
+function recalcularMacros() {
+  if(currentSearchFoodBase) {
+    let q = parseFloat(document.getElementById('edit-qty').value) || 0;
+    let m = parseFloat(document.getElementById('edit-unit').value) || 1;
+    let factor = (q * m) / 100;
+    document.getElementById('edit-cal').value = Math.round(currentSearchFoodBase.cal * factor);
+    document.getElementById('edit-prot').value = Math.round(currentSearchFoodBase.prot * factor);
+    document.getElementById('edit-carb').value = Math.round(currentSearchFoodBase.carb * factor);
+    document.getElementById('edit-gras').value = Math.round(currentSearchFoodBase.gras * factor);
+  }
+}
 
-document.getElementById('btn-calcular-rango')?.addEventListener('click', async () => { 
-  const bench = parseFloat(document.getElementById('rm-bench')?.value) || 0; 
-  const squat = parseFloat(document.getElementById('rm-squat')?.value) || 0; 
-  const deadlift = parseFloat(document.getElementById('rm-deadlift')?.value) || 0; 
-  if(bench === 0 && squat === 0 && deadlift === 0) { showToast('⚠️ Ingresa marcas.'); return; } 
-  const total = bench + squat + deadlift; 
-  const ratio = parseFloat((total / userProfile.peso).toFixed(2)); 
-  let rango = rangos[0], prog = 0; 
-  for(let i=0; i<rangos.length; i++) { 
-    if(ratio >= rangos[i].minRatio) { 
-      rango = rangos[i]; 
-      prog = i < rangos.length - 1 ? ((ratio - rangos[i].minRatio) / (rangos[i+1].minRatio - rangos[i].minRatio)) * 100 : 100; 
-    } 
-  } 
-  const rt = document.getElementById('rango-titulo'); if(rt) { rt.innerText = rango.nombre; rt.style.color = rango.color; }
-  const rm = document.getElementById('rango-multi'); if(rm) rm.innerText = `${ratio}x`; 
-  const rtot = document.getElementById('rango-total'); if(rtot) rtot.innerText = total; 
-  const rp = document.getElementById('rango-progreso'); if(rp) { rp.style.width = `${prog}%`; rp.style.backgroundColor = rango.color; }
-  const hr = document.getElementById('header-rank'); if(hr) hr.innerHTML = `<span style="color: ${rango.color};">${rango.nombre.toUpperCase()}</span>`; 
-  currentRankName = rango.nombre; 
-  actualizarUIHeader(); actualizarUIPerfil(); 
-  if(currentUser && db) { 
-    try { 
-      await setDoc(doc(db, "leaderboard", currentUser.uid), { userId: currentUser.uid, nombre: userProfile.nickname, foto: currentUser.photoURL || "", multiplicador: ratio, totalKg: total, pesoCorporal: userProfile.peso, rango: rango.nombre, colorRango: rango.color, updatedAt: Date.now() }, { merge: true }); 
-      showToast(`⚔️ ¡Ranking Actualizado!`); await guardarEstadoNube(); cargarLeaderboard();
-    } catch(e) { console.error(e); } 
-  } 
+document.getElementById('btn-confirm-food-final')?.addEventListener('click', async function() {
+  if (this.disabled) return; this.disabled = true;
+  let mt = document.getElementById('food-meal-time').value;
+  let n = document.getElementById('food-selected-name').innerText || "Alimento";
+  let c = parseInt(document.getElementById('edit-cal').value)||0;
+  let p = parseInt(document.getElementById('edit-prot').value)||0;
+  let cb = parseInt(document.getElementById('edit-carb').value)||0;
+  let g = parseInt(document.getElementById('edit-gras').value)||0;
+  let qtyVal = document.getElementById('edit-qty').value;
+  let unitSelect = document.getElementById('edit-unit');
+  let unitText = unitSelect.options[unitSelect.selectedIndex].text.split(' ')[0];
+  if(!c && !p) { showToast('⚠️ Ingresa cantidad.'); this.disabled = false; return; }
+  let nombreFinalRegistro = `${n} (${qtyVal} ${unitText})`;
+  await registrarComidaNube(c, p, cb, g, `[${mt}] ${nombreFinalRegistro}`);
+  window.closeSheet();
+  showToast(`✅ Alimento registrado.`);
+  this.disabled = false;
 });
 
-async function cargarLeaderboard() { 
-  const container = document.getElementById('leaderboard-list'); 
-  if(!container || !db) return; 
-  container.innerHTML = `<p style="font-size: 12px; color: #9ca3af; text-align: center;">Cargando guerreros...</p>`; 
-  try { 
-    const q = query(collection(db, "leaderboard"), orderBy("multiplicador", "desc"), limit(20)); 
-    const snapshot = await getDocs(q); 
-    if(snapshot.empty) { container.innerHTML = `<p style="font-size: 12px; color: #9ca3af; text-align: center;">El dojo está vacío.</p>`; return; } 
-    let html = "", pos = 1; 
-    snapshot.forEach(docSnap => { 
-      const d = docSnap.data(); 
-      const topClass = pos===1?"top-1":pos===2?"top-2":pos===3?"top-3":""; 
-      const medal = pos===1?"🥇":pos===2?"🥈":pos===3?"🥉":`#${pos}`; 
-      html += `<div class="leaderboard-item ${topClass}"><div class="lb-rank-num">${medal}</div><div class="lb-user-info"><img class="lb-avatar" src="${generarAvatarPorRango(d.nombre, d.rango)}"><div><span class="lb-name">${d.nombre}</span><span class="lb-badge" style="color: ${d.colorRango};">${d.rango}</span></div></div><div class="lb-score"><span class="lb-multiplier">${d.multiplicador}x</span><span class="lb-kg">${d.totalKg} kg</span></div></div>`; 
-      pos++; 
-    }); 
-    container.innerHTML = html; 
-  } catch(e) { container.innerHTML = `<p style="font-size: 12px; color: #ff3366; text-align: center;">Error al cargar.</p>`; } 
+// --- PERFIL ---
+function actualizarUIPerfil() { 
+  const cn = document.getElementById('profile-card-name'); if(cn) cn.innerText = userProfile.nickname.toUpperCase(); 
+  const vp = document.getElementById('profile-val-peso'); if(vp) vp.innerText = `${userProfile.peso} kg`; 
+  const va = document.getElementById('profile-val-altura'); if(va) va.innerText = `${userProfile.altura} cm`; 
+  const ve = document.getElementById('profile-val-edad'); if(ve) ve.innerText = `${userProfile.edad} años`; 
+  const vg = document.getElementById('profile-val-genero'); if(vg) vg.innerText = userProfile.genero === 'M' ? 'Hombre' : 'Mujer'; 
+  let labelMeta = "Mantenimiento"; 
+  if(userProfile.metaObj === -500) labelMeta = "Déficit Agresivo"; 
+  if(userProfile.metaObj === -300) labelMeta = "Definición"; 
+  if(userProfile.metaObj === 300) labelMeta = "Volumen"; 
+  const cg = document.getElementById('profile-card-goal'); if(cg) cg.innerText = `Meta: ${labelMeta}`; 
+  const ca = document.getElementById('profile-card-avatar'); if(ca) ca.src = generarAvatarPorRango(userProfile.nickname, currentRankName); 
 }
-document.getElementById('btn-refresh-leaderboard')?.addEventListener('click', cargarLeaderboard);
 
 // --- MÓDULO SOCIAL Y COFRADÍA COMPLETO ---
 function cargarModuloSocialCompleto() {
@@ -795,7 +905,6 @@ document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
 
   if(currentWorkoutRoutine.length === 0) { showToast('⚠️ No hay ejercicios para este filtro.'); return; }
 
-  // CORRECCIÓN: Mostramos primero la lista para que el usuario pueda cambiar opciones
   renderizarRutina(false);
   document.getElementById('workout-generator-card').style.display = 'none';
   document.getElementById('workout-live-container').style.display = 'block';
@@ -1123,7 +1232,6 @@ window.borrarTodoHistorial = function() { if(confirm("¿Restablecer historial ar
 function actualizarAguaUI() { const metaAgua = 3000; let pct = Math.min(100, Math.round((totalAgua/metaAgua)*100)); const wb = document.getElementById('water-fill-bar'); if(wb) wb.style.height = `${pct}%`; const wt = document.getElementById('water-text-val'); if(wt) wt.innerText = `${totalAgua} / ${metaAgua} ml`; guardarEstadoNube(); }
 window.agregarAgua = ml => { totalAgua += ml; actualizarAguaUI(); showToast(`💧 +${ml} ml añadidos.`); }; window.resetAgua = () => { totalAgua = 0; actualizarAguaUI(); showToast(`🔄 Hidratación reiniciada.`); };
 
-// Bottom Sheets / Modales
 const overlay = document.getElementById('sheet-overlay'); let activeSheet = null;
 window.openSheet = function(sheetId) { activeSheet = document.getElementById(sheetId); if(overlay) overlay.style.display = 'block'; if(activeSheet) { activeSheet.classList.add('open'); setTimeout(() => activeSheet.style.bottom = '0', 10); } };
 window.closeSheet = function() { if(activeSheet) { activeSheet.style.bottom = '-100%'; setTimeout(() => { activeSheet.classList.remove('open'); if(overlay) overlay.style.display = 'none'; }, 300); } };
@@ -1131,7 +1239,6 @@ document.querySelectorAll('.custom-select').forEach(sel => { sel.addEventListene
 document.querySelectorAll('.sheet-option').forEach(opt => { opt.addEventListener('click', function() { if(this.parentElement.id !== 'sheet-actividad') { this.parentElement.querySelectorAll('.sheet-option').forEach(o => o.classList.remove('active')); this.classList.add('active'); if(window.activeSelect) { window.activeSelect.innerText = this.innerText; window.activeSelect.setAttribute('data-val', this.getAttribute('data-val')); } window.closeSheet(); } else { window.closeSheet(); } }); });
 if(overlay) overlay.addEventListener('click', window.closeSheet);
 
-// Configuración de Pestañas Principales y Subtabs
 const navItems = document.querySelectorAll('.nav-item'); const pages = document.querySelectorAll('.page');
 navItems.forEach(btn => { 
   btn.addEventListener('click', () => { 
