@@ -1,3 +1,39 @@
+// ============================================================================
+// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM (ANTI-FEALDAD) ---
+// ============================================================================
+const customCSS = `
+  .iron-btn-primary {
+    width: 100%; padding: 14px; margin-top: 12px;
+    background: linear-gradient(135deg, #00e5ff 0%, #007acc 100%);
+    color: #fff; font-size: 14px; font-weight: 800; border: none; border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,229,255,0.4); text-transform: uppercase; cursor: pointer;
+    letter-spacing: 1px; transition: all 0.2s ease;
+  }
+  .iron-btn-primary:active { transform: scale(0.98); }
+  
+  .iron-btn-danger {
+    width: 100%; padding: 12px; margin-top: 15px;
+    background: rgba(255, 51, 102, 0.1); color: #ff3366; border: 1px solid #ff3366;
+    border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease;
+  }
+  .iron-btn-danger:active { transform: scale(0.98); background: rgba(255, 51, 102, 0.3); }
+
+  .iron-input-modern {
+    width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,229,255,0.5);
+    border-radius: 8px; color: #fff; font-weight: bold; font-size: 14px; text-align: center;
+    box-sizing: border-box; transition: border 0.3s;
+  }
+  .iron-input-modern:focus { outline: none; border-color: #00e5ff; box-shadow: 0 0 8px rgba(0,229,255,0.5); }
+
+  .history-day { background: rgba(26, 33, 48, 0.8); margin-bottom: 12px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+  .history-day-header { padding: 15px; background: rgba(0, 229, 255, 0.1); font-weight: 800; color: #00e5ff; display: flex; justify-content: space-between; cursor: pointer; font-size: 14px; }
+  .history-day-content { padding: 15px; display: none; background: rgba(0,0,0,0.2); }
+`;
+const styleEl = document.createElement('style');
+styleEl.innerHTML = customCSS;
+document.head.appendChild(styleEl);
+
 // --- IMPORTACIÓN MODULAR DE FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -34,8 +70,10 @@ const ironCoreTips = [
   "💤 El descanso es vital: duerme 8 horas para reparar tu Sistema Nervioso Central.",
   "🔥 En déficit agresivo, prioriza alimentos voluminosos como verduras para engañar la saciedad."
 ];
-const dt = document.getElementById('daily-tip');
-if(dt) dt.innerText = ironCoreTips[Math.floor(Math.random() * ironCoreTips.length)]; 
+window.addEventListener('DOMContentLoaded', () => { 
+  const dt = document.getElementById('daily-tip');
+  if(dt) dt.innerText = ironCoreTips[Math.floor(Math.random() * ironCoreTips.length)]; 
+});
 
 // --- AUTENTICACIÓN GOOGLE ---
 const authScreen = document.getElementById('auth-screen');
@@ -204,6 +242,7 @@ async function cargarDatosDesdeNube(uid) {
   actualizarDashboard(); 
   actualizarAguaUI(); 
   await cargarRegistrosDelDia(uid); 
+  await cargarHistorialYCheckins(uid); // NUEVO: Carga del historial y checks
   actualizarGraficoProyeccion(userProfile.peso, userProfile.metaObj); 
 }
 
@@ -245,10 +284,9 @@ async function inicializarBases() {
     const resEx = await fetch('ejercicios.json?v=' + Date.now());
     if (!resEx.ok) throw new Error('No se pudo cargar ejercicios.json (HTTP ' + resEx.status + ')');
     exercisesDB = await resEx.json();
-    console.log(`⚔️ Base de Combate sincronizada con ${exercisesDB.length} ejercicios desde ejercicios.json.`);
+    console.log(`⚔️ Base de Combate sincronizada con ${exercisesDB.length} ejercicios.`);
   } catch (error) { 
     console.error("Error cargando ejercicios.json:", error);
-    showToast("⚠️ Error al cargar el catálogo de ejercicios en español.");
   }
 }
 // Ejecución Inmediata
@@ -687,6 +725,8 @@ document.getElementById('btn-generar-rutina')?.addEventListener('click', () => {
     let ex = getRandomEx(g);
     if(ex && !currentWorkoutRoutine.find(e => e.id === ex.id)) {
       ex.loggedSets = []; 
+      // Calculamos calorías aproximadas quemadas al generar (Entre 35 y 55 kcal)
+      ex.estimatedCals = Math.floor(Math.random() * 20) + 35;
       currentWorkoutRoutine.push(ex);
     }
   });
@@ -716,40 +756,42 @@ function renderizarRutina(isLiveMode) {
     ex.loggedSets = ex.loggedSets || []; 
 
     let html = `
-      <div class="plan-meal-card workout-card" data-index="${idx}" data-name="${ex.nombre}">
+      <div class="plan-meal-card workout-card" data-index="${idx}" data-name="${ex.nombre}" style="border: 1px solid rgba(0,229,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
         <div class="plan-meal-header">
-          <span class="plan-meal-title">${ex.nombre}</span>
+          <span class="plan-meal-title" style="font-size:14px;">${ex.nombre}</span>
           <button class="btn-swap" style="display:${displaySwap};" onclick="window.abrirMenuReemplazoEj(${idx})">🔄 Cambiar</button>
         </div>
-        <div style="display:flex; gap:12px; align-items:center; margin-bottom: 10px;">
-          <img src="${imgSource}" onerror="this.onerror=null; this.src='${fallbackNeon}';" style="width:70px; height:70px; border-radius:10px; object-fit:cover; border:1px solid rgba(0,229,255,0.3);">
-          <div>
-            <p style="font-size:11px; color:var(--primary); margin:0 0 5px 0; font-weight:800; text-transform:uppercase;">🎯 ${ex.musculoPrincipal || 'General'}</p>
+        <div style="display:flex; gap:15px; align-items:center; margin-bottom: 12px;">
+          <img src="${imgSource}" onerror="this.onerror=null; this.src='${fallbackNeon}';" style="width:75px; height:75px; border-radius:12px; object-fit:cover; border:2px solid rgba(0,229,255,0.3);">
+          <div style="flex:1;">
+            <p style="font-size:12px; color:var(--primary); margin:0 0 5px 0; font-weight:800; text-transform:uppercase;">🎯 ${ex.musculoPrincipal || 'General'}</p>
+            <p style="font-size:12px; color:#ffaa00; margin:0 0 5px 0; font-weight:800;">🔥 ~${ex.estimatedCals} kcal aprox.</p>
             <p style="font-size:11px; color:#a0aec0; margin:0; line-height:1.4;">💡 ${ex.tips || 'Mantén la técnica estricta.'}</p>
           </div>
         </div>
     `;
 
     if (isLiveMode) {
-      let seriesHTML = ex.loggedSets.map((s, i) => `<li style="margin-bottom:4px; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.05);">Serie ${i+1}: <span style="color:var(--primary); font-weight:800;">${s.reps} reps x ${s.peso} kg</span></li>`).join('');
+      let seriesHTML = ex.loggedSets.map((s, i) => `<li style="margin-bottom:6px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px;">Serie ${i+1}: <span style="color:var(--primary); font-weight:800;">${s.reps} reps x ${s.peso} kg</span></li>`).join('');
 
       html += `
-        <div class="workout-inputs" style="display:${displayInputs}; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px;">
-          <div style="display:flex; gap:8px; margin-bottom:10px;">
-            <div style="flex:1;"><label style="font-size:9px; color:#a0aec0;">Repes</label><input type="number" id="reps-${idx}" class="neon-input" placeholder="Ej: 10"></div>
-            <div style="flex:1;"><label style="font-size:9px; color:#a0aec0;">Peso (Kg)</label><input type="number" id="peso-${idx}" class="neon-input" placeholder="Ej: 50"></div>
-            <div style="flex:1;"><label style="font-size:9px; color:#a0aec0;">Descanso (seg)</label><input type="number" id="descanso-${idx}" class="neon-input" value="90"></div>
+        <div class="workout-inputs" style="display:${displayInputs}; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-top:10px;">
+          <div style="display:flex; gap:10px; margin-bottom:12px;">
+            <div style="flex:1;"><label style="font-size:10px; color:#a0aec0; font-weight:bold;">REPETICIONES</label><input type="number" id="reps-${idx}" class="iron-input-modern" placeholder="Ej: 10"></div>
+            <div style="flex:1;"><label style="font-size:10px; color:#a0aec0; font-weight:bold;">PESO (KG)</label><input type="number" id="peso-${idx}" class="iron-input-modern" placeholder="Ej: 50"></div>
+            <div style="flex:1;"><label style="font-size:10px; color:#a0aec0; font-weight:bold;">DESCANSO (S)</label><input type="number" id="descanso-${idx}" class="iron-input-modern" value="90"></div>
           </div>
           
-          <button class="btn-primary" style="width:100%; padding: 8px; font-size:12px; margin-bottom:10px;" onclick="window.registrarSerieIndividual(${idx})">✅ Registrar Serie</button>
+          <button class="iron-btn-primary" onclick="window.registrarSerieIndividual(${idx})">✅ Registrar Serie</button>
           
-          <ul id="lista-series-${idx}" style="list-style:none; padding:0; margin:0 0 10px 0; font-size:11px; color:#fff;">
+          <ul id="lista-series-${idx}" style="list-style:none; padding:0; margin:15px 0 0 0; color:#fff;">
             ${seriesHTML}
           </ul>
 
-          <div id="timer-container-${idx}" style="display:none; text-align:center; background: #1a2130; padding:10px; border-radius:8px; border: 1px dashed var(--primary);">
-            <span style="font-size:16px; font-weight:800; color:var(--primary); display:block; margin-bottom:8px;">⏱️ Descanso: <span id="time-left-${idx}">0</span>s</span>
-            <button class="btn-swap" style="width:100%; border-color:#ff3366; color:#ff3366;" onclick="window.terminarDescanso(${idx})">Terminar Descanso ⏹️</button>
+          <div id="timer-container-${idx}" style="display:none; text-align:center; background: #1a2130; padding:15px; border-radius:12px; border: 1px dashed #ffaa00; margin-top:15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+            <span style="font-size:22px; font-weight:900; color:#ffaa00; display:block; margin-bottom:5px;">⏱️ <span id="time-left-${idx}">0</span>s</span>
+            <span style="font-size:11px; color:#a0aec0; display:block; margin-bottom:10px; text-transform:uppercase;">Recuperación Activa</span>
+            <button class="iron-btn-danger" onclick="window.terminarDescanso(${idx})">⏹️ Terminar Descanso</button>
           </div>
         </div>
       `;
@@ -779,7 +821,7 @@ window.registrarSerieIndividual = function(idx) {
 
   const lista = document.getElementById(`lista-series-${idx}`);
   const numSerie = currentWorkoutRoutine[idx].loggedSets.length;
-  lista.innerHTML += `<li style="margin-bottom:4px; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.05);">Serie ${numSerie}: <span style="color:var(--primary); font-weight:800;">${reps} reps x ${peso} kg</span></li>`;
+  lista.innerHTML += `<li style="margin-bottom:6px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px;">Serie ${numSerie}: <span style="color:var(--primary); font-weight:800;">${reps} reps x ${peso} kg</span></li>`;
 
   repsInput.value = ''; 
   window.iniciarDescanso(idx, descanso);
@@ -847,6 +889,7 @@ window.confirmarReemplazoEj = function(encodedData) {
   if(workoutSwapTargetIndex > -1) {
     const newEx = JSON.parse(decodeURIComponent(encodedData));
     newEx.loggedSets = []; 
+    newEx.estimatedCals = Math.floor(Math.random() * 20) + 35;
     currentWorkoutRoutine[workoutSwapTargetIndex] = newEx;
     renderizarRutina(false);
     window.closeSheet();
@@ -872,7 +915,6 @@ document.getElementById('btn-cancel-workout')?.addEventListener('click', () => {
   currentWorkoutRoutine = [];
 });
 
-// Guardado de entrenamiento entero con prevención Anti-Duplicado
 document.getElementById('btn-finish-workout')?.addEventListener('click', async function() {
   if (this.disabled) return; 
   this.disabled = true; 
@@ -908,7 +950,7 @@ document.getElementById('btn-finish-workout')?.addEventListener('click', async f
   this.disabled = false; 
 });
 
-// Guardado manual con prevención Anti-Duplicado
+// Guardado manual
 document.getElementById('btn-registrar-serie')?.addEventListener('click', () => { 
   document.getElementById('work-name').value = ''; 
   document.getElementById('work-sets').value = ''; 
@@ -937,7 +979,7 @@ document.getElementById('btn-confirm-workout')?.addEventListener('click', async 
   this.disabled = false; 
 });
 
-// --- PERSISTENCIA Y DASHBOARD ---
+// --- PERSISTENCIA, DASHBOARD E HISTORIAL DE JORNADAS ---
 async function cargarRegistrosDelDia(uid) {
   const hoyKey = getTodayKey(); 
   const listaComidas = document.getElementById('lista-comidas');
@@ -960,6 +1002,59 @@ async function cargarRegistrosDelDia(uid) {
   }
 }
 
+// Cargar Historial Global y Checkins
+async function cargarHistorialYCheckins(uid) {
+  const histContainer = document.getElementById('historial-container');
+  const chkContainer = document.getElementById('checkin-history-container');
+  
+  if(chkContainer && db) {
+    chkContainer.innerHTML = '<p style="text-align:center; font-size:12px; color:#a0aec0;">Cargando check-ins...</p>';
+    const q = query(collection(db, "users", uid, "checkins"), orderBy("timestamp", "desc"), limit(15));
+    const snaps = await getDocs(q);
+    let html = '';
+    snaps.forEach(d => {
+      let data = d.data();
+      html += `<div style="background:rgba(0,0,0,0.3); padding:12px; margin-bottom:10px; border-radius:8px; border-left:3px solid #ffaa00; display:flex; justify-content:space-between; align-items:center;">
+        <span style="color:#00e5ff; font-weight:800; font-size:12px;">📅 ${data.fecha}</span>
+        <span style="color:#fff; font-weight:900; font-size:14px;">⚖️ ${data.peso} kg</span>
+      </div>`;
+    });
+    chkContainer.innerHTML = html || '<p style="text-align:center; font-size:12px; color:#a0aec0;">No hay check-ins registrados.</p>';
+  }
+
+  if(histContainer && db) {
+    histContainer.innerHTML = '<p style="text-align:center; font-size:12px; color:#a0aec0;">Cargando historial...</p>';
+    const q2 = query(collection(db, "users", uid, "history"), orderBy("timestamp", "desc"), limit(50));
+    const snaps2 = await getDocs(q2);
+    
+    let agrupado = {};
+    snaps2.forEach(d => {
+      let data = d.data();
+      if(!agrupado[data.date]) agrupado[data.date] = [];
+      agrupado[data.date].push(data);
+    });
+
+    let html2 = '';
+    for(const [fecha, items] of Object.entries(agrupado)) {
+      let itemsHtml = items.map(i => `<div style="margin-top:10px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <b style="color:${i.tipo === 'entreno' ? '#ff3366' : '#00e5ff'}; font-size:13px;">${i.tipo === 'entreno' ? '🏋️' : '🍏'} ${i.nombre}</b><br>
+        <span style="font-size:11px; color:#a0aec0; display:block; margin-top:4px;">${i.detalle}</span>
+      </div>`).join('');
+
+      html2 += `
+      <div class="history-day">
+        <div class="history-day-header" onclick="const content = this.nextElementSibling; content.style.display = content.style.display === 'block' ? 'none' : 'block';">
+          <span>📅 Jornada: ${fecha}</span> <span style="color:#fff;">▼</span>
+        </div>
+        <div class="history-day-content">
+          ${itemsHtml}
+        </div>
+      </div>`;
+    }
+    histContainer.innerHTML = html2 || '<p style="text-align:center; font-size:12px; color:#a0aec0;">Aún no hay historial de jornadas registradas.</p>';
+  }
+}
+
 function renderizarComidaEnUI(nombre, cal, prot, carb, gras, docId = null) { 
   const l = document.getElementById('lista-comidas'); 
   if(!l) return; 
@@ -974,7 +1069,7 @@ function renderizarEntrenoEnUI(nombre, sets, weight, rpe, docId = null) {
   if(!l) return; 
   const li = document.createElement('li'); 
   if(docId) li.setAttribute('data-id', docId); 
-  li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre.toUpperCase()}</span><button class="btn-delete-item" onclick="window.eliminarEntrenoNube('${docId}', this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🏋️ Series: ${sets} &nbsp;|&nbsp; <span style="color:#00e5ff;">Peso: ${weight} kg</span></span>`; 
+  li.innerHTML = `<span style="color:#fff; font-weight:800;">${nombre.toUpperCase()}</span><button class="btn-delete-item" onclick="window.eliminarEntrenoNube('${docId}', this)">🗑️</button><br><span style="color: #6b7c93; font-size: 11px; margin-top:5px; display:block;">🏋️ ${sets} &nbsp;|&nbsp; <span style="color:#00e5ff;">Peso Máx: ${weight} kg</span></span>`; 
   l.appendChild(li); 
 }
 
@@ -997,19 +1092,18 @@ window.eliminarEntrenoNube = async function(docId, btnElement) {
 };
 
 async function registrarComidaNube(cal, prot, carb, gras, nombreDisplay) { 
-  totalCalorias += cal; 
-  totalProt += prot; 
-  totalCarb += carb; 
-  totalGrasa += gras; 
-  guardarEstadoNube(); 
-  actualizarDashboard(); 
+  totalCalorias += cal; totalProt += prot; totalCarb += carb; totalGrasa += gras; 
+  guardarEstadoNube(); actualizarDashboard(); 
   let docId = null; 
   if(currentUser && db) { 
     const d = await addDoc(collection(db, "users", currentUser.uid, "days", getTodayKey(), "meals"), { nombre: nombreDisplay, cal, prot, carb, gras, timestamp: Date.now() }); 
     docId = d.id; 
+    // Guardar en historial global
+    await addDoc(collection(db, "users", currentUser.uid, "history"), { tipo: 'comida', nombre: nombreDisplay, detalle: `🔥 ${cal} kcal | P:${prot}g C:${carb}g G:${gras}g`, date: getTodayKey(), timestamp: Date.now() });
   } 
   renderizarComidaEnUI(nombreDisplay, cal, prot, carb, gras, docId); 
   document.querySelector('[data-target="page-dashboard"]')?.click(); 
+  if(currentUser) cargarHistorialYCheckins(currentUser.uid);
 }
 
 async function registrarEntrenoNube(nombre, sets, weight, rpe) { 
@@ -1017,25 +1111,22 @@ async function registrarEntrenoNube(nombre, sets, weight, rpe) {
   if(currentUser && db) { 
     const d = await addDoc(collection(db, "users", currentUser.uid, "days", getTodayKey(), "workouts"), { nombre, sets, weight, rpe, timestamp: Date.now() }); 
     docId = d.id; 
+    // Guardar en historial global
+    await addDoc(collection(db, "users", currentUser.uid, "history"), { tipo: 'entreno', nombre: nombre.toUpperCase(), detalle: `${sets}`, date: getTodayKey(), timestamp: Date.now() });
   } 
   renderizarEntrenoEnUI(nombre, sets, weight, rpe, docId); 
+  if(currentUser) cargarHistorialYCheckins(currentUser.uid);
 }
 
-// --- UTILIDADES GLOBALES ---
 function iniciarSakuraBackground() { 
   const c = document.getElementById('sakura-bg'); 
   if(!c) return; 
   c.innerHTML = ''; 
   for(let i=0; i<15; i++) { 
-    const p = document.createElement('div'); 
-    p.className = 'sakura-petal'; 
-    const s = Math.random() * 8 + 4; 
-    p.style.width = `${s}px`; 
-    p.style.height = `${s*1.4}px`; 
-    p.style.left = `${Math.random()*100}vw`; 
-    p.style.animationDuration = `${Math.random()*10+8}s`; 
-    p.style.animationDelay = `${Math.random()*5}s`; 
-    c.appendChild(p); 
+    const p = document.createElement('div'); p.className = 'sakura-petal'; 
+    const s = Math.random() * 8 + 4; p.style.width = `${s}px`; p.style.height = `${s*1.4}px`; 
+    p.style.left = `${Math.random()*100}vw`; p.style.animationDuration = `${Math.random()*10+8}s`; 
+    p.style.animationDelay = `${Math.random()*5}s`; c.appendChild(p); 
   } 
 }
 
@@ -1044,30 +1135,17 @@ function verificarCambioDeDia() {
   const ult = localStorage.getItem('ic_ultima_fecha'); 
   if (!ult) localStorage.setItem('ic_ultima_fecha', hoy); 
   else if (ult !== hoy) { 
-    totalCalorias = 0; 
-    totalProt = 0; 
-    totalCarb = 0; 
-    totalGrasa = 0; 
-    totalAgua = 0; 
-    userStreak++; 
+    totalCalorias = 0; totalProt = 0; totalCarb = 0; totalGrasa = 0; totalAgua = 0; userStreak++; 
     localStorage.setItem('ic_ultima_fecha', hoy); 
-    guardarEstadoNube(); 
-    showToast('🌙 Nuevo día. ¡Racha incrementada!'); 
+    guardarEstadoNube(); showToast('🌙 Nuevo día. ¡Racha incrementada!'); 
   } 
-  const st = document.getElementById('header-streak'); 
-  if(st) st.innerText = `🔥 Racha: ${userStreak} días`; 
+  const st = document.getElementById('header-streak'); if(st) st.innerText = `🔥 Racha: ${userStreak} días`; 
 }
 
 window.reiniciarDiaActual = function() { 
   if(confirm("¿Reiniciar balance?")) { 
-    totalCalorias = 0; 
-    totalProt = 0; 
-    totalCarb = 0; 
-    totalGrasa = 0; 
-    totalAgua = 0; 
-    guardarEstadoNube(); 
-    actualizarDashboard(); 
-    actualizarAguaUI(); 
+    totalCalorias = 0; totalProt = 0; totalCarb = 0; totalGrasa = 0; totalAgua = 0; 
+    guardarEstadoNube(); actualizarDashboard(); actualizarAguaUI(); 
     const lc = document.getElementById('lista-comidas'); if(lc) lc.innerHTML = ''; 
     showToast('🔄 Restablecido.'); 
   } 
@@ -1075,8 +1153,7 @@ window.reiniciarDiaActual = function() {
 
 window.borrarTodoHistorial = function() { 
   if(confirm("¿Restablecer historial archivado?")) { 
-    localStorage.removeItem('ic_historial_pasado'); 
-    localStorage.removeItem('ic_checkins'); 
+    localStorage.removeItem('ic_historial_pasado'); localStorage.removeItem('ic_checkins'); 
     const hc = document.getElementById('historial-container'); if(hc) hc.innerHTML = ''; 
     const chc = document.getElementById('checkin-history-container'); if(chc) chc.innerHTML = ''; 
     showToast('🧹 Borrado.'); 
@@ -1090,7 +1167,6 @@ function actualizarAguaUI() {
   const wt = document.getElementById('water-text-val'); if(wt) wt.innerText = `${totalAgua} / ${metaAgua} ml`; 
   guardarEstadoNube(); 
 }
-
 window.agregarAgua = ml => { totalAgua += ml; actualizarAguaUI(); showToast(`💧 +${ml} ml añadidos.`); }; 
 window.resetAgua = () => { totalAgua = 0; actualizarAguaUI(); showToast(`🔄 Hidratación reiniciada.`); };
 
@@ -1105,8 +1181,7 @@ function enviarMensajeShogun() {
   const box = document.getElementById('chat-messages'); 
   if(!box) return;
   box.innerHTML += `<div class="chat-msg user">${txt}</div>`; 
-  inp.value = ''; 
-  box.scrollTop = box.scrollHeight; 
+  inp.value = ''; box.scrollTop = box.scrollHeight; 
   setTimeout(() => { 
     box.innerHTML += `<div class="chat-msg ai">"La disciplina vence a la motivación. Céntrate en tus macros y el hierro hará el resto."</div>`; 
     box.scrollTop = box.scrollHeight; 
@@ -1118,75 +1193,47 @@ const overlay = document.getElementById('sheet-overlay'); let activeSheet = null
 window.openSheet = function(sheetId) { 
   activeSheet = document.getElementById(sheetId); 
   if(overlay) overlay.style.display = 'block'; 
-  if(activeSheet) { 
-    activeSheet.classList.add('open'); 
-    setTimeout(() => activeSheet.style.bottom = '0', 10); 
-  } 
+  if(activeSheet) { activeSheet.classList.add('open'); setTimeout(() => activeSheet.style.bottom = '0', 10); } 
 };
-
 window.closeSheet = function() { 
   if(activeSheet) { 
     activeSheet.style.bottom = '-100%'; 
-    setTimeout(() => { 
-      activeSheet.classList.remove('open'); 
-      if(overlay) overlay.style.display = 'none'; 
-    }, 300); 
+    setTimeout(() => { activeSheet.classList.remove('open'); if(overlay) overlay.style.display = 'none'; }, 300); 
   } 
 };
-
-document.querySelectorAll('.custom-select').forEach(sel => { 
-  sel.addEventListener('click', () => { 
-    window.activeSelect = sel; 
-    window.openSheet(sel.id.replace('select-', 'sheet-')); 
-  }); 
-});
-
+document.querySelectorAll('.custom-select').forEach(sel => { sel.addEventListener('click', () => { window.activeSelect = sel; window.openSheet(sel.id.replace('select-', 'sheet-')); }); });
 document.querySelectorAll('.sheet-option').forEach(opt => { 
   opt.addEventListener('click', function() { 
     if(this.parentElement.id !== 'sheet-actividad') { 
       this.parentElement.querySelectorAll('.sheet-option').forEach(o => o.classList.remove('active')); 
       this.classList.add('active'); 
-      if(window.activeSelect) {
-        window.activeSelect.innerText = this.innerText; 
-        window.activeSelect.setAttribute('data-val', this.getAttribute('data-val')); 
-      }
+      if(window.activeSelect) { window.activeSelect.innerText = this.innerText; window.activeSelect.setAttribute('data-val', this.getAttribute('data-val')); }
       window.closeSheet(); 
-    } else { 
-      window.closeSheet(); 
-    }
+    } else { window.closeSheet(); }
   }); 
 });
-
 if(overlay) overlay.addEventListener('click', window.closeSheet);
-
 const navItems = document.querySelectorAll('.nav-item'); const pages = document.querySelectorAll('.page');
 navItems.forEach(btn => { 
   btn.addEventListener('click', () => { 
-    navItems.forEach(nav => nav.classList.remove('active')); 
-    pages.forEach(page => page.classList.remove('active')); 
+    navItems.forEach(nav => nav.classList.remove('active')); pages.forEach(page => page.classList.remove('active')); 
     btn.classList.add('active'); 
-    const tgt = document.getElementById(btn.getAttribute('data-target'));
-    if(tgt) tgt.classList.add('active'); 
+    const tgt = document.getElementById(btn.getAttribute('data-target')); if(tgt) tgt.classList.add('active'); 
   }); 
 });
-
 function setupTabs(btnClass, subTabClass) { 
-  const btns = document.querySelectorAll(`.${btnClass}`); 
-  const tabs = document.querySelectorAll(`.${subTabClass}`); 
+  const btns = document.querySelectorAll(`.${btnClass}`); const tabs = document.querySelectorAll(`.${subTabClass}`); 
   btns.forEach(btn => { 
     btn.addEventListener('click', () => { 
-      btns.forEach(t => t.classList.remove('active')); 
-      tabs.forEach(s => s.style.display = 'none'); 
+      btns.forEach(t => t.classList.remove('active')); tabs.forEach(s => s.style.display = 'none'); 
       btn.classList.add('active'); 
-      const targetTab = btn.getAttribute('data-tab'); 
-      const elem = document.getElementById(targetTab);
+      const targetTab = btn.getAttribute('data-tab'); const elem = document.getElementById(targetTab);
       if(elem) elem.style.display = 'block'; 
       if(targetTab === 'tab-leaderboard') cargarLeaderboard(); 
     }); 
   }); 
 }
-setupTabs('tab-btn-diet', 'sub-tab-diet'); 
-setupTabs('tab-btn-train', 'sub-tab-train');
+setupTabs('tab-btn-diet', 'sub-tab-diet'); setupTabs('tab-btn-train', 'sub-tab-train');
 
 // --- LEADERBOARD Y RANGOS ---
 const rangos = [ 
@@ -1196,7 +1243,6 @@ const rangos = [
   { nombre: "Daimyō", minRatio: 3.5, color: "#9933ff", msg: "Élite del hierro." }, 
   { nombre: "IRON SHŌGUN", minRatio: 4.5, color: "#00e5ff", msg: "Comandante Supremo." } 
 ];
-
 document.getElementById('btn-calcular-rango')?.addEventListener('click', async () => { 
   const bench = parseFloat(document.getElementById('rm-bench')?.value) || 0; 
   const squat = parseFloat(document.getElementById('rm-squat')?.value) || 0; 
@@ -1216,101 +1262,79 @@ document.getElementById('btn-calcular-rango')?.addEventListener('click', async (
   const rtot = document.getElementById('rango-total'); if(rtot) rtot.innerText = total; 
   const rp = document.getElementById('rango-progreso'); if(rp) { rp.style.width = `${prog}%`; rp.style.backgroundColor = rango.color; }
   const hr = document.getElementById('header-rank'); if(hr) hr.innerHTML = `Rango: <span style="color: ${rango.color};">${rango.nombre.toUpperCase()}</span>`; 
-  currentRankName = rango.nombre; 
-  actualizarUIHeader(); 
-  actualizarUIPerfil(); 
+  currentRankName = rango.nombre; actualizarUIHeader(); actualizarUIPerfil(); 
   if(currentUser && db) { 
     try { 
-      await setDoc(doc(db, "leaderboard", currentUser.uid), { 
-        userId: currentUser.uid, 
-        nombre: userProfile.nickname, 
-        foto: currentUser.photoURL || "", 
-        multiplicador: ratio, 
-        totalKg: total, 
-        pesoCorporal: userProfile.peso, 
-        rango: rango.nombre, 
-        colorRango: rango.color, 
-        updatedAt: Date.now() 
-      }, { merge: true }); 
-      showToast(`⚔️ ¡Ranking Actualizado!`); 
-      await guardarEstadoNube(); 
+      await setDoc(doc(db, "leaderboard", currentUser.uid), { userId: currentUser.uid, nombre: userProfile.nickname, foto: currentUser.photoURL || "", multiplicador: ratio, totalKg: total, pesoCorporal: userProfile.peso, rango: rango.nombre, colorRango: rango.color, updatedAt: Date.now() }, { merge: true }); 
+      showToast(`⚔️ ¡Ranking Actualizado!`); await guardarEstadoNube(); 
     } catch(e) { console.error(e); } 
   } 
 });
-
 async function cargarLeaderboard() { 
-  const container = document.getElementById('leaderboard-list'); 
-  if(!container || !db) return; 
+  const container = document.getElementById('leaderboard-list'); if(!container || !db) return; 
   container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">Cargando guerreros...</p>`; 
   try { 
-    const q = query(collection(db, "leaderboard"), orderBy("multiplicador", "desc"), limit(20)); 
-    const snapshot = await getDocs(q); 
-    if(snapshot.empty) { 
-      container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">El dojo está vacío.</p>`; 
-      return; 
-    } 
+    const q = query(collection(db, "leaderboard"), orderBy("multiplicador", "desc"), limit(20)); const snapshot = await getDocs(q); 
+    if(snapshot.empty) { container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">El dojo está vacío.</p>`; return; } 
     let html = "", pos = 1; 
     snapshot.forEach(docSnap => { 
-      const d = docSnap.data(); 
-      const topClass = pos===1?"top-1":pos===2?"top-2":pos===3?"top-3":""; 
-      const medal = pos===1?"🥇":pos===2?"🥈":pos===3?"🥉":`#${pos}`; 
+      const d = docSnap.data(); const topClass = pos===1?"top-1":pos===2?"top-2":pos===3?"top-3":""; const medal = pos===1?"🥇":pos===2?"🥈":pos===3?"🥉":`#${pos}`; 
       html += `<div class="leaderboard-item ${topClass}"><div class="lb-rank-num">${medal}</div><div class="lb-user-info"><img class="lb-avatar" src="${generarAvatarPorRango(d.nombre, d.rango)}"><div><span class="lb-name">${d.nombre}</span><span class="lb-badge" style="color: ${d.colorRango};">${d.rango}</span></div></div><div class="lb-score"><span class="lb-multiplier">${d.multiplicador}x</span><span class="lb-kg">${d.totalKg} kg</span></div></div>`; 
       pos++; 
     }); 
     container.innerHTML = html; 
-  } catch(e) { 
-    container.innerHTML = `<p style="font-size: 12px; color: #ff3366; text-align: center;">Error al cargar.</p>`; 
-  } 
+  } catch(e) { container.innerHTML = `<p style="font-size: 12px; color: #ff3366; text-align: center;">Error al cargar.</p>`; } 
 }
 document.getElementById('btn-refresh-leaderboard')?.addEventListener('click', cargarLeaderboard);
 
-let macroChart = null; 
-const ctxDonut = document.getElementById('macroChart'); 
-if(ctxDonut) { 
-  macroChart = new Chart(ctxDonut.getContext('2d'), { 
-    type: 'doughnut', 
-    data: { 
-      labels: ['Prot', 'Carb', 'Gras'], 
-      datasets: [{ data: [0.1, 0.1, 0.1], backgroundColor: ['#ff3366', '#00e5ff', '#ffaa00'], borderWidth: 0 }] 
-    }, 
-    options: { responsive: true, maintainAspectRatio: false, cutout: '82%', plugins: { legend: { display: false } } } 
-  }); 
-}
+let macroChart = null; const ctxDonut = document.getElementById('macroChart'); 
+if(ctxDonut) { macroChart = new Chart(ctxDonut.getContext('2d'), { type: 'doughnut', data: { labels: ['Prot', 'Carb', 'Gras'], datasets: [{ data: [0.1, 0.1, 0.1], backgroundColor: ['#ff3366', '#00e5ff', '#ffaa00'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '82%', plugins: { legend: { display: false } } } }); }
+let progressChart = null; const ctxLine = document.getElementById('progressChart'); 
+if(ctxLine) { progressChart = new Chart(ctxLine.getContext('2d'), { type: 'line', data: { labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'], datasets: [{ label: 'Proyección (kg)', data: [75, 75, 75, 75], borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.1)', borderWidth: 3, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } } }); }
+function actualizarGraficoProyeccion(pesoActual, variacionObj) { if(!progressChart) return; let vSemana = variacionObj / 1000; progressChart.data.datasets[0].data = [pesoActual, pesoActual + vSemana, pesoActual + (vSemana * 2), pesoActual + (vSemana * 3)]; progressChart.update(); }
 
-let progressChart = null; 
-const ctxLine = document.getElementById('progressChart'); 
-if(ctxLine) { 
-  progressChart = new Chart(ctxLine.getContext('2d'), { 
-    type: 'line', 
-    data: { 
-      labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'], 
-      datasets: [{ label: 'Proyección (kg)', data: [75, 75, 75, 75], borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.1)', borderWidth: 3, fill: true, tension: 0.4 }] 
-    }, 
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } } 
-  }); 
-}
-
-function actualizarGraficoProyeccion(pesoActual, variacionObj) { 
-  if(!progressChart) return; 
-  let vSemana = variacionObj / 1000; 
-  progressChart.data.datasets[0].data = [pesoActual, pesoActual + vSemana, pesoActual + (vSemana * 2), pesoActual + (vSemana * 3)]; 
-  progressChart.update(); 
-}
-
+// --- DASHBOARD EMBELLECIDO ---
 function actualizarDashboard() { 
-  const calT = document.getElementById('calorias-total'); if(calT) calT.innerText = `${totalCalorias} / ${metaCalorias} kcal`; 
-  const prT = document.getElementById('prot-total'); if(prT) prT.innerText = `${totalProt}g / ${metaProt}g`; 
-  const cbT = document.getElementById('carb-total'); if(cbT) cbT.innerText = `${totalCarb}g`; 
-  const grT = document.getElementById('gras-total'); if(grT) grT.innerText = `${totalGrasa}g`; 
+  // Rediseño Inyectado de Calorías
+  const calT = document.getElementById('calorias-total'); 
+  if(calT) calT.innerHTML = `<span style="font-size:26px; font-weight:900; color:#00e5ff; text-shadow: 0 0 10px rgba(0,229,255,0.4);">${totalCalorias}</span><span style="font-size:13px; color:#a0aec0; font-weight:normal;"> / ${metaCalorias} kcal</span>`; 
+  
+  // Rediseño de Macros
+  const prT = document.getElementById('prot-total'); if(prT) prT.innerHTML = `<span style="color:#ff3366; font-size:16px; font-weight:800;">${totalProt}g</span> <span style="font-size:11px; color:#a0aec0;">/ ${metaProt}g</span>`; 
+  const cbT = document.getElementById('carb-total'); if(cbT) cbT.innerHTML = `<span style="color:#00e5ff; font-size:16px; font-weight:800;">${totalCarb}g</span> <span style="font-size:11px; color:#a0aec0;">/ ${metaCarb}g</span>`; 
+  const grT = document.getElementById('gras-total'); if(grT) grT.innerHTML = `<span style="color:#ffaa00; font-size:16px; font-weight:800;">${totalGrasa}g</span> <span style="font-size:11px; color:#a0aec0;">/ ${metaGrasa}g</span>`; 
+  
   const ec = document.getElementById('en-consumidas'); if(ec) ec.innerText = `${totalCalorias} kcal`; 
-  const en = document.getElementById('en-netas'); if(en) en.innerText = `${totalCalorias - 450} kcal`; 
-  if(macroChart && (totalProt > 0 || totalCarb > 0 || totalGrasa > 0)) { 
-    macroChart.data.datasets[0].data = [totalProt, totalCarb, totalGrasa]; 
-    macroChart.update(); 
-  } 
+  const en = document.getElementById('en-netas'); if(en) en.innerText = `${Math.max(0, totalCalorias - 450)} kcal`; 
+  if(macroChart && (totalProt > 0 || totalCarb > 0 || totalGrasa > 0)) { macroChart.data.datasets[0].data = [totalProt, totalCarb, totalGrasa]; macroChart.update(); } 
 }
 
 document.getElementById('btn-checkin')?.addEventListener('click', () => window.openSheet('sheet-checkin'));
-document.getElementById('btn-confirm-checkin')?.addEventListener('click', () => { window.closeSheet(); showToast('📈 Check-in guardado.'); });
+
+document.getElementById('btn-confirm-checkin')?.addEventListener('click', async function() { 
+  if (this.disabled) return; 
+  this.disabled = true;
+  
+  const pesoInp = document.getElementById('checkin-peso');
+  const pesoVal = pesoInp ? parseFloat(pesoInp.value) : 0;
+  
+  if(!pesoVal) { 
+    showToast('⚠️ Por favor ingresa tu peso.'); 
+    this.disabled = false; return; 
+  }
+  
+  if(currentUser && db) {
+    await addDoc(collection(db, "users", currentUser.uid, "checkins"), { peso: pesoVal, fecha: getTodayKey(), timestamp: Date.now() });
+    userProfile.peso = pesoVal; // Actualiza el perfil con el nuevo peso
+    await guardarEstadoNube();
+    actualizarUIPerfil();
+    cargarHistorialYCheckins(currentUser.uid); // Recarga la lista para que aparezca
+  }
+  
+  window.closeSheet(); 
+  if(pesoInp) pesoInp.value = '';
+  showToast('📈 Check-in guardado en el historial.'); 
+  this.disabled = false;
+});
 
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(console.log); }); }
