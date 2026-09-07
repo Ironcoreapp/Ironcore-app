@@ -320,9 +320,6 @@ window.agregarComentario = async (postId) => { const inp = document.getElementBy
 window.aceptarSolicitud = async (reqDocId, fromUid, fromNickname) => { const friendsRef = window.collection(window.db, "users", window.currentUser.uid, "friends"); const checkDup = await window.getDocs(window.query(friendsRef, window.where("friendUid", "==", fromUid))); if(checkDup.empty) { await window.addDoc(friendsRef, { friendUid: fromUid, friendNickname: fromNickname, timestamp: Date.now() }); await window.addDoc(window.collection(window.db, "users", fromUid, "friends"), { friendUid: window.currentUser.uid, friendNickname: userProfile.nickname, timestamp: Date.now() }); } await window.deleteDoc(window.doc(window.db, "users", window.currentUser.uid, "friend_requests", reqDocId)); const sentQ = window.query(window.collection(window.db, "users", fromUid, "sent_requests"), window.where("toUid", "==", window.currentUser.uid)); const sentSnap = await window.getDocs(sentQ); sentSnap.forEach(async (d) => await window.deleteDoc(d.ref)); window.showToast(`⚔️ ¡Alianza forjada!`); window.cargarSolicitudesYAmigosSocial(); window.cargarMuroSocialPrivado(); };
 window.eliminarAmigo = async (friendDocId, friendUid) => { if(!confirm("¿Cortar el lazo con este guerrero?")) return; await window.deleteDoc(window.doc(window.db, "users", window.currentUser.uid, "friends", friendDocId)); const reciprocalQuery = window.query(window.collection(window.db, "users", friendUid, "friends"), window.where("friendUid", "==", window.currentUser.uid)); const recSnap = await window.getDocs(reciprocalQuery); recSnap.forEach(async (rDoc) => { await window.deleteDoc(rDoc.ref); }); window.showToast("🗑️ Vínculo roto."); window.cargarSolicitudesYAmigosSocial(); window.cargarMuroSocialPrivado(); };
 
-// INITIALIZE PWA SERVICE WORKER
-if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(console.log); }); }
-
 // --- VINCULACIÓN DIRECTA DEL BOTÓN DE GOOGLE ---
 document.addEventListener('DOMContentLoaded', () => {
   const loginBtn = document.getElementById('btn-google-login');
@@ -340,3 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 });
+
+// INITIALIZE PWA SERVICE WORKER
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(console.log); }); }
+
+
