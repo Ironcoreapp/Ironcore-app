@@ -1,5 +1,5 @@
 // ============================================================================
-// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM, DASHBOARD GRID Y RED SOCIAL ---
+// --- INYECCIÓN DINÁMICA DE ESTILOS PREMIUM, DASHBOARD Y RED SOCIAL ---
 // ============================================================================
 const customCSS = `
   header, .top-header, #main-header {
@@ -69,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
     rankElem.classList.add('user-badge-mini'); streakElem.classList.add('user-badge-mini');
   }
 
-  // Inyectar Pestaña o Sección Social en el menú si se desea, o dejarla en Perfil
   const genBtn = document.getElementById('btn-generar-rutina');
   if(genBtn && !document.getElementById('check-warmup')) {
     const fasesDiv = document.createElement('div');
@@ -276,7 +275,7 @@ async function inicializarBases() {
 }
 inicializarBases();
 
-// --- INYECCIÓN Y CREACIÓN DEL GRÁFICO DE PERFIL SEGURO ---
+// --- GRÁFICO DE PERFIL ---
 let profileChartInstance = null;
 function dibujarGraficoPerfil(historialPesos) {
   const tabProfile = document.getElementById('page-profile');
@@ -297,7 +296,6 @@ function dibujarGraficoPerfil(historialPesos) {
 
   const ctx = document.getElementById('profile-chart-canvas');
   if(!ctx) return;
-
   if(profileChartInstance) profileChartInstance.destroy();
 
   const labels = historialPesos.map(item => item.fecha.split('-').slice(1).join('/')); 
@@ -319,7 +317,7 @@ function dibujarGraficoPerfil(historialPesos) {
   });
 }
 
-// --- LEADERBOARD COMPLETO ---
+// --- LEADERBOARD ---
 const rangos = [ 
   { nombre: "Ashigaru", minRatio: 0, color: "#6b7c93" }, 
   { nombre: "Rōnin", minRatio: 1.5, color: "#ffaa00" }, 
@@ -371,7 +369,7 @@ async function cargarLeaderboard() {
     const q = query(collection(db, "leaderboard"), orderBy("multiplicador", "desc"), limit(20)); 
     const snapshot = await getDocs(q); 
     if(snapshot.empty) { 
-      container.innerHTML = `<p style="font-size: 12px; color: #9ca3af; text-align: center;">El dojo está vacío.</p>`; 
+      container.innerHTML = `<p style="font-size: 12px; color: #9ca3af; text-align: center;">El dojo está vacío.</p>"; 
       return; 
     } 
     let html = "", pos = 1; 
@@ -389,7 +387,7 @@ async function cargarLeaderboard() {
 }
 document.getElementById('btn-refresh-leaderboard')?.addEventListener('click', cargarLeaderboard);
 
-// --- MÓDULO SOCIAL Y SOLICITUDES DE AMISTAD ---
+// --- MÓDULO SOCIAL, AMIGOS Y MURO (FEED) PRIVADO ---
 function inyectarModuloSocial() {
   const tabProfile = document.getElementById('page-profile');
   if(!tabProfile || document.getElementById('social-friends-card')) return;
@@ -410,6 +408,16 @@ function inyectarModuloSocial() {
       
       <h5 style="font-size: 11px; color: #00e5ff; text-transform: uppercase; font-weight: 800; margin: 15px 0 8px 0;">⚔️ Tus Amigos Conectados</h5>
       <div id="my-friends-list" style="font-size:12px; color:#9ca3af;">No hay amigos en la cofradía aún.</div>
+
+      <!-- MURO SOCIAL (FEED) -->
+      <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+        <h4 style="font-size: 12px; color: #ffaa00; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 10px;">📰 Muro de la Cofradía</h4>
+        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+          <textarea id="social-post-text" class="iron-input-modern" placeholder="Comparte tu progreso o rutina con la cofradía..." style="height: 60px; font-size:12px; resize:none;"></textarea>
+          <button id="btn-publish-social" class="iron-btn-primary" style="padding: 8px; font-size:12px; margin-top:8px;">📢 Publicar en el Muro</button>
+        </div>
+        <div id="social-feed-container">Cargando muro...</div>
+      </div>
     </div>
   `;
   tabProfile.appendChild(socialCard);
@@ -446,15 +454,18 @@ function inyectarModuloSocial() {
       `;
 
       document.getElementById('btn-send-req').onclick = async () => {
-        // Crear documento de solicitud en subcolección de amigo
-        await addDoc(collection(db, "users", friendDocId, "friend_requests"), {
-          fromUid: currentUser.uid,
-          fromNickname: userProfile.nickname,
-          status: "pendiente",
-          timestamp: Date.now()
-        });
-        showToast("✅ Solicitud enviada con éxito.");
-        resBox.innerHTML = '';
+        try {
+          await addDoc(collection(db, "users", friendDocId, "friend_requests"), {
+            fromUid: currentUser.uid,
+            fromNickname: userProfile.nickname,
+            status: "pendiente",
+            timestamp: Date.now()
+          });
+          showToast("✅ Solicitud enviada con éxito.");
+          resBox.innerHTML = '';
+        } catch(e) {
+          showToast("❌ Error al enviar solicitud. Revisa permisos.");
+        }
       };
 
     } catch(err) {
@@ -462,7 +473,27 @@ function inyectarModuloSocial() {
     }
   });
 
+  document.getElementById('btn-publish-social')?.addEventListener('click', async () => {
+    const txt = document.getElementById('social-post-text').value.trim();
+    if(!txt) return;
+    try {
+      await addDoc(collection(db, "social_posts"), {
+        uid: currentUser.uid,
+        author: userProfile.nickname,
+        rango: currentRankName,
+        content: txt,
+        timestamp: Date.now()
+      });
+      document.getElementById('social-post-text').value = '';
+      showToast("📢 ¡Publicado en el muro!");
+      cargarMuroSocial();
+    } catch(e) {
+      showToast("❌ Error al publicar.");
+    }
+  });
+
   cargarSolicitudesYAmigos();
+  cargarMuroSocial();
 }
 
 async function cargarSolicitudesYAmigos() {
@@ -470,47 +501,69 @@ async function cargarSolicitudesYAmigos() {
   const reqContainer = document.getElementById('friend-requests-list');
   const friendsContainer = document.getElementById('my-friends-list');
 
-  // 1. Cargar Solicitudes Entrantes
-  const reqSnap = await getDocs(collection(db, "users", currentUser.uid, "friend_requests"));
-  let reqHtml = '';
-  reqSnap.forEach(d => {
-    let req = d.data();
-    if(req.status === 'pendiente') {
-      reqHtml += `
-        <div style="background:rgba(255,170,0,0.05); border:1px solid rgba(255,170,0,0.2); padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-          <span><b>${req.fromNickname}</b> quiere unirse a tu cofradía</span>
-          <div>
-            <button onclick="window.aceptarSolicitud('${d.id}', '${req.fromUid}', '${req.fromNickname}')" style="background:#00e5ff; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer;">Aceptar</button>
+  try {
+    const reqSnap = await getDocs(collection(db, "users", currentUser.uid, "friend_requests"));
+    let reqHtml = '';
+    reqSnap.forEach(d => {
+      let req = d.data();
+      if(req.status === 'pendiente') {
+        reqHtml += `
+          <div style="background:rgba(255,170,0,0.05); border:1px solid rgba(255,170,0,0.2); padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <span><b>${req.fromNickname}</b> quiere unirse a tu cofradía</span>
+            <button onclick="window.aceptarSolicitud('${d.id}', '${req.fromUid}', '${req.fromNickname}')" style="background:#00e5ff; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; color:#111827;">Aceptar</button>
           </div>
+        `;
+      }
+    });
+    if(reqContainer) reqContainer.innerHTML = reqHtml || 'No hay solicitudes pendientes.';
+
+    const friendsSnap = await getDocs(collection(db, "users", currentUser.uid, "friends"));
+    let friendHtml = '';
+    friendsSnap.forEach(d => {
+      let f = d.data();
+      friendHtml += `
+        <div style="background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.2); padding:8px; border-radius:6px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+          <span>⚔️ <b>${f.friendNickname}</b></span>
+          <button onclick="window.verPerfilAmigo('${f.friendUid}')" style="background:transparent; color:#00e5ff; border:1px solid #00e5ff; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">Ver Expediente</button>
         </div>
       `;
-    }
-  });
-  if(reqContainer) reqContainer.innerHTML = reqHtml || 'No hay solicitudes pendientes.';
+    });
+    if(friendsContainer) friendsContainer.innerHTML = friendHtml || 'Aún no tienes amigos en la cofradía.';
+  } catch(e) { console.error(e); }
+}
 
-  // 2. Cargar Amigos Aceptados
-  const friendsSnap = await getDocs(collection(db, "users", currentUser.uid, "friends"));
-  let friendHtml = '';
-  friendsSnap.forEach(d => {
-    let f = d.data();
-    friendHtml += `
-      <div style="background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.2); padding:8px; border-radius:6px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
-        <span>⚔️ <b>${f.friendNickname}</b></span>
-        <button onclick="window.verPerfilAmigo('${f.friendUid}')" style="background:transparent; color:#00e5ff; border:1px solid #00e5ff; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">Ver Perfil</button>
-      </div>
-    `;
-  });
-  if(friendsContainer) friendsContainer.innerHTML = friendHtml || 'Aún no tienes amigos en la cofradía.';
+async function cargarMuroSocial() {
+  const feedContainer = document.getElementById('social-feed-container');
+  if(!feedContainer || !db) return;
+  try {
+    const q = query(collection(db, "social_posts"), orderBy("timestamp", "desc"), limit(20));
+    const snaps = await getDocs(q);
+    let html = '';
+    snaps.forEach(d => {
+      let post = d.data();
+      html += `
+        <div class="social-post-card">
+          <div class="social-post-header">
+            <img class="social-post-avatar" src="${generarAvatarPorRango(post.author, post.rango || 'Ashigaru')}">
+            <div>
+              <b style="color:#fff; font-size:13px;">${post.author}</b><br>
+              <span style="font-size:9px; color:#ffaa00;">${post.rango || 'Guerrero'} • ${new Date(post.timestamp).toLocaleDateString()}</span>
+            </div>
+          </div>
+          <div class="social-post-body">${post.content}</div>
+        </div>
+      `;
+    });
+    feedContainer.innerHTML = html || '<p style="font-size:12px; color:#9ca3af; text-align:center;">El muro está silencioso. ¡Sé el primero en publicar!</p>';
+  } catch(e) {
+    feedContainer.innerHTML = '<p style="font-size:12px; color:#ff3366;">Error cargando muro social.</p>';
+  }
 }
 
 window.aceptarSolicitud = async function(reqDocId, fromUid, fromNickname) {
-  // Añadir a amigos del usuario actual
   await addDoc(collection(db, "users", currentUser.uid, "friends"), { friendUid: fromUid, friendNickname: fromNickname, timestamp: Date.now() });
-  // Añadir al usuario actual en la lista de amigos del solicitante
   await addDoc(collection(db, "users", fromUid, "friends"), { friendUid: currentUser.uid, friendNickname: userProfile.nickname, timestamp: Date.now() });
-  // Borrar la solicitud
   await deleteDoc(doc(db, "users", currentUser.uid, "friend_requests", reqDocId));
-  
   showToast(`⚔️ ¡Ahora ${fromNickname} es parte de tu cofradía!`);
   cargarHistorialYCheckins(currentUser.uid);
 };
@@ -520,7 +573,6 @@ window.verPerfilAmigo = async function(friendUid) {
   if(!docSnap.exists()) { showToast("⚠️ No se encontró al usuario."); return; }
   const data = docSnap.data();
 
-  // Abrir un sheet o modal mostrando sus datos básicos y última rutina
   const container = document.getElementById('sheet-workout');
   if(!container) return;
   container.innerHTML = `
@@ -528,12 +580,12 @@ window.verPerfilAmigo = async function(friendUid) {
       <img src="${generarAvatarPorRango(data.nickname, data.currentRankName || 'Ashigaru')}" style="width:70px; height:70px; border-radius:50%; border:2px solid #00e5ff; margin-bottom:10px;">
       <h3 style="color:#fff; font-weight:900; text-transform:uppercase;">${data.nickname}</h3>
       <p style="color:#ffaa00; font-size:12px; font-weight:bold; margin-bottom:15px;">Rango: ${data.currentRankName || 'Ashigaru'}</p>
-      <div style="background:#111827; padding:12px; border-radius:8px; text-align:left; font-size:12px; color:#9ca3af;">
+      <div style="background:#111827; padding:12px; border-radius:8px; text-align:left; font-size:12px; color:#9ca3af; margin-bottom:15px;">
         <p><b>Peso Actual:</b> ${data.peso || '--'} kg</p>
         <p><b>Altura:</b> ${data.altura || '--'} cm</p>
         <p><b>Meta:</b> ${data.metaObj === 300 ? 'Volumen' : 'Definición / Mantenimiento'}</p>
       </div>
-      <button class="iron-btn-primary" onclick="window.closeSheet()" style="margin-top:20px;">Cerrar Expediente</button>
+      <button class="iron-btn-primary" onclick="window.closeSheet()">Cerrar Expediente</button>
     </div>
   `;
   window.openSheet('sheet-workout');
