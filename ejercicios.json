@@ -6,8 +6,8 @@
     "musculoPrincipal": "Cuádriceps / Glúteos",
     "equipamiento": ["gimnasio", "barra"],
     "nivel": "intermedio",
-    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Sentadilla+Barra",
-    "tips": "Rompe el paralelo si tu movilidad lo permite. Mantén el pecho arriba."
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Sentadilla+Barra",
+    "tips": "Rompe el paralelo si tu movilidad lo permite. Mantén el pecho arriba y la mirada al frente."
   },
   {
     "id": 2,
@@ -16,7 +16,7 @@
     "musculoPrincipal": "Pectoral Mayor",
     "equipamiento": ["corporal"],
     "nivel": "principiante",
-    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Push-ups",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Push-ups",
     "tips": "Baja controlado. Mantén el core apretado para no curvar la zona lumbar."
   },
   {
@@ -24,9 +24,9 @@
     "nombre": "Dominadas Estrictas (Pull-ups)",
     "grupo": "espalda",
     "musculoPrincipal": "Dorsal Ancho",
-    "equipamiento": ["corporal", "barra-dominadas"],
+    "equipamiento": ["corporal", "gimnasio"],
     "nivel": "intermedio",
-    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Dominadas",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Dominadas",
     "tips": "Inicia el movimiento juntando las escápulas. Rango de movimiento completo."
   },
   {
@@ -36,7 +36,7 @@
     "musculoPrincipal": "Pectoral Mayor / Tríceps",
     "equipamiento": ["gimnasio", "barra"],
     "nivel": "intermedio",
-    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Press+Banca",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Press+Banca",
     "tips": "Haz retracción escapular y planta los pies firmes en el suelo (Leg Drive)."
   },
   {
@@ -46,7 +46,7 @@
     "musculoPrincipal": "Isquiosurales / Espalda Baja",
     "equipamiento": ["gimnasio", "barra"],
     "nivel": "avanzado",
-    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Peso+Muerto",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Peso+Muerto",
     "tips": "La barra debe rozar tus tibias. Tira con las piernas, no jales con la espalda."
   },
   {
@@ -56,7 +56,7 @@
     "musculoPrincipal": "Deltoides Anterior",
     "equipamiento": ["gimnasio", "mancuernas"],
     "nivel": "principiante",
-    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Press+Militar",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Press+Militar",
     "tips": "No arquees la espalda baja. Controla la fase excéntrica (bajada)."
   },
   {
@@ -66,7 +66,7 @@
     "musculoPrincipal": "Cuádriceps / Glúteos",
     "equipamiento": ["gimnasio", "mancuernas", "corporal"],
     "nivel": "intermedio",
-    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Bulgaras",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Bulgaras",
     "tips": "Si inclinas el torso hacia adelante, enfocarás más el trabajo en el glúteo."
   },
   {
@@ -76,7 +76,7 @@
     "musculoPrincipal": "Pectoral Inferior / Tríceps",
     "equipamiento": ["corporal", "gimnasio"],
     "nivel": "intermedio",
-    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Fondos+Dips",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Fondos+Dips",
     "tips": "Inclínate hacia adelante para enfocar el pecho. Mantente recto para tríceps."
   },
   {
@@ -86,7 +86,7 @@
     "musculoPrincipal": "Dorsal Ancho",
     "equipamiento": ["gimnasio", "mancuernas"],
     "nivel": "principiante",
-    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Remo+Mancuerna",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Remo+Mancuerna",
     "tips": "Lleva el codo hacia la cadera en lugar de subirlo directo hacia el techo."
   },
   {
@@ -96,7 +96,57 @@
     "musculoPrincipal": "Recto Abdominal",
     "equipamiento": ["corporal"],
     "nivel": "principiante",
-    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Plank",
-    "tips": "Aprieta los glúteos y retroversión pélvica para máxima activación."
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Plank",
+    "tips": "Aprieta los glúteos y haz retroversión pélvica para máxima activación."
+  },
+  {
+    "id": 11,
+    "nombre": "Curl de Bíceps con Mancuernas",
+    "grupo": "brazos",
+    "musculoPrincipal": "Bíceps Braquial",
+    "equipamiento": ["gimnasio", "mancuernas"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Curl+Biceps",
+    "tips": "Mantén los codos pegados a las costillas. No uses el impulso de la espalda."
+  },
+  {
+    "id": 12,
+    "nombre": "Extensión de Tríceps en Polea",
+    "grupo": "brazos",
+    "musculoPrincipal": "Tríceps Braquial",
+    "equipamiento": ["gimnasio", "polea"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Triceps+Polea",
+    "tips": "Abre la cuerda al final del movimiento para una contracción máxima."
+  },
+  {
+    "id": 13,
+    "nombre": "Prensa de Piernas (Leg Press)",
+    "grupo": "piernas",
+    "musculoPrincipal": "Cuádriceps",
+    "equipamiento": ["gimnasio", "maquina"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Leg+Press",
+    "tips": "No bloquees ni trabes las rodillas al estirar las piernas. Mantén tensión constante."
+  },
+  {
+    "id": 14,
+    "nombre": "Remo en Máquina Sentado",
+    "grupo": "espalda",
+    "musculoPrincipal": "Dorsal y Romboides",
+    "equipamiento": ["gimnasio", "maquina"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Remo+Maquina",
+    "tips": "Mantén el pecho pegado a la almohadilla y tira desde los codos."
+  },
+  {
+    "id": 15,
+    "nombre": "Elevaciones Laterales",
+    "grupo": "hombros",
+    "musculoPrincipal": "Deltoides Lateral",
+    "equipamiento": ["gimnasio", "mancuernas", "polea"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x400/141a26/00e5ff&text=Elevaciones+Lat",
+    "tips": "Sube el peso como si estuvieras vaciando una jarra de agua. Ligeramente hacia adelante."
   }
 ]
