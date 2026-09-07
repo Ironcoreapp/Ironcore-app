@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "nombre": "Sentadilla Libre con Barra",
+    "grupo": "piernas",
+    "musculoPrincipal": "Cuádriceps / Glúteos",
+    "equipamiento": ["gimnasio", "barra"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Sentadilla+Barra",
+    "tips": "Rompe el paralelo si tu movilidad lo permite. Mantén el pecho arriba."
+  },
+  {
+    "id": 2,
+    "nombre": "Flexiones de Brazo (Push-ups)",
+    "grupo": "pecho",
+    "musculoPrincipal": "Pectoral Mayor",
+    "equipamiento": ["corporal"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Push-ups",
+    "tips": "Baja controlado. Mantén el core apretado para no curvar la zona lumbar."
+  },
+  {
+    "id": 3,
+    "nombre": "Dominadas Estrictas (Pull-ups)",
+    "grupo": "espalda",
+    "musculoPrincipal": "Dorsal Ancho",
+    "equipamiento": ["corporal", "barra-dominadas"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Dominadas",
+    "tips": "Inicia el movimiento juntando las escápulas. Rango de movimiento completo."
+  },
+  {
+    "id": 4,
+    "nombre": "Press de Banca Plano",
+    "grupo": "pecho",
+    "musculoPrincipal": "Pectoral Mayor / Tríceps",
+    "equipamiento": ["gimnasio", "barra"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Press+Banca",
+    "tips": "Haz retracción escapular y planta los pies firmes en el suelo (Leg Drive)."
+  },
+  {
+    "id": 5,
+    "nombre": "Peso Muerto Convencional",
+    "grupo": "piernas",
+    "musculoPrincipal": "Isquiosurales / Espalda Baja",
+    "equipamiento": ["gimnasio", "barra"],
+    "nivel": "avanzado",
+    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Peso+Muerto",
+    "tips": "La barra debe rozar tus tibias. Tira con las piernas, no jales con la espalda."
+  },
+  {
+    "id": 6,
+    "nombre": "Press Militar con Mancuernas",
+    "grupo": "hombros",
+    "musculoPrincipal": "Deltoides Anterior",
+    "equipamiento": ["gimnasio", "mancuernas"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Press+Militar",
+    "tips": "No arquees la espalda baja. Controla la fase excéntrica (bajada)."
+  },
+  {
+    "id": 7,
+    "nombre": "Sentadilla Búlgara",
+    "grupo": "piernas",
+    "musculoPrincipal": "Cuádriceps / Glúteos",
+    "equipamiento": ["gimnasio", "mancuernas", "corporal"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Bulgaras",
+    "tips": "Si inclinas el torso hacia adelante, enfocarás más el trabajo en el glúteo."
+  },
+  {
+    "id": 8,
+    "nombre": "Fondos en Paralelas (Dips)",
+    "grupo": "pecho",
+    "musculoPrincipal": "Pectoral Inferior / Tríceps",
+    "equipamiento": ["corporal", "gimnasio"],
+    "nivel": "intermedio",
+    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Fondos+Dips",
+    "tips": "Inclínate hacia adelante para enfocar el pecho. Mantente recto para tríceps."
+  },
+  {
+    "id": 9,
+    "nombre": "Remo con Mancuerna a Una Mano",
+    "grupo": "espalda",
+    "musculoPrincipal": "Dorsal Ancho",
+    "equipamiento": ["gimnasio", "mancuernas"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Remo+Mancuerna",
+    "tips": "Lleva el codo hacia la cadera en lugar de subirlo directo hacia el techo."
+  },
+  {
+    "id": 10,
+    "nombre": "Plancha Abdominal (Plank)",
+    "grupo": "core",
+    "musculoPrincipal": "Recto Abdominal",
+    "equipamiento": ["corporal"],
+    "nivel": "principiante",
+    "imagen": "https://dummyimage.com/400x300/141a26/00e5ff&text=Plank",
+    "tips": "Aprieta los glúteos y retroversión pélvica para máxima activación."
+  }
+]
