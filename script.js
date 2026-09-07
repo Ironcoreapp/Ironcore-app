@@ -138,50 +138,219 @@ function actualizarUIPerfil() {
   if(currentUser && currentUser.photoURL) document.getElementById('profile-card-avatar').src = currentUser.photoURL;
 }
 
-// --- EL ORÁCULO NUTRICIONAL (MOTOR CLÍNICO DE ALTA PRECISIÓN) ---
+// --- EL ORÁCULO NUTRICIONAL (IA CLÍNICA Y BASE DE DATOS) ---
 
-// Base de Datos Estructurada con Gramajes Reales
+// Base de datos inteligente: Note los tags "isDense", "isVolume" y "glutenFree"
 const oracleDB = [
-  // 🌅 DESAYUNOS (Base: ~400 kcal)
-  { id: 1, tipo: 'desayuno', dietas: ['normal', 'lowcarb', 'vegetariano'], name: 'Huevos Revueltos con Palta', calBase: 400, prot: 24, carb: 15, gras: 28, 
-    ingredientes: [ { nombre: 'Huevos enteros', baseQty: 3, unidad: 'unidades' }, { nombre: 'Palta Hass', baseQty: 50, unidad: 'g' }, { nombre: 'Pan integral', baseQty: 1, unidad: 'rebanadas' }, { nombre: 'Aceite de oliva', baseQty: 5, unidad: 'ml' } ] },
-  { id: 2, tipo: 'desayuno', dietas: ['normal', 'vegetariano'], name: 'Avena Proteica', calBase: 400, prot: 30, carb: 50, gras: 8, 
-    ingredientes: [ { nombre: 'Avena tradicional', baseQty: 60, unidad: 'g' }, { nombre: 'Proteína Whey (Suero)', baseQty: 1, unidad: 'scoop' }, { nombre: 'Leche descremada', baseQty: 150, unidad: 'ml' }, { nombre: 'Arándanos', baseQty: 50, unidad: 'g' } ] },
-  { id: 3, tipo: 'desayuno', dietas: ['vegano', 'lowcarb'], name: 'Tofu Scramble', calBase: 400, prot: 25, carb: 12, gras: 26, 
-    ingredientes: [ { nombre: 'Tofu firme', baseQty: 150, unidad: 'g' }, { nombre: 'Espinaca fresca', baseQty: 50, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 10, unidad: 'ml' }, { nombre: 'Pan de masa madre', baseQty: 1, unidad: 'rebanadas' } ] },
-  { id: 4, tipo: 'desayuno', dietas: ['keto', 'lowcarb'], name: 'Huevos con Tocino Crujiente', calBase: 400, prot: 26, carb: 2, gras: 32, 
-    ingredientes: [ { nombre: 'Huevos enteros', baseQty: 3, unidad: 'unidades' }, { nombre: 'Tocino ahumado', baseQty: 30, unidad: 'g' }, { nombre: 'Mantequilla', baseQty: 10, unidad: 'g' } ] },
+  // 🌅 DESAYUNOS
+  { id: 1, tipo: 'desayuno', dietas: ['normal', 'lowcarb', 'vegetariano'], name: 'Huevos Revueltos con Palta', calBase: 400, prot: 24, carb: 15, gras: 28, glutenFree: true, isVolume: true, isDense: false,
+    ingredientes: [ { nombre: 'Huevos enteros', baseQty: 3, unidad: 'unidades' }, { nombre: 'Palta Hass', baseQty: 50, unidad: 'g' }, { nombre: 'Pan sin gluten / Arepa', baseQty: 1, unidad: 'porción' } ] },
+  { id: 2, tipo: 'desayuno', dietas: ['normal', 'vegetariano'], name: 'Avena Proteica Densidad', calBase: 500, prot: 30, carb: 65, gras: 12, glutenFree: false, isVolume: false, isDense: true,
+    ingredientes: [ { nombre: 'Avena tradicional', baseQty: 80, unidad: 'g' }, { nombre: 'Proteína Whey', baseQty: 1, unidad: 'scoop' }, { nombre: 'Mantequilla de maní', baseQty: 15, unidad: 'g' } ] },
+  { id: 3, tipo: 'desayuno', dietas: ['vegano', 'lowcarb'], name: 'Tofu Scramble', calBase: 350, prot: 25, carb: 12, gras: 20, glutenFree: true, isVolume: true, isDense: false,
+    ingredientes: [ { nombre: 'Tofu firme', baseQty: 150, unidad: 'g' }, { nombre: 'Espinaca fresca', baseQty: 100, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 10, unidad: 'ml' } ] },
   
-  // 🍽️ ALMUERZOS (Base: ~600 kcal)
-  { id: 5, tipo: 'almuerzo', dietas: ['normal'], name: 'Pollo y Arroz del Guerrero', calBase: 600, prot: 55, carb: 70, gras: 10, 
-    ingredientes: [ { nombre: 'Pechuga de pollo magra', baseQty: 200, unidad: 'g' }, { nombre: 'Arroz blanco crudo', baseQty: 80, unidad: 'g' }, { nombre: 'Brócoli', baseQty: 100, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 5, unidad: 'ml' } ] },
-  { id: 6, tipo: 'almuerzo', dietas: ['normal', 'lowcarb'], name: 'Salmón Salvaje con Espárragos', calBase: 600, prot: 45, carb: 15, gras: 40, 
-    ingredientes: [ { nombre: 'Filete de salmón', baseQty: 200, unidad: 'g' }, { nombre: 'Espárragos frescos', baseQty: 150, unidad: 'g' }, { nombre: 'Mix de hojas verdes', baseQty: 100, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 15, unidad: 'ml' } ] },
-  { id: 7, tipo: 'almuerzo', dietas: ['vegano', 'vegetariano'], name: 'Guiso de Lentejas y Quinoa', calBase: 600, prot: 35, carb: 90, gras: 12, 
-    ingredientes: [ { nombre: 'Lentejas crudas', baseQty: 80, unidad: 'g' }, { nombre: 'Quinoa cruda', baseQty: 50, unidad: 'g' }, { nombre: 'Zanahoria', baseQty: 50, unidad: 'g' }, { nombre: 'Semillas de zapallo', baseQty: 15, unidad: 'g' } ] },
-  { id: 8, tipo: 'almuerzo', dietas: ['keto', 'lowcarb'], name: 'Cerdo Asado con Palta', calBase: 600, prot: 45, carb: 8, gras: 45, 
-    ingredientes: [ { nombre: 'Chuleta de cerdo magra', baseQty: 200, unidad: 'g' }, { nombre: 'Palta Hass', baseQty: 100, unidad: 'g' }, { nombre: 'Mix de lechugas', baseQty: 100, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 10, unidad: 'ml' } ] },
+  // 🍽️ ALMUERZOS
+  { id: 4, tipo: 'almuerzo', dietas: ['normal'], name: 'Pollo y Arroz Clásico', calBase: 600, prot: 55, carb: 70, gras: 10, glutenFree: true, isVolume: false, isDense: true,
+    ingredientes: [ { nombre: 'Pechuga de pollo magra', baseQty: 200, unidad: 'g' }, { nombre: 'Arroz blanco crudo', baseQty: 80, unidad: 'g' }, { nombre: 'Brócoli', baseQty: 100, unidad: 'g' } ] },
+  { id: 5, tipo: 'almuerzo', dietas: ['normal'], name: 'Pasta Boloñesa de Volumen', calBase: 800, prot: 50, carb: 100, gras: 20, glutenFree: false, isVolume: false, isDense: true,
+    ingredientes: [ { nombre: 'Fideos / Pasta seca', baseQty: 120, unidad: 'g' }, { nombre: 'Carne molida magra', baseQty: 180, unidad: 'g' }, { nombre: 'Salsa de tomate natural', baseQty: 100, unidad: 'ml' } ] },
+  { id: 6, tipo: 'almuerzo', dietas: ['normal', 'lowcarb'], name: 'Pescado Blanco con Ensalada Gigante', calBase: 400, prot: 45, carb: 10, gras: 15, glutenFree: true, isVolume: true, isDense: false,
+    ingredientes: [ { nombre: 'Pescado blanco (Merluza/Reineta)', baseQty: 250, unidad: 'g' }, { nombre: 'Mix de lechuga y pepino', baseQty: 200, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 10, unidad: 'ml' } ] },
+  { id: 7, tipo: 'almuerzo', dietas: ['vegano', 'vegetariano'], name: 'Guiso de Lentejas y Quinoa', calBase: 600, prot: 35, carb: 90, gras: 12, glutenFree: true, isVolume: true, isDense: false,
+    ingredientes: [ { nombre: 'Lentejas crudas', baseQty: 80, unidad: 'g' }, { nombre: 'Quinoa cruda', baseQty: 50, unidad: 'g' }, { nombre: 'Zanahoria', baseQty: 50, unidad: 'g' } ] },
 
-  // 🌙 CENAS (Base: ~500 kcal)
-  { id: 9, tipo: 'cena', dietas: ['normal'], name: 'Lomo de Atún y Papas', calBase: 500, prot: 45, carb: 55, gras: 10, 
-    ingredientes: [ { nombre: 'Lomo de atún fresco', baseQty: 180, unidad: 'g' }, { nombre: 'Papa natural cruda', baseQty: 250, unidad: 'g' }, { nombre: 'Tomate', baseQty: 100, unidad: 'g' } ] },
-  { id: 10, tipo: 'cena', dietas: ['normal', 'lowcarb'], name: 'Filete Magro y Ensalada Verde', calBase: 500, prot: 50, carb: 10, gras: 28, 
-    ingredientes: [ { nombre: 'Posta rosada o filete magro', baseQty: 180, unidad: 'g' }, { nombre: 'Espinaca y lechuga', baseQty: 150, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 15, unidad: 'ml' } ] },
-  { id: 11, tipo: 'cena', dietas: ['keto'], name: 'Omelette Relleno de Queso', calBase: 500, prot: 35, carb: 4, gras: 39, 
-    ingredientes: [ { nombre: 'Huevos enteros', baseQty: 3, unidad: 'unidades' }, { nombre: 'Queso mantecoso/gauda', baseQty: 60, unidad: 'g' }, { nombre: 'Mantequilla', baseQty: 10, unidad: 'g' } ] },
+  // 🌙 CENAS
+  { id: 8, tipo: 'cena', dietas: ['normal', 'lowcarb'], name: 'Filete Magro y Verduras Verdes', calBase: 450, prot: 50, carb: 10, gras: 20, glutenFree: true, isVolume: true, isDense: false,
+    ingredientes: [ { nombre: 'Posta rosada o filete magro', baseQty: 180, unidad: 'g' }, { nombre: 'Espinaca y lechuga', baseQty: 150, unidad: 'g' }, { nombre: 'Aceite de oliva', baseQty: 10, unidad: 'ml' } ] },
+  { id: 9, tipo: 'cena', dietas: ['normal'], name: 'Fajitas de Pollo', calBase: 550, prot: 45, carb: 50, gras: 15, glutenFree: false, isVolume: false, isDense: true,
+    ingredientes: [ { nombre: 'Pechuga en tiras', baseQty: 180, unidad: 'g' }, { nombre: 'Tortillas de trigo', baseQty: 2, unidad: 'unidades' }, { nombre: 'Palta Hass', baseQty: 40, unidad: 'g' } ] },
+  { id: 10, tipo: 'cena', dietas: ['keto'], name: 'Omelette Relleno de Queso', calBase: 500, prot: 35, carb: 4, gras: 39, glutenFree: true, isVolume: false, isDense: true,
+    ingredientes: [ { nombre: 'Huevos enteros', baseQty: 3, unidad: 'unidades' }, { nombre: 'Queso mantecoso/gauda', baseQty: 60, unidad: 'g' } ] },
 
-  // 🍎 SNACKS (Base: ~300 kcal)
-  { id: 12, tipo: 'snack', dietas: ['normal', 'vegetariano', 'lowcarb'], name: 'Batido Proteico y Almendras', calBase: 300, prot: 30, carb: 10, gras: 15, 
-    ingredientes: [ { nombre: 'Proteína Whey (Suero)', baseQty: 1.5, unidad: 'scoops' }, { nombre: 'Almendras naturales', baseQty: 20, unidad: 'g' } ] },
-  { id: 13, tipo: 'snack', dietas: ['normal', 'vegetariano'], name: 'Yogur Griego y Plátano', calBase: 300, prot: 20, carb: 45, gras: 4, 
-    ingredientes: [ { nombre: 'Yogur griego sin azúcar', baseQty: 200, unidad: 'g' }, { nombre: 'Plátano mediano', baseQty: 1, unidad: 'unidades' } ] },
-  { id: 14, tipo: 'snack', dietas: ['vegano'], name: 'Batido Vegetal y Maní', calBase: 300, prot: 25, carb: 20, gras: 13, 
-    ingredientes: [ { nombre: 'Proteína Vegetal (Soya/Arveja)', baseQty: 1, unidad: 'scoop' }, { nombre: 'Leche de almendras', baseQty: 200, unidad: 'ml' }, { nombre: 'Mantequilla de maní', baseQty: 15, unidad: 'g' } ] },
-  { id: 15, tipo: 'snack', dietas: ['keto', 'lowcarb'], name: 'Mix de Nueces y Queso', calBase: 300, prot: 15, carb: 5, gras: 25, 
-    ingredientes: [ { nombre: 'Nueces mariposa', baseQty: 20, unidad: 'g' }, { nombre: 'Queso fresco/mantecoso', baseQty: 40, unidad: 'g' } ] }
+  // 🍎 SNACKS
+  { id: 11, tipo: 'snack', dietas: ['normal', 'vegetariano', 'lowcarb'], name: 'Batido Proteico Cero Carbos', calBase: 200, prot: 30, carb: 3, gras: 2, glutenFree: true, isVolume: true, isDense: false,
+    ingredientes: [ { nombre: 'Proteína Whey Isolate', baseQty: 1.5, unidad: 'scoops' }, { nombre: 'Agua fría', baseQty: 300, unidad: 'ml' } ] },
+  { id: 12, tipo: 'snack', dietas: ['normal', 'vegetariano'], name: 'Snack de Volumen: Nueces y Plátano', calBase: 400, prot: 10, carb: 40, gras: 25, glutenFree: true, isVolume: false, isDense: true,
+    ingredientes: [ { nombre: 'Nueces o Almendras', baseQty: 40, unidad: 'g' }, { nombre: 'Plátano', baseQty: 1, unidad: 'unidades' } ] },
+  { id: 13, tipo: 'snack', dietas: ['vegano'], name: 'Galletas de Arroz y Hummus', calBase: 250, prot: 8, carb: 35, gras: 8, glutenFree: true, isVolume: true, isDense: false,
+    ingredientes: [ { nombre: 'Galletas de arroz inflado', baseQty: 3, unidad: 'unidades' }, { nombre: 'Hummus de garbanzo', baseQty: 40, unidad: 'g' } ] }
 ];
 
+let weeklyPlan = [];
+let currentDietType = 'normal';
+let isCeliac = false;
+let currentAllergies = [];
+let selectedDayIndex = 0;
 
+// Actualizar UI para mostrar a la IA la meta del usuario
+function actualizarLabelMetaIA() {
+  let label = "Mantenimiento";
+  if(userProfile.metaObj < 0) label = "Déficit Agresivo / Definición (Prioridad: Saciedad)";
+  if(userProfile.metaObj > 0) label = "Volumen / Hipertrofia (Prioridad: Densidad Energética)";
+  const metaLabel = document.getElementById('oracle-target-goal');
+  if(metaLabel) metaLabel.innerText = label;
+}
+// Asegúrate de llamar a esta función cuando cargas el perfil en cargarDatosDesdeNube()
+setTimeout(actualizarLabelMetaIA, 2000);
+
+document.getElementById('btn-generar-plan')?.addEventListener('click', () => {
+  currentDietType = document.getElementById('oracle-diet-type').value;
+  isCeliac = document.getElementById('oracle-celiac').checked;
+  
+  let rawAlergias = document.getElementById('oracle-allergies').value.toLowerCase();
+  currentAllergies = rawAlergias.split(',').map(a => a.trim()).filter(a => a !== "");
+  
+  generarPlanSemanal();
+  
+  document.getElementById('oracle-form-card').style.display = 'none';
+  document.getElementById('plan-resultado').style.display = 'block';
+  showToast('🤖 IA: Plan optimizado para tu genética generado.');
+});
+
+document.getElementById('oracle-day-selector')?.addEventListener('change', (e) => {
+  selectedDayIndex = parseInt(e.target.value);
+  renderizarDiaSeleccionado();
+});
+
+function generarPlanSemanal() {
+  weeklyPlan = [];
+  const distribution = [
+    { tipo: 'desayuno', cals: metaCalorias * 0.25 },
+    { tipo: 'almuerzo', cals: metaCalorias * 0.35 },
+    { tipo: 'cena', cals: metaCalorias * 0.30 },
+    { tipo: 'snack', cals: metaCalorias * 0.10 }
+  ];
+
+  for(let i=0; i<7; i++) {
+    let dayMeals = distribution.map(slot => obtenerComidaAlgoritmo(slot.tipo, slot.cals, []));
+    weeklyPlan.push(dayMeals);
+  }
+  
+  selectedDayIndex = 0;
+  document.getElementById('oracle-day-selector').value = "0";
+  renderizarDiaSeleccionado();
+}
+
+function obtenerComidaAlgoritmo(tipo, targetCals, excludesId) {
+  // 1. FILTRO CLÍNICO DURO
+  let candidatos = oracleDB.filter(m => {
+    if(m.tipo !== tipo) return false;
+    if(!m.dietas.includes(currentDietType)) return false;
+    if(excludesId.includes(m.id)) return false;
+    
+    // Filtro Celíaco inquebrantable
+    if(isCeliac && m.glutenFree === false) return false;
+    
+    // Filtro de Alergias manuales
+    let jsonStr = JSON.stringify(m).toLowerCase();
+    for(let a of currentAllergies) {
+      if(jsonStr.includes(a)) return false;
+    }
+    return true;
+  });
+
+  if(candidatos.length === 0) candidatos = oracleDB.filter(m => m.tipo === tipo); 
+
+  // 2. FILTRO DE INTELIGENCIA DE METAS (Densidad vs Volumen)
+  let bestCandidates = [];
+  if(userProfile.metaObj > 0) {
+    // Está en Volumen: Buscar alimentos densos para que no explote comiendo
+    bestCandidates = candidatos.filter(m => m.isDense === true);
+  } else if (userProfile.metaObj < 0) {
+    // Está en Déficit: Buscar alimentos con mucho volumen de agua/fibra para saciar
+    bestCandidates = candidatos.filter(m => m.isVolume === true);
+  }
+  
+  // Si la IA encontró opciones ideales, las usa. Si no, usa el pool general.
+  if(bestCandidates.length > 0) candidatos = bestCandidates;
+
+  const selected = candidatos[Math.floor(Math.random() * candidatos.length)];
+  
+  // 3. CÁLCULO MATEMÁTICO AL GRAMO
+  const factor = targetCals / selected.calBase;
+  
+  let ingredientesAdaptados = selected.ingredientes.map(ing => {
+    let qtyCalculada = ing.baseQty * factor;
+    qtyCalculada = ing.unidad === 'unidades' || ing.unidad === 'scoops' || ing.unidad === 'rebanadas' 
+                   ? parseFloat(qtyCalculada.toFixed(1)) 
+                   : Math.round(qtyCalculada);
+                   
+    return { nombre: ing.nombre, cantidad: qtyCalculada, unidad: ing.unidad };
+  });
+
+  return {
+    id: selected.id, tipo: selected.tipo, name: selected.name,
+    cals: Math.round(selected.calBase * factor), prot: Math.round(selected.prot * factor),
+    carb: Math.round(selected.carb * factor), gras: Math.round(selected.gras * factor),
+    ingredientes: ingredientesAdaptados
+  };
+}
+
+function renderizarDiaSeleccionado() {
+  const container = document.getElementById('comidas-plan');
+  if(!container) return;
+  container.innerHTML = '';
+  
+  const dayMeals = weeklyPlan[selectedDayIndex];
+  
+  dayMeals.forEach((meal, idx) => {
+    let ingredientesHTML = meal.ingredientes.map(i => `• ${i.cantidad} ${i.unidad} de ${i.nombre}`).join('<br>');
+
+    let html = `
+      <div class="plan-meal-card">
+        <div class="plan-meal-header">
+          <span class="plan-meal-title">${meal.tipo}</span>
+          <button class="btn-swap" onclick="swapMealPlan(${idx})">🔄 Reemplazar</button>
+        </div>
+        <p class="plan-meal-desc"><b style="color:#fff;">${meal.name}</b><br><span style="color:#a0aec0; font-size:11px;">${ingredientesHTML}</span></p>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <span class="plan-meal-cals">🔥 ${meal.cals} kcal</span>
+          <span style="font-size:10px; color:var(--text-muted); font-weight:800;">P: ${meal.prot}g | C: ${meal.carb}g | G: ${meal.gras}g</span>
+        </div>
+      </div>
+    `;
+    container.innerHTML += html;
+  });
+}
+
+window.swapMealPlan = function(mealIndex) {
+  const oldMeal = weeklyPlan[selectedDayIndex][mealIndex];
+  const newMeal = obtenerComidaAlgoritmo(oldMeal.tipo, oldMeal.cals, [oldMeal.id]);
+  weeklyPlan[selectedDayIndex][mealIndex] = newMeal;
+  renderizarDiaSeleccionado();
+  showToast(`🔄 Opción modificada por la IA.`);
+};
+
+window.generarListaCompras = function() {
+  const ul = document.getElementById('lista-compras-ui');
+  if(!ul) return;
+  
+  let listaConsolidada = {};
+  
+  weeklyPlan.forEach(dia => {
+    dia.forEach(comida => {
+      comida.ingredientes.forEach(ing => {
+        let key = `${ing.nombre} (${ing.unidad})`;
+        listaConsolidada[key] = (listaConsolidada[key] || 0) + ing.cantidad;
+      });
+    });
+  });
+
+  ul.innerHTML = '';
+  for (let key in listaConsolidada) {
+    let rawQty = listaConsolidada[key];
+    let qtyDisplay = key.includes('unidades') || key.includes('scoops') || key.includes('rebanadas') || key.includes('porción') ? rawQty.toFixed(1) : Math.round(rawQty);
+    
+    let match = key.match(/(.*) \((.*)\)/);
+    let nombreLimpio = match ? match[1] : key;
+    let unidadLimpia = match ? match[2] : '';
+
+    ul.innerHTML += `<li><input type="checkbox" style="accent-color:var(--primary); width:18px; height:18px;"> <span style="flex:1;">${nombreLimpio}</span> <b style="color:var(--primary); font-size:12px;">${qtyDisplay} ${unidadLimpia}</b></li>`;
+  }
+  
+  openSheet('sheet-compras');
+};
 let weeklyPlan = []; // Guarda los 7 días
 let currentDietType = 'normal';
 let currentAllergies = [];
