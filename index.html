@@ -145,41 +145,51 @@
         <div class="log"><h3>Historial de Hoy</h3><ul id="lista-comidas"></ul></div>
       </div>
 
-      <!-- ORÁCULO NUTRICIONAL (NUEVO) -->
+<!-- ORÁCULO NUTRICIONAL (SEMANAL Y EXACTO) -->
       <div id="tab-plan" class="sub-tab-diet" style="display: none;">
         <div class="card" style="text-align: left;" id="oracle-form-card">
-          <h3 style="color: #00e5ff; margin-top:0;">Evaluación Clínica</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">El Oráculo diseñará un plan matemático ajustado a tus <b id="oracle-target-cals">0</b> kcal diarias.</p>
+          <h3 style="color: #00e5ff; margin-top:0;">Consulta Clínica Semanal</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">El Oráculo estructurará tus 7 días ajustados a <b id="oracle-target-cals">0</b> kcal/día.</p>
           
           <label>Preferencia Dietética:</label>
           <select id="oracle-diet-type" class="neon-input" style="margin-top:5px;">
             <option value="normal">Normal (Omnívoro)</option>
             <option value="lowcarb">Baja en Carbohidratos (Low-Carb)</option>
-            <option value="keto">Cetogénica (Keto)</option>
+            <option value="keto">Cetogénica Estricta (Keto)</option>
             <option value="vegano">Vegana (Plant-based)</option>
-            <option value="vegetariano">Vegetariana (Incluye lácteos/huevos)</option>
+            <option value="vegetariano">Vegetariana (Huevos/Lácteos)</option>
           </select>
 
           <label style="margin-top:15px;">Alergias o Exclusiones (Opcional):</label>
           <input type="text" id="oracle-allergies" class="neon-input" placeholder="Ej: maní, lactosa, mariscos, brócoli" style="margin-top:5px;">
           
-          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 20px; box-shadow: 0 0 15px var(--primary-glow);">Consultar al Oráculo 🔮</button>
+          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 20px; box-shadow: 0 0 15px var(--primary-glow);">Generar Plan Semanal 🔮</button>
         </div>
         
         <div id="plan-resultado" style="display: none;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-            <h3 style="color: #fff; margin: 0;">Plan del Oráculo</h3>
+            <h3 style="color: #fff; margin: 0;">Plan de Batalla</h3>
             <button class="btn-clear-history" onclick="document.getElementById('plan-resultado').style.display='none'; document.getElementById('oracle-form-card').style.display='block';">Volver</button>
           </div>
           
-          <!-- Contenedor Dinámico del Plan -->
+          <!-- Selector de Días de la Semana -->
+          <select id="oracle-day-selector" class="custom-select" style="margin-top: 15px; font-weight:800; color:var(--primary); border-color:var(--primary);">
+            <option value="0">📅 Lunes</option>
+            <option value="1">📅 Martes</option>
+            <option value="2">📅 Miércoles</option>
+            <option value="3">📅 Jueves</option>
+            <option value="4">📅 Viernes</option>
+            <option value="5">📅 Sábado</option>
+            <option value="6">📅 Domingo</option>
+          </select>
+
+          <!-- Contenedor Dinámico de las Comidas del Día Seleccionado -->
           <div id="comidas-plan" style="margin-top:15px;"></div>
           
-          <button class="btn btn-secondary" style="width:100%; margin-top:15px;" onclick="generarListaCompras()">🛒 Exportar Lista de Compras</button>
+          <button class="btn btn-secondary" style="width:100%; margin-top:15px; border-color:#ffaa00; color:#ffaa00;" onclick="generarListaCompras()">🛒 Lista de Compras (7 Días)</button>
         </div>
       </div>
-    </section>
-
+      
     <!-- 💪 COMBATE -->
     <section id="page-training" class="page">
       <h2 class="page-title">Sistema de Combate</h2>
