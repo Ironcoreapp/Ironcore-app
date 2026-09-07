@@ -8,11 +8,9 @@
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- LIBRERÍA DEL LECTOR DE CÓDIGOS DE BARRA -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
-  <!-- PANTALLA DE LOGIN -->
   <div id="auth-screen" class="auth-screen">
     <div class="card card-main" style="max-width: 320px; width: 100%;">
       <img src="logo.png" alt="IronCore Nutrition" class="logo-img" style="max-width: 150px; margin: 0 auto 15px;">
@@ -24,7 +22,6 @@
     </div>
   </div>
 
-  <!-- PANTALLA DE ONBOARDING -->
   <div id="onboarding-screen" class="onboarding-overlay" style="display: none;">
     <div class="ob-card">
       <div class="ob-header">
@@ -82,7 +79,7 @@
     <img src="logo.png" alt="IronCore Nutrition" class="logo-img">
     <p>Elite Performance System (Cloud)</p>
     <div id="user-welcome-box" style="display: none; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;">
-      <img id="user-avatar" src="" alt="Avatar" style="width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--primary); display: none;">
+      <img id="user-avatar" src="" alt="Avatar" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--primary); display: none; object-fit: cover; background: #1a2130;">
       <span style="font-size: 11px; font-weight: 700; color: #fff;">Bienvenido, <b id="user-display-name" style="color: var(--primary);">Guerrero</b></span>
     </div>
     <div style="display: flex; justify-content: center; gap: 8px; margin-top: 6px; align-items: center;">
@@ -92,9 +89,8 @@
   </header>
 
   <main>
-    <!-- 📊 DASHBOARD -->
     <section id="page-dashboard" class="page active">
-      <div class="coach-tip"><span class="tip-icon">🧠</span><p id="daily-tip">Cargando...</p></div>
+      <div class="coach-tip"><span class="tip-icon">💡</span><p id="daily-tip">Iniciando base de conocimientos...</p></div>
       <button id="btn-checkin" class="btn btn-accent" style="width: 100%; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 10px;"><span>📝</span> Registrar Check-in Diario</button>
       <div class="card water-card">
         <h3>💧 Control de Hidratación</h3>
@@ -103,12 +99,12 @@
       </div>
       <div class="card card-main">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-          <h3 style="margin:0;">Balance Energético</h3><button class="btn-clear-history" onclick="window.reiniciarDiaActual()">🔄 Reiniciar Día</button>
+          <h3 style="margin:0;">Balance Energético</h3><button class="btn-clear-history" onclick="window.reiniciarDiaActual()">🔄 Reiniciar</button>
         </div>
         <p id="calorias-total">0 / 2500 kcal</p>
         <div class="energy-breakdown">
           <div><span style="color:var(--text-muted); font-size:10px;">CONSUMIDAS</span><br><b id="en-consumidas" style="color:#00e5ff; font-size:14px;">0 kcal</b></div>
-          <div><span style="color:var(--text-muted); font-size:10px;">QUEMADAS (EST.)</span><br><b id="en-quemadas" style="color:#ff3366; font-size:14px;">450 kcal</b></div>
+          <div><span style="color:var(--text-muted); font-size:10px;">QUEMADAS</span><br><b id="en-quemadas" style="color:#ff3366; font-size:14px;">450 kcal</b></div>
           <div><span style="color:var(--text-muted); font-size:10px;">NETAS</span><br><b id="en-netas" style="color:#ffaa00; font-size:14px;">-450 kcal</b></div>
         </div>
         <div class="chart-container" style="margin-top: 15px;"><canvas id="macroChart"></canvas></div>
@@ -120,7 +116,6 @@
       </div>
     </section>
 
-    <!-- 🍎 DIETA & ORÁCULO CLÍNICO -->
     <section id="page-diet" class="page">
       <h2 class="page-title">Nutrición Inteligente</h2>
       <div class="tab-container">
@@ -136,11 +131,10 @@
         <div class="log"><h3>Historial de Hoy</h3><ul id="lista-comidas"></ul></div>
       </div>
 
-      <!-- ORÁCULO NUTRICIONAL (SEMANAL, IA & CLÍNICO) -->
       <div id="tab-plan" class="sub-tab-diet" style="display: none;">
         <div class="card" style="text-align: left; background: linear-gradient(145deg, #141a26 0%, #0b0f17 100%); border: 1px solid rgba(0,229,255,0.2);" id="oracle-form-card">
           <h3 style="color: #00e5ff; margin-top:0;">Motor Clínico Avanzado</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">Estructura tus 7 días ajustados a <b id="oracle-target-cals" style="color:#fff;">0</b> kcal/día. Meta: <span id="oracle-target-goal" style="color:var(--primary); font-weight:800;">Mantenimiento</span>.</p>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">Estructura tus 7 días ajustados a <b id="oracle-target-cals" style="color:#fff;">0</b> kcal/día.</p>
           
           <label>Preferencia Dietética:</label>
           <select id="oracle-diet-type" class="neon-input" style="margin-top:5px; background: #0b0f17;">
@@ -155,12 +149,12 @@
           <div class="clinical-filters">
             <label><input type="checkbox" id="oracle-celiac"> Sin Gluten (Celíaco)</label>
             <label><input type="checkbox" id="oracle-lactose"> Sin Lactosa</label>
-            <label><input type="checkbox" id="oracle-sibo"> Apto SIBO (Bajo en FODMAPs)</label>
+            <label><input type="checkbox" id="oracle-sibo"> Apto SIBO (Bajo FODMAPs)</label>
           </div>
 
           <label style="margin-top:15px;">Otras Alergias (Opcional):</label>
           <div style="position: relative;">
-            <input type="text" id="oracle-allergies-input" class="neon-input" placeholder="Ej: maní, mariscos (Presiona Enter)" style="margin-top:5px; background: #0b0f17;">
+            <input type="text" id="oracle-allergies-input" class="neon-input" placeholder="Ej: maní (Presiona Enter)" style="margin-top:5px; background: #0b0f17;">
           </div>
           <div id="allergy-tags-container" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;"></div>
           
@@ -171,9 +165,9 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 15px;">
             <div style="display:flex; align-items:center; gap:10px;">
               <span style="font-size: 24px;">📅</span>
-              <h3 id="plan-date-header" style="color: #fff; margin: 0; font-size: 16px;">Cargando fecha...</h3>
+              <h3 id="plan-date-header" style="color: #fff; margin: 0; font-size: 16px;">Cargando...</h3>
             </div>
-            <button class="btn-clear-history" onclick="document.getElementById('plan-resultado').style.display='none'; document.getElementById('oracle-form-card').style.display='block';">Ajustar Filtros</button>
+            <button class="btn-clear-history" onclick="document.getElementById('plan-resultado').style.display='none'; document.getElementById('oracle-form-card').style.display='block';">Volver</button>
           </div>
           
           <div class="day-scroll-container" id="day-selector-container"></div>
@@ -184,26 +178,15 @@
       </div>
     </section>
 
-    <!-- 💪 COMBATE -->
     <section id="page-training" class="page">
       <h2 class="page-title">Sistema de Combate</h2>
       <div class="tab-container">
-        <button class="tab-btn-train active" data-tab="tab-rutina">Guía & Bitácora</button>
-        <button class="tab-btn-train" data-tab="tab-rango">Camino del Shōgun</button>
+        <button class="tab-btn-train active" data-tab="tab-rutina">Bitácora</button>
+        <button class="tab-btn-train" data-tab="tab-rango">Tu Rango</button>
         <button class="tab-btn-train" data-tab="tab-leaderboard">🏆 Ranking</button>
       </div>
 
       <div id="tab-rutina" class="sub-tab-train active">
-        <div class="card" style="text-align: left;">
-          <h3 style="color: #00e5ff; margin-top:0;">Foco Semanal y Biblioteca</h3>
-          <div class="focus-grid" id="focus-selector">
-            <div class="focus-card active" data-focus="piernas">🦵 Piernas</div>
-            <div class="focus-card" data-focus="superior">🦍 Tren Superior</div>
-            <div class="focus-card" data-focus="calistenia">🤸 Calistenia/Core</div>
-            <div class="focus-card" data-focus="balance">⚖️ Balanceado</div>
-          </div>
-          <div id="coach-recommendation" class="routine-suggestion"></div>
-        </div>
         <div class="card" style="text-align: left;">
           <h3 style="color: #00e5ff; margin-top:0;">Cuaderno de Bitácora</h3>
           <button id="btn-registrar-serie" class="btn btn-primary" style="width: 100%; margin-bottom: 15px;">+ Registrar Ejercicio</button>
@@ -220,7 +203,6 @@
             <div><span>Fuerza Total</span><br><b id="rango-total">0</b> kg</div>
           </div>
           <div class="progress-bg"><div class="progress-bar" id="rango-progreso" style="width: 10%;"></div></div>
-          <p id="rango-msg" style="font-size: 11px; margin-top: 15px; color: var(--text-muted);">El viaje de las mil millas comienza con un paso.</p>
         </div>
         <div class="card" style="text-align: left;">
           <h3 style="color: #00e5ff; margin-top:0;">Prueba de Fuerza (1RM)</h3>
@@ -242,7 +224,6 @@
       </div>
     </section>
 
-    <!-- 📜 HISTORIAL -->
     <section id="page-history" class="page">
       <h2 class="page-title">Bitácora & Check-ins</h2>
       <div class="card" style="text-align: left;">
@@ -258,7 +239,6 @@
       </div>
     </section>
 
-    <!-- ⚡ SHŌGUN AI -->
     <section id="page-ai" class="page">
       <h2 class="page-title">Santuario del Shōgun AI</h2>
       <div class="card ai-card-container">
@@ -279,11 +259,10 @@
       </div>
     </section>
 
-    <!-- ⚙️ PERFIL -->
     <section id="page-profile" class="page">
       <h2 class="page-title">Credencial de Guerrero</h2>
       <div class="card card-main" style="text-align: center; position: relative;">
-        <img id="profile-card-avatar" src="logo.png" alt="Avatar" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--primary); margin-bottom: 10px; object-fit: cover;">
+        <img id="profile-card-avatar" src="logo.png" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 10px; object-fit: cover; background: #1a2130;">
         <h2 id="profile-card-name" style="margin: 0; color: #fff; font-size: 22px;">GUERRERO</h2>
         <span id="profile-card-goal" style="display:inline-block; padding: 4px 10px; background: rgba(0,229,255,0.1); color: var(--primary); font-size: 10px; font-weight:800; border-radius: 12px; margin-top: 5px; text-transform: uppercase;">Meta: Recomposición</span>
         
@@ -293,15 +272,9 @@
           <div class="macro" style="background:#141a26; padding:10px;"><label style="margin:0; font-size:9px;">Edad</label><b id="profile-val-edad" style="color:#fff;">--</b></div>
           <div class="macro" style="background:#141a26; padding:10px;"><label style="margin:0; font-size:9px;">Género</label><b id="profile-val-genero" style="color:#fff;">--</b></div>
         </div>
-        <label style="margin-top: 20px; text-align:left;">Nivel de Actividad Diaria:</label>
-        <div class="custom-select" id="select-actividad" data-val="1.55" style="margin-bottom: 20px;">Moderado (3-5 días)</div>
         
-        <button id="btn-edit-profile" class="btn btn-primary" style="width: 100%; box-shadow: 0 0 15px var(--primary-glow);" onclick="window.abrirOnboarding(true)">⚙️ Editar Biometría y Metas</button>
+        <button id="btn-edit-profile" class="btn btn-primary" style="width: 100%; box-shadow: 0 0 15px var(--primary-glow); margin-top:20px;" onclick="window.abrirOnboarding(true)">⚙️ Editar Biometría</button>
         <button id="btn-logout-profile" class="btn btn-secondary" style="width: 100%; margin-top: 10px; border-color: #ff3366; color: #ff3366;">🚪 Cerrar Sesión</button>
-      </div>
-      <div class="card card-main">
-        <h3>Proyección de Peso (4 Semanas)</h3>
-        <div class="chart-container" style="height: 180px;"><canvas id="progressChart"></canvas></div>
       </div>
     </section>
   </main>
@@ -309,6 +282,14 @@
   <!-- MODALES BOTTOM SHEETS -->
   <div id="sheet-overlay" class="sheet-overlay"></div>
   
+  <!-- NUEVO MODAL DE REEMPLAZO CLÍNICO -->
+  <div id="sheet-swap-meal" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
+    <h3>🔄 Opciones Clínicas</h3>
+    <p style="font-size: 11px; color: var(--text-muted); text-align:center; margin-bottom:15px;">Selecciona la alternativa perfecta calculada a tus calorías.</p>
+    <div id="sheet-swap-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    <button class="btn btn-secondary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cancelar</button>
+  </div>
+
   <div id="sheet-scanner" class="bottom-sheet" style="max-height: 90vh; overflow-y: auto; text-align: center;">
     <h3>📸 Escáner de Producto</h3>
     <p style="font-size: 11px; color: var(--text-muted); margin-bottom:15px;">Apunta la cámara al código de barras del envase.</p>
@@ -316,36 +297,25 @@
     <button class="btn btn-secondary" style="width: 100%; margin-top: 20px; border-color: #ff3366; color: #ff3366;" onclick="window.closeScanner()">Cancelar y Cerrar</button>
   </div>
 
-  <div id="sheet-actividad" class="bottom-sheet">
-    <h3>Selecciona Actividad</h3>
-    <div class="sheet-option" data-val="1.2">Sedentario (Oficina / Nulo)</div>
-    <div class="sheet-option active" data-val="1.55">Moderado (3-5 días)</div>
-    <div class="sheet-option" data-val="1.725">Intenso (Alto Rendimiento)</div>
-  </div>
-
   <div id="sheet-add-food" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
-    <h3>Base Global (OpenFoodFacts)</h3>
-    <p style="font-size:11px; color:var(--text-muted); text-align:center;">Busca marcas reales (ej: Yogurt Colun, Avena Quaker)</p>
+    <h3>Base Global</h3>
     <label style="margin-top:0;">Tiempo de Comida:</label>
     <select id="food-meal-time" class="neon-input" style="margin-top:5px;">
       <option value="Desayuno">☀️ Desayuno</option>
       <option value="Almuerzo" selected>🍽️ Almuerzo</option>
       <option value="Cena">🌙 Cena</option>
-      <option value="Snack">🍎 Snack / Suplemento</option>
+      <option value="Snack">🍎 Snack</option>
     </select>
-    
     <div style="display:flex; gap:10px;">
       <input type="text" id="food-search" class="neon-input" placeholder="🔍 Buscar producto...">
       <button id="btn-trigger-search" class="btn btn-primary" style="margin-top:5px; padding: 0 20px;">Ir</button>
     </div>
-    
-    <div id="food-loading" style="display:none; text-align:center; font-size:12px; color:var(--primary); margin-top:15px;">Buscando en la base mundial... ⏳</div>
+    <div id="food-loading" style="display:none; text-align:center; font-size:12px; color:var(--primary); margin-top:15px;">Buscando... ⏳</div>
     <div id="food-results-list" style="margin-top: 15px; max-height: 200px; overflow-y: auto; text-align: left;"></div>
     
     <div id="food-custom-section" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; display:none;">
       <h4 style="color: var(--primary); margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase;">Ajustar Porción</h4>
       <p id="food-selected-name" style="font-size:12px; font-weight:800; color:#fff; margin-bottom:10px;">--</p>
-      
       <label style="margin-top:0;">Cantidad consumida:</label>
       <div style="display: flex; gap: 10px; margin-top: 5px;">
         <input type="number" id="edit-qty" class="neon-input" value="100" style="flex: 1; margin-top: 0;">
@@ -357,7 +327,6 @@
           <option value="30">Scoop (30g)</option>
         </select>
       </div>
-
       <div class="macros-grid" style="margin-top: 15px;">
         <div><label style="font-size:9px;">Kcal</label><input type="number" id="edit-cal" class="neon-input" readonly></div>
         <div><label style="font-size:9px;">Prot (g)</label><input type="number" id="edit-prot" class="neon-input" readonly></div>
@@ -396,7 +365,6 @@
 
   <div id="sheet-compras" class="bottom-sheet" style="max-height: 80vh; overflow-y: auto;">
     <h3>🛒 Lista de Compras</h3>
-    <p style="font-size: 11px; color: var(--text-muted); margin-bottom:15px; text-align:center;">Ingredientes consolidados para la semana basados en tu Oráculo.</p>
     <ul id="lista-compras-ui" class="check-list" style="text-align:left;"></ul>
     <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cerrar</button>
   </div>
