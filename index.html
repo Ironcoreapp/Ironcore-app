@@ -148,7 +148,10 @@
               <span style="font-size: 24px;">📅</span>
               <h3 id="plan-date-header" style="color: #fff; margin: 0; font-size: 16px;">Cargando...</h3>
             </div>
-            <button class="btn-clear-history" onclick="document.getElementById('plan-resultado').style.display='none'; document.getElementById('oracle-form-card').style.display='block';">Volver</button>
+            <div style="display:flex; gap:5px;">
+              <button class="btn-clear-history" style="border-color:#00e5ff; color:#00e5ff;" onclick="window.guardarPlanNube()">💾 Guardar Plan</button>
+              <button class="btn-clear-history" onclick="document.getElementById('plan-resultado').style.display='none'; document.getElementById('oracle-form-card').style.display='block';">Volver</button>
+            </div>
           </div>
           <div class="day-scroll-container" id="day-selector-container"></div>
           <div id="comidas-plan" style="margin-top:20px;"></div>
@@ -237,20 +240,25 @@
       <div class="card" style="text-align: left;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
           <h3 style="color: #00e5ff; margin:0;">Historial de Jornadas</h3>
-          <button class="btn-clear-history" onclick="window.borrarTodoHistorial()">Borrar Todo</button>
+          <button class="btn-clear-history" onclick="window.borrarHistorialJornadas()">Borrar Jornadas</button>
         </div>
         <div id="historial-container"><p style="font-size: 13px; color: var(--text-muted);">Aún no hay días archivados.</p></div>
       </div>
       <div class="card" style="text-align: left; margin-top: 20px;">
-        <h3 style="color: #00e5ff; margin-top:0;">Historial de Check-ins</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3 style="color: #00e5ff; margin:0;">Historial de Check-ins</h3>
+          <button class="btn-clear-history" onclick="window.borrarHistorialCheckins()">Borrar Pesos</button>
+        </div>
         <div id="checkin-history-container"><p style="font-size: 13px; color: var(--text-muted);">No hay check-ins registrados todavía.</p></div>
       </div>
     </section>
 
     <!-- 👥 COFRADÍA (SOCIAL) -->
-    <section id="page-social" class="page">
-      <h2 class="page-title">Red de la Cofradía</h2>
-      <div id="social-tab-content-root"></div>
+    <section id="page-social" class="page" style="display: none;">
+      <div style="max-width: 600px; margin: 0 auto; padding-bottom: 80px;">
+        <h2 class="page-title">Cofradía & Muro Social</h2>
+        <div id="social-tab-content-root"></div>
+      </div>
     </section>
 
     <!-- ⚡ SHŌGUN AI -->
@@ -259,9 +267,14 @@
       <div class="card ai-card-container">
         <div class="ai-avatar-box">
           <div class="ai-avatar-glow">👹</div>
-          <div><h3 style="color: #ff3366; margin:0; font-size: 14px;">KENJI AI</h3><span style="font-size: 10px; color: var(--primary);">Inteligencia de Combate</span></div>
+          <div>
+            <h3 style="color: #ff3366; margin:0; font-size: 14px;">KENJI AI</h3>
+            <span style="font-size: 10px; color: var(--primary);">Inteligencia de Combate</span>
+          </div>
         </div>
-        <div class="chat-box" id="chat-messages"><div class="chat-msg ai">"Bienvenido al dojo. ¿Qué dudas atormentan tu espíritu hoy?"</div></div>
+        <div class="chat-box" id="chat-messages">
+          <div class="chat-msg ai">"Bienvenido al dojo. ¿Qué dudas atormentan tu espíritu hoy?"</div>
+        </div>
         <div class="chat-input-area">
           <input type="text" id="chat-input-text" class="neon-input" placeholder="Pregúntale al Shōgun..." style="margin:0;">
           <button id="btn-send-chat" class="btn btn-primary" style="padding: 12px 20px;">Enviar</button>
@@ -279,13 +292,13 @@
   <div id="sheet-overlay" class="sheet-overlay"></div>
   
   <div id="sheet-swap-meal" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
-    <h3>🔄 Alternativas de Comida</h3>
+    <h3>🔄 Opciones Clínicas</h3>
     <div id="sheet-swap-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
     <button class="btn btn-secondary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cancelar</button>
   </div>
 
   <div id="sheet-swap-exercise" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
-    <h3>🔄 Alternativas de Ejercicio</h3>
+    <h3>🔄 Alternativas</h3>
     <div id="sheet-swap-ex-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
     <button class="btn btn-secondary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cancelar</button>
   </div>
@@ -300,53 +313,6 @@
     <h3>📸 Escáner de Producto</h3>
     <div id="qr-reader" style="width:100%; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary);"></div>
     <button class="btn btn-secondary" style="width: 100%; margin-top: 20px; border-color: #ff3366; color: #ff3366;" onclick="window.closeScanner()">Cancelar y Cerrar</button>
-  </div>
-
-  <div id="sheet-add-food" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
-    <h3>Base Global</h3>
-    <label style="margin-top:0;">Tiempo de Comida:</label>
-    <select id="food-meal-time" class="neon-input" style="margin-top:5px;">
-      <option value="Desayuno">☀️ Desayuno</option>
-      <option value="Almuerzo" selected>🍽️ Almuerzo</option>
-      <option value="Cena">🌙 Cena</option>
-      <option value="Snack">🍎 Snack</option>
-    </select>
-    <div style="display:flex; gap:10px;">
-      <input type="text" id="food-search" class="neon-input" placeholder="🔍 Buscar producto...">
-      <button id="btn-trigger-search" class="btn btn-primary" style="margin-top:5px; padding: 0 20px;">Ir</button>
-    </div>
-    <div id="food-loading" style="display:none; text-align:center; font-size:12px; color:var(--primary); margin-top:15px;">Buscando... ⏳</div>
-    <div id="food-results-list" style="margin-top: 15px; max-height: 200px; overflow-y: auto; text-align: left;"></div>
-    
-    <div id="food-custom-section" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; display:none;">
-      <h4 style="color: var(--primary); margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase;">Ajustar Porción</h4>
-      <p id="food-selected-name" style="font-size:12px; font-weight:800; color:#fff; margin-bottom:10px;">--</p>
-      <label style="margin-top:0;">Cantidad consumida:</label>
-      <div style="display: flex; gap: 10px; margin-top: 5px;">
-        <input type="number" id="edit-qty" class="neon-input" value="100" style="flex: 1; margin-top: 0;">
-        <select id="edit-unit" class="neon-input" style="flex: 1; margin-top: 0; padding: 12px;">
-          <option value="1" selected>Gramos / ml</option>
-          <option value="15">Cucharada (15g)</option>
-          <option value="5">Cucharadita (5g)</option>
-          <option value="240">Taza (240ml)</option>
-          <option value="30">Scoop (30g)</option>
-        </select>
-      </div>
-      <div class="macros-grid" style="margin-top: 15px;">
-        <div><label style="font-size:9px;">Kcal</label><input type="number" id="edit-cal" class="neon-input" readonly></div>
-        <div><label style="font-size:9px;">Prot (g)</label><input type="number" id="edit-prot" class="neon-input" readonly></div>
-        <div><label style="font-size:9px;">Carb (g)</label><input type="number" id="edit-carb" class="neon-input" readonly></div>
-        <div><label style="font-size:9px;">Gras (g)</label><input type="number" id="edit-gras" class="neon-input" readonly></div>
-      </div>
-      <button id="btn-confirm-food-final" class="btn btn-primary" style="width: 100%; margin-top: 18px;">Confirmar y Registrar</button>
-    </div>
-  </div>
-
-  <div id="sheet-checkin" class="bottom-sheet">
-    <h3>Check-in Diario</h3>
-    <label style="margin-top: 0;">Peso de hoy (kg):</label>
-    <input type="number" id="checkin-peso" class="neon-input" placeholder="Ej: 74.5" step="0.1">
-    <button id="btn-confirm-checkin" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Guardar Check-in</button>
   </div>
 
   <div id="sheet-workout" class="bottom-sheet">
