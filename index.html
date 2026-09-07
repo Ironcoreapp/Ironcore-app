@@ -37,14 +37,14 @@
             <label>Elige tu Apodo en el Dojo</label>
             <input type="text" id="ob-nickname" class="neon-input" placeholder="Ej: Kenji, Rōnin...">
             <p style="font-size:10px; color:var(--text-muted); margin-top:10px;">Este será tu nombre en el Ranking Global.</p>
-            <button class="btn btn-primary" style="width:100%; margin-top:25px;" onclick="moverOnboarding(1)">Siguiente ➔</button>
+            <button class="btn btn-primary" style="width:100%; margin-top:25px;" onclick="window.moverOnboarding(1)">Siguiente ➔</button>
           </div>
           <!-- Paso 2: Biometría -->
           <div class="ob-step">
             <label style="margin-top:0;">Género Base (TMB)</label>
             <div class="ob-gender-box">
-              <div class="ob-gender-btn active" data-gen="M" onclick="seleccionarGenero('M')">Hombre</div>
-              <div class="ob-gender-btn" data-gen="F" onclick="seleccionarGenero('F')">Mujer</div>
+              <div class="ob-gender-btn active" data-gen="M" onclick="window.seleccionarGenero('M')">Hombre</div>
+              <div class="ob-gender-btn" data-gen="F" onclick="window.seleccionarGenero('F')">Mujer</div>
             </div>
             <div class="macros-grid" style="margin-top: 15px;">
               <div><label>Edad</label><input type="number" id="ob-edad" class="neon-input" placeholder="Años" value="25"></div>
@@ -53,30 +53,30 @@
             <label>Peso Actual (kg)</label>
             <input type="number" id="ob-peso" class="neon-input" placeholder="Ej: 75" value="75" step="0.1">
             <div style="display:flex; gap:10px; margin-top:25px;">
-              <button class="btn btn-secondary" style="flex:1;" onclick="moverOnboarding(-1)">⬅ Atrás</button>
-              <button class="btn btn-primary" style="flex:2;" onclick="moverOnboarding(1)">Siguiente ➔</button>
+              <button class="btn btn-secondary" style="flex:1;" onclick="window.moverOnboarding(-1)">⬅ Atrás</button>
+              <button class="btn btn-primary" style="flex:2;" onclick="window.moverOnboarding(1)">Siguiente ➔</button>
             </div>
           </div>
           <!-- Paso 3: Objetivos -->
           <div class="ob-step">
             <label style="margin-top:0;">¿Cuál es tu senda?</label>
             <div class="ob-goals-grid">
-              <div class="ob-goal-card" data-val="-500" onclick="seleccionarMetaOb(this)">
+              <div class="ob-goal-card" data-val="-500" onclick="window.seleccionarMetaOb(this)">
                 <span>🔥</span><b>Déficit Agresivo</b><br><small>Pérdida de peso rápida</small>
               </div>
-              <div class="ob-goal-card" data-val="-300" onclick="seleccionarMetaOb(this)">
+              <div class="ob-goal-card" data-val="-300" onclick="window.seleccionarMetaOb(this)">
                 <span>🔪</span><b>Definición</b><br><small>Perder grasa, cuidar músculo</small>
               </div>
-              <div class="ob-goal-card active" data-val="0" onclick="seleccionarMetaOb(this)">
+              <div class="ob-goal-card active" data-val="0" onclick="window.seleccionarMetaOb(this)">
                 <span>⚖️</span><b>Recomposición</b><br><small>Mantenimiento y fuerza</small>
               </div>
-              <div class="ob-goal-card" data-val="300" onclick="seleccionarMetaOb(this)">
+              <div class="ob-goal-card" data-val="300" onclick="window.seleccionarMetaOb(this)">
                 <span>💪</span><b>Volumen</b><br><small>Hipertrofia máxima</small>
               </div>
             </div>
             <div style="display:flex; gap:10px; margin-top:25px;">
-              <button class="btn btn-secondary" style="flex:1;" onclick="moverOnboarding(-1)">⬅ Atrás</button>
-              <button class="btn btn-primary" style="flex:2;" onclick="finalizarOnboarding()">Sellar Ritual ✔</button>
+              <button class="btn btn-secondary" style="flex:1;" onclick="window.moverOnboarding(-1)">⬅ Atrás</button>
+              <button class="btn btn-primary" style="flex:2;" onclick="window.finalizarOnboarding()">Sellar Ritual ✔</button>
             </div>
           </div>
         </div>
@@ -108,11 +108,11 @@
       <div class="card water-card">
         <h3>💧 Control de Hidratación</h3>
         <div class="water-progress-container"><div class="water-fill" id="water-fill-bar" style="height: 0%;"></div><span class="water-text" id="water-text-val">0 / 3000 ml</span></div>
-        <div class="water-btns"><button class="btn-water" onclick="agregarAgua(250)">+250 ml</button><button class="btn-water" onclick="agregarAgua(500)">+500 ml</button><button class="btn-water reset" onclick="resetAgua()">Reset</button></div>
+        <div class="water-btns"><button class="btn-water" onclick="window.agregarAgua(250)">+250 ml</button><button class="btn-water" onclick="window.agregarAgua(500)">+500 ml</button><button class="btn-water reset" onclick="window.resetAgua()">Reset</button></div>
       </div>
       <div class="card card-main">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-          <h3 style="margin:0;">Balance Energético</h3><button class="btn-clear-history" onclick="reiniciarDiaActual()">🔄 Reiniciar Día</button>
+          <h3 style="margin:0;">Balance Energético</h3><button class="btn-clear-history" onclick="window.reiniciarDiaActual()">🔄 Reiniciar Día</button>
         </div>
         <p id="calorias-total">0 / 2500 kcal</p>
         <div class="energy-breakdown">
@@ -129,7 +129,7 @@
       </div>
     </section>
 
-    <!-- 🍎 DIETA & ORÁCULO -->
+    <!-- 🍎 DIETA & ORÁCULO IA -->
     <section id="page-diet" class="page">
       <h2 class="page-title">Nutrición Inteligente</h2>
       <div class="tab-container">
@@ -145,7 +145,7 @@
         <div class="log"><h3>Historial de Hoy</h3><ul id="lista-comidas"></ul></div>
       </div>
 
-<!-- ORÁCULO NUTRICIONAL (SEMANAL E IA) -->
+      <!-- ORÁCULO NUTRICIONAL (SEMANAL E IA) -->
       <div id="tab-plan" class="sub-tab-diet" style="display: none;">
         <div class="card" style="text-align: left;" id="oracle-form-card">
           <h3 style="color: #00e5ff; margin-top:0;">Motor de Inteligencia Clínica</h3>
@@ -190,10 +190,11 @@
 
           <div id="comidas-plan" style="margin-top:15px;"></div>
           
-          <button class="btn btn-secondary" style="width:100%; margin-top:15px; border-color:#ffaa00; color:#ffaa00;" onclick="generarListaCompras()">🛒 Lista de Compras (7 Días)</button>
+          <button class="btn btn-secondary" style="width:100%; margin-top:15px; border-color:#ffaa00; color:#ffaa00;" onclick="window.generarListaCompras()">🛒 Lista de Compras (7 Días)</button>
         </div>
       </div>
-      
+    </section>
+
     <!-- 💪 COMBATE -->
     <section id="page-training" class="page">
       <h2 class="page-title">Sistema de Combate</h2>
@@ -262,7 +263,7 @@
       <div class="card" style="text-align: left;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
           <h3 style="color: #00e5ff; margin:0;">Historial de Jornadas</h3>
-          <button class="btn-clear-history" onclick="borrarTodoHistorial()">Borrar Todo</button>
+          <button class="btn-clear-history" onclick="window.borrarTodoHistorial()">Borrar Todo</button>
         </div>
         <div id="historial-container"><p style="font-size: 13px; color: var(--text-muted);">Aún no hay días archivados.</p></div>
       </div>
@@ -387,7 +388,7 @@
     <h3>🛒 Lista de Compras</h3>
     <p style="font-size: 11px; color: var(--text-muted); margin-bottom:15px; text-align:center;">Ingredientes consolidados para la semana basados en tu Oráculo.</p>
     <ul id="lista-compras-ui" class="check-list" style="text-align:left;"></ul>
-    <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="closeSheet()">Cerrar</button>
+    <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cerrar</button>
   </div>
 
   <nav class="bottom-nav">
