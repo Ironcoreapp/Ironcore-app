@@ -16,7 +16,7 @@ document.head.appendChild(uiFixes);
 // 2. ESTADO GLOBAL Y UTILIDADES BÁSICAS
 window.totalCalorias = 0; window.totalProt = 0; window.totalCarb = 0; window.totalGrasa = 0; window.totalAgua = 0; window.totalQuemadas = 0; window.userStreak = 1;
 window.metaCalorias = 2500; window.metaProt = 165; window.metaCarb = 275; window.metaGrasa = 69; window.currentRankName = "Ashigaru";
-window.userProfile = { perfilCompleto: false, nickname: "", genero: "M", edad: 25, peso: 75, altura: 175, metaObj: 0, actividad: 1.55, avatarStyle: "bottts" };
+window.userProfile = { perfilCompleto: false, nickname: "", genero: "M", edad: 25, peso: 75, altura: 175, metaObj: 0, actividad: 1.55, avatarStyle: "bottts", objetivo: "constancia", lugar: "casa", tiempoDisponible: 20, dieta: "omnivora", exclusiones: "", condicionRiesgo: false, consentimientoIA: false };
 window.oracleDB = []; window.exercisesDB = []; window.weeklyPlan = []; window.selectedDayIndex = 0; window.activeAllergies = []; window.dynamicDays = [];
 window.currentWorkoutRoutine = []; window.activeTimers = {}; window.html5QrCode = null; window.currentSearchFoodBase = null; window.profileChartInstance = null;
 window.ultimoHistorialPesos = []; window.swapTargetIndex = -1; window.workoutSwapTargetIndex = -1;
@@ -38,23 +38,37 @@ window.reiniciarDiaActual = function() { if(confirm("¿Reiniciar balance de hoy?
 // 3. RECUPERACIÓN DE FUNCIONES ONBOARDING Y EDICIÓN DE PERFIL
 window.abrirOnboarding = function(isEdit = false) { 
   const obScreen = document.getElementById('onboarding-screen'); const obTrack = document.getElementById('ob-track'); const obBar = document.getElementById('ob-bar');
-  if(!obScreen) return; obScreen.style.display = 'flex'; window.currentObStep = 0; if(obTrack) obTrack.style.transform = `translateX(0%)`; if(obBar) obBar.style.width = '33.33%'; 
+  if(!obScreen) return; obScreen.style.display = 'flex'; window.currentObStep = 0; if(obTrack) obTrack.style.transform = `translateX(0%)`; if(obBar) obBar.style.width = '16.67%'; const lbl=document.getElementById('ob-step-label'); if(lbl) lbl.innerText='Paso 1 de 6'; 
   if(isEdit) { document.getElementById('ob-title').innerText = "Editar Credencial"; document.getElementById('ob-nickname').value = window.userProfile.nickname; window.seleccionarGenero(window.userProfile.genero); document.getElementById('ob-edad').value = window.userProfile.edad; document.getElementById('ob-peso').value = window.userProfile.peso; document.getElementById('ob-altura').value = window.userProfile.altura; } else { document.getElementById('ob-title').innerText = "Ritual de Iniciación"; } 
 };
-window.moverOnboarding = function(dir) { 
-  const obTrack = document.getElementById('ob-track'); const obBar = document.getElementById('ob-bar');
-  if(dir === 1 && window.currentObStep === 0) { const nickVal = document.getElementById('ob-nickname')?.value.trim(); if(!nickVal) { window.showToast('⚠️ Elige un apodo.'); return; } } 
-  window.currentObStep += dir; if(window.currentObStep < 0) window.currentObStep = 0; if(window.currentObStep > 2) window.currentObStep = 2; 
-  if(obTrack) obTrack.style.transform = `translateX(-${window.currentObStep * 33.333}%)`; if(obBar) obBar.style.width = `${(window.currentObStep + 1) * 33.33}%`; 
+window.moverOnboarding = function(dir) {
+  const obTrack=document.getElementById('ob-track'), obBar=document.getElementById('ob-bar'), label=document.getElementById('ob-step-label');
+  if(dir===1 && window.currentObStep===0 && !document.getElementById('ob-nickname')?.value.trim()){ window.showToast('⚠️ Escribe cómo quieres que te llamemos.'); return; }
+  window.currentObStep=Math.max(0,Math.min(5,(window.currentObStep||0)+dir));
+  if(obTrack) obTrack.style.transform=`translateX(-${window.currentObStep*16.6667}%)`;
+  if(obBar) obBar.style.width=`${((window.currentObStep+1)/6)*100}%`;
+  if(label) label.innerText=`Paso ${window.currentObStep+1} de 6`;
 };
 window.seleccionarGenero = function(gen) { window.userProfile.genero = gen; document.querySelectorAll('.ob-gender-btn').forEach(b => { if(b.getAttribute('data-gen') === gen) b.classList.add('active'); else b.classList.remove('active'); }); };
-window.seleccionarMetaOb = function(elem) { document.querySelectorAll('.ob-goal-card').forEach(c => c.classList.remove('active')); elem.classList.add('active'); window.userProfile.metaObj = parseInt(elem.getAttribute('data-val')); };
+window.seleccionarMetaOb = function(elem) { document.querySelectorAll('.ob-goal-card').forEach(c => c.classList.remove('active')); elem.classList.add('active'); window.userProfile.metaObj = parseInt(elem.getAttribute('data-val')); window.userProfile.objetivo = elem.getAttribute('data-goal') || 'constancia'; };
 
+document.querySelectorAll('#ob-place-grid .ob-choice, #ob-time-grid .ob-choice').forEach(btn=>btn.addEventListener('click',()=>{ btn.parentElement.querySelectorAll('.ob-choice').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); }));
+window.setTodayMinutes=function(min,el){ window.userProfile.tiempoDisponible=min; document.querySelectorAll('.quick-time').forEach(x=>x.classList.remove('active')); el?.classList.add('active'); window.showToast(`✅ Plan de hoy ajustado a ${min} minutos.`); };
+window.activateContingency=function(){ const m=document.getElementById('contingency-message'); if(m){m.style.display='block';m.innerHTML='<b style="color:#00e5ff">Plan B activado:</b> prioriza una sesión breve de movilidad, caminata o cuerpo completo. Si declaras dolor o un síntoma preocupante, no entrenes y consulta a un profesional.';} };
 window.finalizarOnboarding = async function() {
   const nickInput = document.getElementById('ob-nickname'); const desiredNick = nickInput?.value.trim().toLowerCase() || "guerrero";
   if (window.currentUser && window.db) { const q = window.query(window.collection(window.db, "users"), window.where("nickname_lower", "==", desiredNick)); const snap = await window.getDocs(q); if (!snap.empty && snap.docs[0].id !== window.currentUser.uid) { window.showToast("⚠️ Ese apodo ya está en uso."); return; } }
-  window.userProfile.nickname = nickInput?.value.trim() || "Guerrero"; window.userProfile.nickname_lower = desiredNick; window.userProfile.edad = parseInt(document.getElementById('ob-edad')?.value) || 25; window.userProfile.peso = parseFloat(document.getElementById('ob-peso')?.value) || 75; window.userProfile.altura = parseInt(document.getElementById('ob-altura')?.value) || 175; window.userProfile.actividad = 1.55; window.userProfile.perfilCompleto = true;
-  let tmb = window.userProfile.genero === 'M' ? (10 * window.userProfile.peso) + (6.25 * window.userProfile.altura) - (5 * window.userProfile.edad) + 5 : (10 * window.userProfile.peso) + (6.25 * window.userProfile.altura) - (5 * window.userProfile.edad) - 161; let tdee = tmb * window.userProfile.actividad;
+  window.userProfile.nickname = nickInput?.value.trim() || "Guerrero"; window.userProfile.nickname_lower = desiredNick; window.userProfile.edad = parseInt(document.getElementById('ob-edad')?.value) || 25; window.userProfile.peso = parseFloat(document.getElementById('ob-peso')?.value) || 75; window.userProfile.altura = parseInt(document.getElementById('ob-altura')?.value) || 175; window.userProfile.actividad = 1.55;
+  window.userProfile.genero = document.getElementById('ob-genero')?.value || 'N';
+  window.userProfile.lugar = document.querySelector('#ob-place-grid .ob-choice.active')?.dataset.value || 'casa';
+  window.userProfile.tiempoDisponible = parseInt(document.querySelector('#ob-time-grid .ob-choice.active')?.dataset.value || '20');
+  window.userProfile.dieta = document.getElementById('ob-diet')?.value || 'omnivora';
+  window.userProfile.exclusiones = document.getElementById('ob-exclusions')?.value.trim() || '';
+  window.userProfile.condicionRiesgo = !!document.getElementById('ob-risk')?.checked;
+  window.userProfile.consentimientoIA = !!document.getElementById('ob-ai-consent')?.checked;
+  if(!document.getElementById('ob-consent')?.checked){ window.showToast('⚠️ Necesitamos tu consentimiento para personalizar la experiencia.'); this.disabled=false; return; }
+  window.userProfile.perfilCompleto = true;
+  let baseTmb=(10*window.userProfile.peso)+(6.25*window.userProfile.altura)-(5*window.userProfile.edad); let tmb=window.userProfile.genero==='M'?baseTmb+5:window.userProfile.genero==='F'?baseTmb-161:baseTmb-78; let tdee = tmb * window.userProfile.actividad;
   window.metaCalorias = Math.round(tdee + (window.userProfile.metaObj || 0)); window.metaProt = (window.userProfile.metaObj || 0) > 0 ? Math.round(window.userProfile.peso * 2.0) : Math.round(window.userProfile.peso * 2.2); window.metaGrasa = Math.round((window.metaCalorias * 0.25) / 9); window.metaCarb = Math.round((window.metaCalorias - ((window.metaProt * 4) + (window.metaGrasa * 9))) / 4);
   await window.guardarEstadoNube(); window.actualizarUIHeader(); window.actualizarUIPerfil(); window.actualizarDashboard(); const obScreen = document.getElementById('onboarding-screen'); if(obScreen) obScreen.style.display = 'none'; window.showToast(`✅ Perfil Guardado`); document.querySelector('[data-target="page-dashboard"]')?.click();
 };
@@ -67,7 +81,7 @@ window.actualizarDashboard = function() {
   const calNetas = Math.max(0, window.totalCalorias - window.totalQuemadas); const calPct = Math.min(100, (calNetas / window.metaCalorias) * 100) || 0;
   const prPct = Math.min(100, (window.totalProt/window.metaProt)*100) || 0; const cbPct = Math.min(100, (window.totalCarb/window.metaCarb)*100) || 0; const grPct = Math.min(100, (window.totalGrasa/window.metaGrasa)*100) || 0;
   const calColor = calNetas > window.metaCalorias ? '#ff3366' : '#00e5ff';
-  let tmb = window.userProfile.genero === 'M' ? (10 * window.userProfile.peso) + (6.25 * window.userProfile.altura) - (5 * window.userProfile.edad) + 5 : (10 * window.userProfile.peso) + (6.25 * window.userProfile.altura) - (5 * window.userProfile.edad) - 161;
+  let baseTmb=(10*window.userProfile.peso)+(6.25*window.userProfile.altura)-(5*window.userProfile.edad); let tmb=window.userProfile.genero==='M'?baseTmb+5:window.userProfile.genero==='F'?baseTmb-161:baseTmb-78;
 
   dashUI.innerHTML = `
     <button class="btn btn-warning" style="width:100%; margin-bottom: 20px; font-size:13px; text-transform:uppercase;" onclick="window.openSheet('sheet-checkin')">📈 Registrar Peso de Hoy</button>
@@ -177,7 +191,7 @@ onAuthStateChanged(window.auth, async (user) => {
     await window.cargarDatosDesdeNube(user.uid); 
     
     if (!sessionStorage.getItem('ironcore_welcome_shown')) {
-      const quotes = [ "No te detengas cuando estés cansado, detente cuando hayas terminado.", "La fuerza no viene de la capacidad física. Viene de una voluntad indomable.", "El dolor que sientes hoy será la fuerza que sentirás mañana.", "El guerrero victorioso gana primero y luego va a la guerra. - Sun Tzu" ];
+      const quotes = [ "Hoy cuenta, incluso si eliges una versión breve.", "La constancia se construye retomando, no castigándote.", "Entrenar con criterio también es progresar.", "Tu plan debe adaptarse a tu vida, no al revés." ];
       const overlay = document.createElement('div'); overlay.className = 'iron-welcome-overlay';
       overlay.innerHTML = `<div class="iron-welcome-modal"><div style="font-size: 18px; font-weight: 900; color: #fff; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">⚔️ LA JORNADA COMIENZA</div><div style="font-size: 14px; color: #00e5ff; font-style: italic; margin-bottom: 25px; line-height: 1.6; font-weight:bold;">"${quotes[Math.floor(Math.random() * quotes.length)]}"</div><button class="btn btn-warning" style="width: 100%;" onclick="this.parentElement.parentElement.classList.remove('active'); setTimeout(() => this.parentElement.parentElement.remove(), 400);">Entendido</button></div>`;
       document.body.appendChild(overlay); setTimeout(() => overlay.classList.add('active'), 100); sessionStorage.setItem('ironcore_welcome_shown', 'true');
