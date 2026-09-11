@@ -144,3 +144,16 @@ main { padding: 15px; max-width: 800px; margin: 0 auto; }
 .nav-item .text { font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 800; }
 .nav-item.active { color: var(--primary); }
 .nav-item.active .icon { filter: grayscale(0%); opacity: 1; filter: drop-shadow(0 0 8px var(--primary-glow)); transform: translateY(-3px); }
+
+/* MVP UX upgrade: onboarding realista, contingencias y seguridad */
+.ob-track { width: 600%; }
+.ob-step { width: 16.6667%; }
+.ob-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+.ob-choice { background:#1a2130; color:#fff; border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:14px 10px; font:700 11px Montserrat,sans-serif; cursor:pointer; }
+.ob-choice.active { border-color:var(--primary); background:rgba(0,229,255,.12); color:var(--primary); box-shadow:0 0 10px var(--primary-glow); }
+.safety-note { margin-top:14px; padding:12px; border-radius:10px; background:rgba(255,170,0,.08); border:1px solid rgba(255,170,0,.25); color:#d6dde8; font-size:10px; line-height:1.5; text-align:left; }
+.day-adapter { margin-bottom:15px; padding:18px; border-radius:16px; background:linear-gradient(135deg,rgba(0,229,255,.11),rgba(255,170,0,.06)); border:1px solid rgba(0,229,255,.25); }
+.quick-time-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
+.quick-time { border:1px solid rgba(0,229,255,.25); background:rgba(0,0,0,.35); color:#fff; border-radius:10px; padding:11px 4px; font:800 11px Montserrat,sans-serif; cursor:pointer; }
+.quick-time.active { color:#001018; background:var(--primary); box-shadow:0 0 12px var(--primary-glow); }
+.safe-badge { display:inline-flex; gap:6px; align-items:center; border-radius:999px; padding:5px 9px; font-size:9px; font-weight:800; color:#9ef5ff; background:rgba(0,229,255,.08); border:1px solid rgba(0,229,255,.2); }
