@@ -32,57 +32,58 @@
     </div>
   </div>
 
-  <!-- PANTALLA DE ONBOARDING -->
-  <div id="onboarding-screen" class="onboarding-overlay" style="display: none;">
+  <!-- ONBOARDING AMPLIADO Y CENTRADO EN ADHERENCIA -->
+  <div id="onboarding-screen" class="onboarding-overlay" style="display:none;">
     <div class="ob-card">
-      <div class="ob-header">
-        <h3 id="ob-title">Identidad del Guerrero</h3>
-        <div class="ob-progress"><div class="ob-progress-bar" id="ob-bar"></div></div>
-      </div>
-      <div class="ob-viewport">
-        <div class="ob-track" id="ob-track">
-          <div class="ob-step">
-            <img id="ob-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Guerrero" alt="Avatar" class="ob-avatar-img">
-            <label>Elige tu Apodo en el Dojo</label>
-            <input type="text" id="ob-nickname" class="neon-input" placeholder="Ej: Kenji, Rōnin...">
-            <p style="font-size:10px; color:var(--text-muted); margin-top:10px;">Nombre visible en Ranking y Cofradía.</p>
-            <button class="btn btn-primary" style="width:100%; margin-top:25px;" onclick="window.moverOnboarding(1)">Siguiente ➔</button>
-          </div>
-          <div class="ob-step">
-            <label style="margin-top:0;">Género Base (TMB)</label>
-            <div class="ob-gender-box">
-              <div class="ob-gender-btn active" data-gen="M" onclick="window.seleccionarGenero('M')">Hombre</div>
-              <div class="ob-gender-btn" data-gen="F" onclick="window.seleccionarGenero('F')">Mujer</div>
-            </div>
-            <div class="macros-grid" style="margin-top: 15px;">
-              <div><label>Edad</label><input type="number" id="ob-edad" class="neon-input" placeholder="Años" value="25"></div>
-              <div><label>Estatura</label><input type="number" id="ob-altura" class="neon-input" placeholder="cm" value="175"></div>
-            </div>
-            <label>Peso Actual (kg)</label>
-            <input type="number" id="ob-peso" class="neon-input" placeholder="Ej: 75" value="75" step="0.1">
-            <div style="display:flex; gap:10px; margin-top:25px;">
-              <button class="btn btn-secondary" style="flex:1;" onclick="window.moverOnboarding(-1)">⬅ Atrás</button>
-              <button class="btn btn-primary" style="flex:2;" onclick="window.moverOnboarding(1)">Siguiente ➔</button>
-            </div>
-          </div>
-          <div class="ob-step">
-            <label style="margin-top:0;">¿Cuál es tu senda?</label>
-            <div class="ob-goals-grid">
-              <div class="ob-goal-card" data-val="-500" onclick="window.seleccionarMetaOb(this)"><span>🔥</span><b>Déficit Agresivo</b><br><small>Pérdida rápida</small></div>
-              <div class="ob-goal-card" data-val="-300" onclick="window.seleccionarMetaOb(this)"><span>🔪</span><b>Definición</b><br><small>Perder grasa</small></div>
-              <div class="ob-goal-card active" data-val="0" onclick="window.seleccionarMetaOb(this)"><span>⚖️</span><b>Recomposición</b><br><small>Mantenimiento</small></div>
-              <div class="ob-goal-card" data-val="300" onclick="window.seleccionarMetaOb(this)"><span>💪</span><b>Volumen</b><br><small>Hipertrofia</small></div>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:25px;">
-              <button class="btn btn-secondary" style="flex:1;" onclick="window.moverOnboarding(-1)">⬅ Atrás</button>
-              <button class="btn btn-primary" style="flex:2;" onclick="window.finalizarOnboarding()">Sellar Ritual ✔</button>
-            </div>
-          </div>
+      <div class="ob-header"><h3 id="ob-title">Configura tu experiencia</h3><div class="ob-progress"><div class="ob-progress-bar" id="ob-bar"></div></div><small id="ob-step-label" style="color:var(--text-muted)">Paso 1 de 6</small></div>
+      <div class="ob-viewport"><div class="ob-track" id="ob-track">
+        <div class="ob-step">
+          <img id="ob-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=IronCore" alt="Avatar" class="ob-avatar-img">
+          <label>¿Cómo quieres que te llamemos?</label><input id="ob-nickname" class="neon-input" placeholder="Tu apodo">
+          <button class="btn btn-primary" style="width:100%;margin-top:25px" onclick="window.moverOnboarding(1)">Continuar</button>
         </div>
-      </div>
+        <div class="ob-step">
+          <label>¿Qué quieres mejorar primero?</label>
+          <div class="ob-goals-grid">
+            <div class="ob-goal-card active" data-goal="constancia" data-val="0" onclick="window.seleccionarMetaOb(this)"><span>🎯</span><b>Constancia</b><small>Crear un hábito sostenible</small></div>
+            <div class="ob-goal-card" data-goal="energia" data-val="0" onclick="window.seleccionarMetaOb(this)"><span>⚡</span><b>Más energía</b><small>Moverme y sentirme mejor</small></div>
+            <div class="ob-goal-card" data-goal="grasa" data-val="-300" onclick="window.seleccionarMetaOb(this)"><span>📉</span><b>Reducir grasa</b><small>Progreso gradual</small></div>
+            <div class="ob-goal-card" data-goal="musculo" data-val="300" onclick="window.seleccionarMetaOb(this)"><span>💪</span><b>Ganar músculo</b><small>Fuerza y progresión</small></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:25px"><button class="btn btn-secondary" style="flex:1" onclick="window.moverOnboarding(-1)">Atrás</button><button class="btn btn-primary" style="flex:2" onclick="window.moverOnboarding(1)">Continuar</button></div>
+        </div>
+        <div class="ob-step">
+          <label>Tu contexto real</label>
+          <div class="ob-choice-grid" id="ob-place-grid"><button class="ob-choice active" data-value="casa">🏠 Casa</button><button class="ob-choice" data-value="gimnasio">🏋️ Gimnasio</button><button class="ob-choice" data-value="ambos">🔁 Ambos</button><button class="ob-choice" data-value="viaje">🎒 Viajes</button></div>
+          <label style="margin-top:18px">Tiempo habitual</label><div class="ob-choice-grid" id="ob-time-grid"><button class="ob-choice" data-value="10">10 min</button><button class="ob-choice active" data-value="20">20 min</button><button class="ob-choice" data-value="30">30 min</button><button class="ob-choice" data-value="45">45+ min</button></div>
+          <div style="display:flex;gap:10px;margin-top:25px"><button class="btn btn-secondary" style="flex:1" onclick="window.moverOnboarding(-1)">Atrás</button><button class="btn btn-primary" style="flex:2" onclick="window.moverOnboarding(1)">Continuar</button></div>
+        </div>
+        <div class="ob-step">
+          <label>Datos opcionales para cálculos orientativos</label>
+          <select id="ob-genero" class="neon-input"><option value="N">Prefiero no indicarlo</option><option value="M">Masculino para cálculo energético</option><option value="F">Femenino para cálculo energético</option></select>
+          <div class="macros-grid" style="margin-top:12px"><div><label>Edad</label><input type="number" id="ob-edad" class="neon-input" value="25"></div><div><label>Estatura cm</label><input type="number" id="ob-altura" class="neon-input" value="175"></div></div>
+          <label>Peso kg, opcional</label><input type="number" id="ob-peso" class="neon-input" value="75" step="0.1">
+          <div class="safety-note">Estos datos se usan para estimaciones generales y pueden editarse. No sustituyen una evaluación profesional.</div>
+          <div style="display:flex;gap:10px;margin-top:18px"><button class="btn btn-secondary" style="flex:1" onclick="window.moverOnboarding(-1)">Atrás</button><button class="btn btn-primary" style="flex:2" onclick="window.moverOnboarding(1)">Continuar</button></div>
+        </div>
+        <div class="ob-step">
+          <label>Preferencias y seguridad</label>
+          <select id="ob-diet" class="neon-input"><option value="omnivora">Omnívora</option><option value="vegetariana">Vegetariana</option><option value="vegana">Vegana</option><option value="sin-lactosa">Sin lactosa</option><option value="sin-gluten">Sin gluten</option></select>
+          <textarea id="ob-exclusions" class="neon-input" rows="3" placeholder="Alergias, intolerancias o ingredientes excluidos"></textarea>
+          <label style="display:flex;gap:8px;align-items:flex-start;margin-top:14px;text-align:left"><input type="checkbox" id="ob-risk"> Declaro embarazo, enfermedad, lesión, alergia grave, tratamiento o una condición que requiere precaución.</label>
+          <div class="safety-note">Si marcas esta opción, IronCore limitará recomendaciones personalizadas y te orientará a consultar a un profesional.</div>
+          <div style="display:flex;gap:10px;margin-top:18px"><button class="btn btn-secondary" style="flex:1" onclick="window.moverOnboarding(-1)">Atrás</button><button class="btn btn-primary" style="flex:2" onclick="window.moverOnboarding(1)">Continuar</button></div>
+        </div>
+        <div class="ob-step">
+          <label>Privacidad y control</label>
+          <div class="safety-note"><b style="color:#fff">Privado por defecto.</b><br>Tu peso, alimentación, salud y ubicación no se publican automáticamente. Puedes exportar o eliminar tus datos.</div>
+          <label style="display:flex;gap:8px;align-items:flex-start;margin-top:15px;text-align:left"><input type="checkbox" id="ob-consent" checked> Acepto usar mis datos para personalizar mi experiencia de bienestar.</label>
+          <label style="display:flex;gap:8px;align-items:flex-start;margin-top:12px;text-align:left"><input type="checkbox" id="ob-ai-consent"> Autorizo por separado el uso de mis datos declarados para recomendaciones mediante IA.</label>
+          <div style="display:flex;gap:10px;margin-top:25px"><button class="btn btn-secondary" style="flex:1" onclick="window.moverOnboarding(-1)">Atrás</button><button class="btn btn-primary" style="flex:2" onclick="window.finalizarOnboarding()">Crear mi plan</button></div>
+        </div>
+      </div></div>
     </div>
   </div>
-
   <div class="sakura-container" id="sakura-bg"></div>
   <div id="toast-notif" class="toast">Notificación</div>
 
@@ -103,6 +104,7 @@
     <!-- 📊 DASHBOARD -->
     <section id="page-dashboard" class="page active">
       <div class="coach-tip"><span class="tip-icon">💡</span><p id="daily-tip">Iniciando base de conocimientos...</p></div>
+      <div class="day-adapter"><span class="safe-badge">✓ Plan adaptable</span><h3 style="margin:12px 0 4px">¿Cuánto tiempo tienes hoy?</h3><p style="font-size:11px;color:var(--text-muted);margin:0">Elegir una versión breve también mantiene tu constancia.</p><div class="quick-time-row"><button class="quick-time" onclick="window.setTodayMinutes(5,this)">5 min</button><button class="quick-time" onclick="window.setTodayMinutes(10,this)">10 min</button><button class="quick-time active" onclick="window.setTodayMinutes(20,this)">20 min</button><button class="quick-time" onclick="window.setTodayMinutes(30,this)">30 min</button></div><button class="btn btn-secondary" style="width:100%;margin-top:12px" onclick="window.activateContingency()">Hoy cambió mi plan</button><p id="contingency-message" style="display:none;font-size:11px;color:#d6dde8;line-height:1.5;margin:12px 0 0"></p></div>
       <div id="iron-dash-ui-advanced"></div>
       
       <div class="log" style="margin-top: 25px;"><h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;">Consumo de Hoy</h3><ul id="lista-comidas"></ul></div>
@@ -129,7 +131,7 @@
 
       <div id="tab-plan" class="sub-tab-diet" style="display: none;">
         <div class="card" style="text-align: left;" id="oracle-form-card">
-          <h3 style="color: #00e5ff; margin-top:0;">Motor Clínico Avanzado</h3>
+          <h3 style="color: #00e5ff; margin-top:0;">Planificador Nutricional Orientativo</h3>
           <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">Estructura tus 7 días ajustados a tus macros.</p>
           <label>Preferencia Dietética:</label>
           <select id="oracle-diet-type" class="neon-input">
@@ -139,13 +141,13 @@
             <option value="vegano">Vegana (Plant-based)</option>
             <option value="vegetariano">Vegetariana (Huevos/Lácteos)</option>
           </select>
-          <label style="margin-top:15px;">Filtros Médicos:</label>
+          <label style="margin-top:15px;">Preferencias y restricciones declaradas:</label>
           <div class="clinical-filters">
             <label><input type="checkbox" id="oracle-celiac"> Sin Gluten (Celíaco)</label>
             <label><input type="checkbox" id="oracle-lactose"> Sin Lactosa</label>
             <label><input type="checkbox" id="oracle-sibo"> Apto SIBO</label>
           </div>
-          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 25px;">Generar Plan Semanal 🔮</button>
+          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 25px;">Crear plan orientativo</button>
         </div>
         
         <div id="plan-resultado" style="display: none;">
@@ -299,7 +301,7 @@
   <div id="sheet-overlay" class="sheet-overlay"></div>
   
   <div id="sheet-swap-meal" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
-    <h3>🔄 Opciones Clínicas</h3>
+    <h3>🔄 Opciones de alimentación</h3>
     <div id="sheet-swap-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
     <button class="btn btn-secondary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cancelar</button>
   </div>
