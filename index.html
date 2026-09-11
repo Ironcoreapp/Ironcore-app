@@ -1,402 +1,55 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IronCore Tracker Cloud</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a0c10">
+  <meta name="description" content="IRONCORE AI FITNESS: entrenamiento y nutrición para principiantes e intermedios.">
+  <title>IRONCORE AI FITNESS</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- PANTALLA DE LOGIN -->
-  <div id="auth-screen" class="auth-screen">
-    <div class="card card-main" style="max-width: 320px; width: 100%; text-align: center;">
-      <img src="logo.png" alt="IronCore Nutrition" class="logo-img" style="max-width: 180px; margin: 0 auto 15px;">
-      <h3 style="color: #00e5ff; font-size: 16px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px;">Cloud Access</h3>
-      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 25px;">Sincronización en la nube en tiempo real.</p>
-      <button id="btn-google-login" class="btn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; background: #ffffff; color: #3c4043; box-shadow: 0 4px 15px rgba(255,255,255,0.15);">
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" style="width:20px; height:20px;">
-          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-        </svg>
-        <span style="font-weight:800; font-size: 13px;">Continuar con Google</span>
-      </button>
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="modal-root"></div>
+
+  <section id="landing" class="landing">
+    <header class="landing-header container">
+      <a class="brand" href="#" aria-label="IRONCORE inicio"><span class="brand-mark">IC</span><span>IRONCORE <b>AI FITNESS</b></span></a>
+      <nav aria-label="Navegación pública"><button class="btn ghost" data-action="demo-login">Ver demo</button><button class="btn primary" data-action="show-register">Comenzar</button></nav>
+    </header>
+    <main class="hero container">
+      <div><span class="eyebrow">TU PLAN. TU RITMO. TU PROGRESO.</span><h1>Entrena con dirección, no con <em>confusión.</em></h1><p>Planes de entrenamiento, nutrición sencilla y acompañamiento adaptativo para construir hábitos sostenibles.</p><div class="hero-actions"><button class="btn primary large" data-action="show-register">Crear mi plan</button><button class="btn secondary large" data-action="demo-login">Explorar demostración</button></div><p class="fine">Datos de demostración. No sustituye orientación médica.</p></div>
+      <div class="hero-card"><div class="hero-ring"><strong>74%</strong><span>meta semanal</span></div><div><span class="status">● Plan adaptado</span><h2>Torso: fuerza básica</h2><p>42 min · 6 ejercicios</p><button class="btn primary" data-action="demo-login">Entrenar ahora</button></div></div>
+    </main>
+  </section>
+
+  <section id="auth" class="auth hidden" aria-labelledby="auth-title">
+    <form id="register-form" class="auth-card">
+      <button type="button" class="icon-btn close-auth" aria-label="Volver">×</button>
+      <span class="eyebrow">CREA TU CUENTA</span><h1 id="auth-title">Empieza con una meta clara</h1>
+      <label>Nombre<input name="name" required minlength="2" autocomplete="name" placeholder="Tu nombre"></label>
+      <label>Correo<input name="email" required type="email" autocomplete="email" placeholder="nombre@correo.com"></label>
+      <label>Contraseña<input name="password" required type="password" minlength="8" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></label>
+      <label class="check"><input required type="checkbox"> <span>Acepto el uso local de mis datos en este prototipo.</span></label>
+      <button class="btn primary large" type="submit">Continuar al onboarding</button><p class="fine">Este MVP guarda la información únicamente en LocalStorage de este navegador.</p>
+    </form>
+  </section>
+
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <a class="brand" href="#dashboard"><span class="brand-mark">IC</span><span>IRONCORE <b>AI FITNESS</b></span></a>
+      <nav id="side-nav" class="side-nav" aria-label="Secciones principales"></nav>
+      <button class="coach-card" data-route="coach"><span>✦</span><strong>Coach IA simulado</strong><small>Resuelve dudas generales</small></button>
+    </aside>
+    <div class="app-shell">
+      <header class="topbar"><div><small id="today"></small><h2 id="page-title">Dashboard</h2></div><div class="top-actions"><button class="icon-btn" data-route="profile" aria-label="Perfil"><span id="avatar">IC</span></button></div></header>
+      <main id="main" tabindex="-1"></main>
     </div>
+    <nav id="bottom-nav" class="bottom-nav" aria-label="Navegación móvil"></nav>
   </div>
 
-  <!-- ONBOARDING AMPLIADO Y CENTRADO EN ADHERENCIA -->
-  <div id="onboarding-screen" class="onboarding-overlay" style="display:none;">
-    <div class="ob-card">
-      <div class="ob-header"><h3 id="ob-title">Configura tu experiencia</h3><div class="ob-progress"><div class="ob-progress-bar" id="ob-bar"></div></div><small id="ob-step-label" style="color:var(--text-muted)">Paso 1 de 6</small></div>
-      <div class="ob-viewport"><div class="ob-track" id="ob-track">
-        <div class="ob-step">
-          <img id="ob-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=IronCore" alt="Avatar" class="ob-avatar-img">
-          <label>¿Cómo quieres que te llamemos?</label><input id="ob-nickname" class="neon-input" placeholder="Tu apodo">
-          <button class="btn btn-primary" style="width:100%;margin-top:25px" onclick="window.moverOnboarding(1)">Continuar</button>
-        </div>
-        <div class="ob-step">
-          <label>¿Qué quieres mejorar primero?</label>
-          <div class="ob-goals-grid">
-            <div class="ob-goal-card active" data-goal="constancia" data-val="0" onclick="window.seleccionarMetaOb(this)"><span>🎯</span><b>Constancia</b><small>Crear un hábito sostenible</small></div>
-            <div class="ob-goal-card" data-goal="energia" data-val="0" onclick="window.seleccionarMetaOb(this)"><span>⚡</span><b>Más energía</b><small>Moverme y sentirme mejor</small></div>
-            <div class="ob-goal-card" data-goal="grasa" data-val="-300" onclick="window.seleccionarMetaOb(this)"><span>📉</span><b>Reducir grasa</b><small>Progreso gradual</small></div>
-            <div class="ob-goal-card" data-goal="musculo" data-val="300" onclick="window.seleccionarMetaOb(this)"><span>💪</span><b>Ganar músculo</b><small>Fuerza y progresión</small></div>
-          </div>
-          <div style="display:flex;gap:10px;margin-top:25px"><button class="btn btn-secondary" style="flex:1" onclick="window.moverOnboarding(-1)">Atrás</button><button class="btn btn-primary" style="flex:2" onclick="window.moverOnboarding(1)">Continuar</button></div>
-        </div>
-        <div class="ob-step">
-          <label>Tu contexto real</label>
-          <div class="ob-choice-grid" id="ob-place-grid"><button class="ob-choice active" data-value="casa">🏠 Casa</button><button class="ob-choice" data-value="gimnasio">🏋️ Gimnasio</button><button class="ob-choice" data-value="ambos">🔁 Ambos</button><button class="ob-choice" data-value="viaje">🎒 Viajes</button></div>
-          <label style="margin-top:18px">Tiempo habitual</label><div class="ob-choice-grid" id="ob-time-grid"><button class="ob-choice" data-value="10">10 min</button><button class="ob-choice active" data-value="20">20 min</button><button class="ob-choice" data-value="30">30 min</button><button class="ob-choice" data-value="45">45+ min</button></div>
-          <div style="display:flex;gap:10px;margin-top:25px"><button class="btn btn-secondary" style="flex:1" onclick="window.moverOnboarding(-1)">Atrás</button><button class="btn btn-primary" style="flex:2" onclick="window.moverOnboarding(1)">Continuar</button></div>
-        </div>
-        <div class="ob-step">
-          <label>Datos opcionales para cálculos orientativos</label>
-          <select id="ob-genero" class="neon-input"><option value="N">Prefiero no indicarlo</option><option value="M">Masculino para cálculo energético</option><option value="F">Femenino para cálculo energético</option></select>
-          <div class="macros-grid" style="margin-top:12px"><div><label>Edad</label><input type="number" id="ob-edad" class="neon-input" value="25"></div><div><label>Estatura cm</label><input type="number" id="ob-altura" class="neon-input" value="175"></div></div>
-          <label>Peso kg, opcional</label><input type="number" id="ob-peso" class="neon-input" value="75" step="0.1">
-          <div class="safety-note">Estos datos se usan para estimaciones generales y pueden editarse. No sustituyen una evaluación profesional.</div>
-          <div style="display:flex;gap:10px;margin-top:18px"><button class="btn btn-secondary" style="flex:1" onclick="window.moverOnboarding(-1)">Atrás</button><button class="btn btn-primary" style="flex:2" onclick="window.moverOnboarding(1)">Continuar</button></div>
-        </div>
-        <div class="ob-step">
-          <label>Preferencias y seguridad</label>
-          <select id="ob-diet" class="neon-input"><option value="omnivora">Omnívora</option><option value="vegetariana">Vegetariana</option><option value="vegana">Vegana</option><option value="sin-lactosa">Sin lactosa</option><option value="sin-gluten">Sin gluten</option></select>
-          <textarea id="ob-exclusions" class="neon-input" rows="3" placeholder="Alergias, intolerancias o ingredientes excluidos"></textarea>
-          <label style="display:flex;gap:8px;align-items:flex-start;margin-top:14px;text-align:left"><input type="checkbox" id="ob-risk"> Declaro embarazo, enfermedad, lesión, alergia grave, tratamiento o una condición que requiere precaución.</label>
-          <div class="safety-note">Si marcas esta opción, IronCore limitará recomendaciones personalizadas y te orientará a consultar a un profesional.</div>
-          <div style="display:flex;gap:10px;margin-top:18px"><button class="btn btn-secondary" style="flex:1" onclick="window.moverOnboarding(-1)">Atrás</button><button class="btn btn-primary" style="flex:2" onclick="window.moverOnboarding(1)">Continuar</button></div>
-        </div>
-        <div class="ob-step">
-          <label>Privacidad y control</label>
-          <div class="safety-note"><b style="color:#fff">Privado por defecto.</b><br>Tu peso, alimentación, salud y ubicación no se publican automáticamente. Puedes exportar o eliminar tus datos.</div>
-          <label style="display:flex;gap:8px;align-items:flex-start;margin-top:15px;text-align:left"><input type="checkbox" id="ob-consent" checked> Acepto usar mis datos para personalizar mi experiencia de bienestar.</label>
-          <label style="display:flex;gap:8px;align-items:flex-start;margin-top:12px;text-align:left"><input type="checkbox" id="ob-ai-consent"> Autorizo por separado el uso de mis datos declarados para recomendaciones mediante IA.</label>
-          <div style="display:flex;gap:10px;margin-top:25px"><button class="btn btn-secondary" style="flex:1" onclick="window.moverOnboarding(-1)">Atrás</button><button class="btn btn-primary" style="flex:2" onclick="window.finalizarOnboarding()">Crear mi plan</button></div>
-        </div>
-      </div></div>
-    </div>
-  </div>
-  <div class="sakura-container" id="sakura-bg"></div>
-  <div id="toast-notif" class="toast">Notificación</div>
-
-  <!-- HEADER -->
-  <header>
-    <img src="logo.png" alt="IronCore Nutrition" class="logo-img-header">
-    <p>⚡ IRONCORE // PRE-ALFA TESTNET</p>
-    <div id="user-welcome-box" style="display: none; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;">
-      <span style="font-size: 11px; font-weight: 700; color: #fff;">Guerrero <b id="user-display-name" style="color: var(--primary);">--</b></span>
-    </div>
-    <div style="display: flex; justify-content: center; gap: 8px; margin-top: 6px; align-items: center;">
-      <div class="user-rank" id="header-rank">Rango: <span style="color: #6b7c93;">ASHIGARU</span></div>
-      <div class="user-streak" id="header-streak">🔥 Racha: 0 días</div>
-    </div>
-  </header>
-
-  <main>
-    <!-- 📊 DASHBOARD -->
-    <section id="page-dashboard" class="page active">
-      <div class="coach-tip"><span class="tip-icon">💡</span><p id="daily-tip">Iniciando base de conocimientos...</p></div>
-      <div class="day-adapter"><span class="safe-badge">✓ Plan adaptable</span><h3 style="margin:12px 0 4px">¿Cuánto tiempo tienes hoy?</h3><p style="font-size:11px;color:var(--text-muted);margin:0">Elegir una versión breve también mantiene tu constancia.</p><div class="quick-time-row"><button class="quick-time" onclick="window.setTodayMinutes(5,this)">5 min</button><button class="quick-time" onclick="window.setTodayMinutes(10,this)">10 min</button><button class="quick-time active" onclick="window.setTodayMinutes(20,this)">20 min</button><button class="quick-time" onclick="window.setTodayMinutes(30,this)">30 min</button></div><button class="btn btn-secondary" style="width:100%;margin-top:12px" onclick="window.activateContingency()">Hoy cambió mi plan</button><p id="contingency-message" style="display:none;font-size:11px;color:#d6dde8;line-height:1.5;margin:12px 0 0"></p></div>
-      <div id="iron-dash-ui-advanced"></div>
-      
-      <div class="log" style="margin-top: 25px;"><h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;">Consumo de Hoy</h3><ul id="lista-comidas"></ul></div>
-      <div class="log" style="margin-top: 25px;"><h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;">Entrenamiento de Hoy</h3><ul id="lista-entrenos"></ul></div>
-    </section>
-
-    <!-- 🍎 DIETA & ORÁCULO CLÍNICO -->
-    <section id="page-diet" class="page">
-      <h2 class="page-title">Nutrición Inteligente</h2>
-      <div class="tab-container">
-        <button class="tab-btn-diet active" data-tab="tab-registro">Registro</button>
-        <button class="tab-btn-diet" data-tab="tab-plan">Oráculo Semanal</button>
-      </div>
-
-      <div id="tab-registro" class="sub-tab-diet active">
-        <div class="actions">
-          <button id="btn-add-planned" class="btn btn-primary" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; background: linear-gradient(90deg, #ffaa00 0%, #ff5500 100%); color:#000;">📅 Comer lo Planeado Hoy</button>
-          <div style="display:flex; gap:10px;">
-            <button id="btn-abrir-manual" class="btn btn-secondary" style="flex:1; padding: 12px; font-size: 11px;" onclick="window.abrirBuscadorComida()">🔍 Buscar Manual</button>
-            <button id="btn-foto" class="btn btn-secondary" style="flex:1; padding: 12px; font-size: 11px;">📸 Escáner</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="tab-plan" class="sub-tab-diet" style="display: none;">
-        <div class="card" style="text-align: left;" id="oracle-form-card">
-          <h3 style="color: #00e5ff; margin-top:0;">Planificador Nutricional Orientativo</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">Estructura tus 7 días ajustados a tus macros.</p>
-          <label>Preferencia Dietética:</label>
-          <select id="oracle-diet-type" class="neon-input">
-            <option value="normal">Normal (Omnívoro)</option>
-            <option value="lowcarb">Baja en Carbohidratos (Low-Carb)</option>
-            <option value="keto">Cetogénica Estricta (Keto)</option>
-            <option value="vegano">Vegana (Plant-based)</option>
-            <option value="vegetariano">Vegetariana (Huevos/Lácteos)</option>
-          </select>
-          <label style="margin-top:15px;">Preferencias y restricciones declaradas:</label>
-          <div class="clinical-filters">
-            <label><input type="checkbox" id="oracle-celiac"> Sin Gluten (Celíaco)</label>
-            <label><input type="checkbox" id="oracle-lactose"> Sin Lactosa</label>
-            <label><input type="checkbox" id="oracle-sibo"> Apto SIBO</label>
-          </div>
-          <button id="btn-generar-plan" class="btn btn-primary" style="width: 100%; margin-top: 25px;">Crear plan orientativo</button>
-        </div>
-        
-        <div id="plan-resultado" style="display: none;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 15px;">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <span style="font-size: 24px;">📅</span>
-              <h3 id="plan-date-header" style="color: #fff; margin: 0; font-size: 16px;">Cargando...</h3>
-            </div>
-            <div style="display:flex; gap:5px;">
-              <button class="btn-clear-history" style="border-color:#00e5ff; color:#00e5ff;" onclick="window.guardarPlanNube()">💾 Guardar</button>
-              <button class="btn-clear-history" onclick="document.getElementById('plan-resultado').style.display='none'; document.getElementById('oracle-form-card').style.display='block';">Volver</button>
-            </div>
-          </div>
-          <div class="day-scroll-container" id="day-selector-container"></div>
-          <div id="comidas-plan" style="margin-top:20px;"></div>
-          <button class="btn btn-primary" style="width:100%; margin-top:15px;" onclick="window.generarListaCompras()">🛒 Generar Lista de Compras</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 💪 SISTEMA DE COMBATE -->
-    <section id="page-training" class="page">
-      <h2 class="page-title">Sistema de Combate</h2>
-      <div class="tab-container">
-        <button class="tab-btn-train active" data-tab="tab-rutina">Oráculo Táctico</button>
-        <button class="tab-btn-train" data-tab="tab-rango">Tu Rango</button>
-        <button class="tab-btn-train" data-tab="tab-leaderboard">🏆 Ranking</button>
-      </div>
-
-      <div id="tab-rutina" class="sub-tab-train active">
-        <div class="card" id="workout-generator-card" style="text-align: left;">
-          <h3 style="color: #00e5ff; margin-top:0;">Planificación</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom:15px;">Adaptación dinámica por equipamiento.</p>
-          <label>Equipamiento:</label>
-          <select id="train-equip" class="neon-input">
-            <option value="gimnasio">Gimnasio Completo</option>
-            <option value="mancuernas">Mancuernas / Casa</option>
-            <option value="corporal">Peso Corporal</option>
-          </select>
-          <label style="margin-top:15px;">Foco del Día:</label>
-          <select id="train-focus" class="neon-input">
-            <option value="fullbody">Cuerpo Completo (FullBody)</option>
-            <option value="superior">Tren Superior</option>
-            <option value="piernas">Tren Inferior</option>
-          </select>
-          <div style="display:flex; justify-content:space-between; margin-top:15px;">
-            <label style="color:#ffaa00;"><input type="checkbox" id="check-warmup" checked> 🔥 Calentar</label>
-            <label style="color:#00e5ff;"><input type="checkbox" id="check-cooldown" checked> ❄️ Enfriar</label>
-          </div>
-          <button id="btn-generar-rutina" class="btn btn-primary" style="width: 100%; margin-top: 25px;">Generar Rutina ⚔️</button>
-          
-          <button id="btn-registrar-serie" class="btn btn-secondary" style="width: 100%; margin-top: 15px; font-size:11px;" onclick="window.abrirBuscadorManual()">+ Agregar Serie Manual</button>
-          <button id="btn-registrar-cardio" class="btn btn-secondary" style="width: 100%; margin-top: 10px; font-size:11px; border-color:#00e5ff; color:#00e5ff; box-shadow:0 0 10px rgba(0,229,255,0.2);" onclick="window.abrirBuscadorCardio()">🏃‍♂️ Agregar Sesión de Cardio</button>
-        </div>
-
-        <div id="workout-live-container" style="display: none;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="color: #fff; margin: 0; font-size: 16px;">Modo Foco Activado</h3>
-            <button id="btn-cancel-workout" class="btn-clear-history">Descartar</button>
-          </div>
-          <div id="rutina-generada-lista"></div>
-          <button id="btn-start-workout" class="btn btn-primary" style="width:100%; margin-top:20px; font-size:16px;">🔥 COMENZAR</button>
-          <button id="btn-finish-workout" class="btn btn-primary" style="width:100%; margin-top:20px; font-size:16px; background: linear-gradient(90deg, #ff3366 0%, #ff0044 100%); display:none;">Terminar y Guardar 💾</button>
-        </div>
-      </div>
-
-      <div id="tab-rango" class="sub-tab-train" style="display: none;">
-        <div class="card rank-card" id="rank-display-card">
-          <h4 style="color: var(--text-muted); margin: 0 0 5px 0;">NIVEL DE PODER</h4>
-          <h2 id="rango-titulo" style="color: #6b7c93; margin: 0 0 10px 0; font-size: 28px; text-transform: uppercase;">Ashigaru</h2>
-          <div class="rank-stats">
-            <div><span>Multiplicador</span><br><b id="rango-multi">0.0x</b> BW</div>
-            <div><span>Fuerza Total</span><br><b id="rango-total">0</b> kg</div>
-          </div>
-          <div class="progress-bg"><div class="progress-bar" id="rango-progreso" style="width: 10%;"></div></div>
-        </div>
-        <div class="card" style="text-align: left;">
-          <h3 style="color: #00e5ff; margin-top:0;">Prueba de Fuerza (1RM)</h3>
-          <label style="margin-top:0;">Press de Banca (kg)</label><input type="number" id="rm-bench" class="neon-input" placeholder="Ej: 100">
-          <label>Sentadilla (kg)</label><input type="number" id="rm-squat" class="neon-input" placeholder="Ej: 140">
-          <label>Peso Muerto (kg)</label><input type="number" id="rm-deadlift" class="neon-input" placeholder="Ej: 180">
-          <button id="btn-calcular-rango" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Evaluar y Publicar al Ranking</button>
-        </div>
-      </div>
-
-      <div id="tab-leaderboard" class="sub-tab-train" style="display: none;">
-        <div class="card" style="text-align: left;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <h3 style="color: #00e5ff; margin:0;">Salón del Shōgun</h3>
-            <button id="btn-refresh-leaderboard" class="btn-clear-history" onclick="window.cargarLeaderboard()">🔄 Actualizar</button>
-          </div>
-          <div id="leaderboard-list"><p style="font-size: 12px; color: var(--text-muted); text-align: center;">Cargando guerreros...</p></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 📜 HISTORIAL -->
-    <section id="page-history" class="page">
-      <h2 class="page-title">Bitácora & Check-ins</h2>
-      <div class="card" style="text-align: left;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <h3 style="color: #00e5ff; margin:0;">Historial de Jornadas</h3>
-          <button class="btn-clear-history" onclick="window.borrarHistorialJornadas()">Borrar Jornadas</button>
-        </div>
-        <div id="historial-container"><p style="font-size: 13px; color: var(--text-muted);">Aún no hay días archivados.</p></div>
-      </div>
-      <div class="card" style="text-align: left; margin-top: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <h3 style="color: #00e5ff; margin:0;">Historial de Check-ins</h3>
-        </div>
-        <div id="checkin-history-container"><p style="font-size: 13px; color: var(--text-muted);">No hay check-ins registrados todavía.</p></div>
-      </div>
-    </section>
-
-    <!-- 👥 COFRADÍA (SOCIAL) -->
-    <section id="page-social" class="page" style="display: none;">
-      <div style="max-width: 600px; margin: 0 auto; padding-bottom: 80px;">
-        <h2 class="page-title">Cofradía & Muro Social</h2>
-        <div id="social-tab-content-root"></div>
-      </div>
-    </section>
-
-    <!-- ⚡ SHŌGUN AI -->
-    <section id="page-ai" class="page">
-      <h2 class="page-title">Santuario del Shōgun AI</h2>
-      <div class="card ai-card-container">
-        <div class="ai-avatar-box">
-          <div class="ai-avatar-glow">👹</div>
-          <div>
-            <h3 style="color: #ff3366; margin:0; font-size: 14px;">KENJI AI</h3>
-            <span style="font-size: 10px; color: var(--primary);">Inteligencia de Combate</span>
-          </div>
-        </div>
-        <div class="chat-box" id="chat-messages">
-          <div class="chat-msg ai">"Bienvenido al dojo. ¿Qué dudas atormentan tu espíritu hoy?"</div>
-        </div>
-        <div class="chat-input-area">
-          <input type="text" id="chat-input-text" class="neon-input" placeholder="Pregúntale al Shōgun..." style="margin:0;">
-          <button id="btn-send-chat" class="btn btn-primary" style="padding: 12px 20px;">Enviar</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ⚙️ PERFIL -->
-    <section id="page-profile" class="page">
-      <div id="profile-dynamic-root"></div>
-    </section>
-  </main>
-
-  <!-- MODALES BOTTOM SHEETS -->
-  <div id="sheet-overlay" class="sheet-overlay"></div>
-  
-  <div id="sheet-swap-meal" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
-    <h3>🔄 Opciones de alimentación</h3>
-    <div id="sheet-swap-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
-    <button class="btn btn-secondary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cancelar</button>
-  </div>
-
-  <div id="sheet-swap-exercise" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
-    <h3>🔄 Alternativas</h3>
-    <div id="sheet-swap-ex-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
-    <button class="btn btn-secondary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cancelar</button>
-  </div>
-
-  <div id="sheet-planned-meals" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
-    <h3>📅 Plan de Hoy</h3>
-    <div id="sheet-planned-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
-    <button class="btn btn-secondary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cancelar</button>
-  </div>
-
-  <div id="sheet-scanner" class="bottom-sheet" style="max-height: 90vh; overflow-y: auto; text-align: center;">
-    <h3>📸 Escáner de Producto</h3>
-    <div id="qr-reader" style="width:100%; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary);"></div>
-    <button class="btn btn-secondary" style="width: 100%; margin-top: 20px; border-color: #ff3366; color: #ff3366;" onclick="window.closeScanner()">Cancelar y Cerrar</button>
-  </div>
-
-  <div id="sheet-workout" class="bottom-sheet">
-    <div id="sheet-workout-dynamic"></div>
-  </div>
-
-  <div id="sheet-compras" class="bottom-sheet" style="max-height: 80vh; overflow-y: auto;">
-    <h3>🛒 Lista de Compras</h3>
-    <ul id="lista-compras-ui" class="check-list" style="text-align:left;"></ul>
-    <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="window.closeSheet()">Cerrar</button>
-  </div>
-
-  <div id="sheet-add-food" class="bottom-sheet" style="max-height: 85vh; overflow-y: auto;">
-    <div id="sheet-add-food-dynamic">
-      <h3>Base Global</h3>
-      <label style="margin-top:0;">Tiempo de Comida:</label>
-      <select id="food-meal-time" class="neon-input" style="margin-top:5px;">
-        <option value="Desayuno">☀️ Desayuno</option>
-        <option value="Almuerzo" selected>🍽️ Almuerzo</option>
-        <option value="Cena">🌙 Cena</option>
-      </select>
-      <div style="display:flex; gap:10px;">
-        <input type="text" id="food-search" class="neon-input" placeholder="🔍 Buscar producto...">
-        <button id="btn-trigger-search" class="btn btn-primary" style="margin-top:5px; padding: 0 20px;">Ir</button>
-      </div>
-      <button class="btn btn-secondary" style="width:100%; margin-top:10px; font-size:11px; color:#ffaa00; border-color:#ffaa00;" onclick="window.prepararAlimentoManual()">✏️ Crear Alimento Personalizado</button>
-      
-      <div id="food-loading" style="display:none; text-align:center; font-size:12px; color:var(--primary); margin-top:15px;">Buscando... ⏳</div>
-      <div id="food-results-list" style="margin-top: 15px; max-height: 200px; overflow-y: auto; text-align: left;"></div>
-      
-      <div id="food-custom-section" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; display:none;">
-        <h4 style="color: var(--primary); margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase;">Ajustar Porción o Crear</h4>
-        <div id="food-selected-name-container"><p id="food-selected-name" style="font-size:12px; font-weight:800; color:#fff; margin-bottom:10px;">--</p></div>
-        <label style="margin-top:0;">Cantidad consumida:</label>
-        <div style="display: flex; gap: 10px; margin-top: 5px;">
-          <input type="number" id="edit-qty" class="neon-input" value="100" style="flex: 1; margin-top: 0;">
-          <select id="edit-unit" class="neon-input" style="flex: 1; margin-top: 0; padding: 12px;">
-            <option value="1" selected>Gramos / ml</option>
-            <option value="15">Cucharada (15g)</option>
-            <option value="5">Cucharadita (5g)</option>
-            <option value="240">Taza (240ml)</option>
-            <option value="30">Scoop (30g)</option>
-            <option value="100">Unidad (Generico)</option>
-          </select>
-        </div>
-        <div class="macros-grid" style="margin-top: 15px;">
-          <div><label style="font-size:9px;">Kcal</label><input type="number" id="edit-cal" class="neon-input" readonly></div>
-          <div><label style="font-size:9px;">Prot (g)</label><input type="number" id="edit-prot" class="neon-input" readonly></div>
-          <div><label style="font-size:9px;">Carb (g)</label><input type="number" id="edit-carb" class="neon-input" readonly></div>
-          <div><label style="font-size:9px;">Gras (g)</label><input type="number" id="edit-gras" class="neon-input" readonly></div>
-        </div>
-        <button id="btn-confirm-food-final" class="btn btn-primary" style="width: 100%; margin-top: 18px;">Confirmar y Registrar</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="sheet-checkin" class="bottom-sheet">
-    <h3>Check-in Diario</h3>
-    <label style="margin-top: 0;">Peso de hoy (kg):</label>
-    <input type="number" id="checkin-peso" class="neon-input" placeholder="Ej: 74.5" step="0.1">
-    <button id="btn-confirm-checkin" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Guardar Check-in</button>
-  </div>
-
-  <nav class="bottom-nav">
-    <button class="nav-item active" data-target="page-dashboard"><span class="icon">📊</span><span class="text">Resumen</span></button>
-    <button class="nav-item" data-target="page-diet"><span class="icon">🍎</span><span class="text">Dieta</span></button>
-    <button class="nav-item" data-target="page-training"><span class="icon">⚔️</span><span class="text">Combate</span></button>
-    <button class="nav-item" data-target="page-history"><span class="icon">📜</span><span class="text">Historial</span></button>
-    <button class="nav-item" data-target="page-social"><span class="icon">👥</span><span class="text">Cofradía</span></button>
-    <button class="nav-item" data-target="page-ai"><span class="icon">👹</span><span class="text">Shōgun</span></button>
-    <button class="nav-item" data-target="page-profile"><span class="icon">⚙️</span><span class="text">Perfil</span></button>
-  </nav>
-
-  <script type="module">
-    import(`./script.js?v=${Date.now()}`);
-  </script>
+  <template id="loading-template"><div class="state-box"><span class="spinner"></span><h2>Cargando</h2><p>Preparando tu experiencia…</p></div></template>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
